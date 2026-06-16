@@ -1,757 +1,2355 @@
 import { LibraryExercise } from '../models/fitness';
 
 export const STATIC_EXERCISE_LIBRARY: LibraryExercise[] = [
-  // --- WARM-UP (KHỞI ĐỘNG) ---
   {
-    id: 'arm_circles',
-    name: 'Arm Circles',
-    targetMuscleGroup: 'Warm-up',
-    instructions: [
-      'Stand with feet shoulder-width apart and extend your arms straight out to the sides.',
-      'Slowly make small circles with your arms in a clockwise motion.',
-      'Gradually increase the size of the circles.',
-      'Reverse the direction to counter-clockwise after 15-20 seconds.'
+    "id": "flat_barbell_bench_press",
+    "name": "Flat Barbell Bench Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie flat on your back on a bench.",
+      "Grip the barbell with hands slightly wider than shoulder-width.",
+      "Lower the bar to your chest slowly and press it back up, locking your elbows at the top."
     ],
-    techniqueNotes: 'Keep your shoulders down and relaxed, and engage your core slightly.'
+    "techniqueNotes": "Keep your feet flat on the floor and retract your shoulder blades."
   },
   {
-    id: 'neck_rotations',
-    name: 'Neck Rotations',
-    targetMuscleGroup: 'Warm-up',
-    instructions: [
-      'Stand or sit upright with shoulders relaxed.',
-      'Slowly tilt your head forward, bringing your chin towards your chest.',
-      'Roll your head slowly in a circle to the right shoulder, backwards, to the left shoulder, and back to center.',
-      'Repeat the circle in the opposite direction.'
+    "id": "incline_barbell_bench_press",
+    "name": "Incline Barbell Bench Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie on an incline bench angled at 30-45 degrees.",
+      "Unrack the barbell with a medium-wide grip.",
+      "Lower the bar to your upper chest and press it straight up to lockout."
     ],
-    techniqueNotes: 'Move slowly and gently. Stop immediately if you feel any sharp pain or dizziness.'
+    "techniqueNotes": "Focus on keeping your elbows under the barbell to avoid shoulder strain."
   },
   {
-    id: 'torso_twists',
-    name: 'Torso Twists',
-    targetMuscleGroup: 'Warm-up',
-    instructions: [
-      'Stand with your feet slightly wider than shoulder-width, knees slightly bent.',
-      'Raise your hands to chest height, bending your elbows.',
-      'Rotate your torso and hips slowly from side to side, letting your arms swing gently.',
-      'Pivot on the back foot as you twist to protect your knees.'
+    "id": "decline_barbell_bench_press",
+    "name": "Decline Barbell Bench Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie on a decline bench and secure your feet.",
+      "Grip the barbell shoulder-width apart.",
+      "Lower the bar to your lower chest, then press it back up."
     ],
-    techniqueNotes: 'Keep your chest tall and do not force the twist beyond a comfortable range.'
+    "techniqueNotes": "Always have a spotter for decline bench presses."
   },
   {
-    id: 'hip_circles',
-    name: 'Hip Circles',
-    targetMuscleGroup: 'Warm-up',
-    instructions: [
-      'Stand with your hands on your hips and feet wider than shoulder-width apart.',
-      'Push your hips forward, then circle them wide to the right, backwards, to the left, and forward again.',
-      'Make large, smooth circles.',
-      'Repeat in the opposite direction.'
+    "id": "flat_dumbbell_bench_press",
+    "name": "Flat Dumbbell Bench Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie back on a flat bench holding dumbbells at your chest sides.",
+      "Press the weights straight up over your chest.",
+      "Lower the weights slowly back to the start."
     ],
-    techniqueNotes: 'Keep your knees slightly soft and move smoothly through the entire circle.'
+    "techniqueNotes": "Dumbbells allow for a deeper stretch and more natural path than barbells."
   },
   {
-    id: 'high_knees_warmup',
-    name: 'High Knees (Warm-up)',
-    targetMuscleGroup: 'Warm-up',
-    instructions: [
-      'Stand in place with your feet hip-width apart.',
-      'Bring your right knee up toward your chest, then quickly lower it and bring your left knee up.',
-      'Coordinate your arms as if you were running in place.',
-      'Perform at a moderate pace to warm up the body.'
+    "id": "incline_dumbbell_bench_press",
+    "name": "Incline Dumbbell Bench Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie back on an incline bench holding dumbbells at chest level.",
+      "Press the weights straight up, bringing them slightly closer together at the top.",
+      "Lower under control to your chest sides."
     ],
-    techniqueNotes: 'Focus on landing softly on the balls of your feet and keeping your core braced.'
+    "techniqueNotes": "Keep your wrists straight and aligned over your elbows."
   },
   {
-    id: 'butt_kicks_warmup',
-    name: 'Butt Kicks (Warm-up)',
-    targetMuscleGroup: 'Warm-up',
-    instructions: [
-      'Stand upright and start jogging in place.',
-      'With each stride, bend your knee to lift your heel toward your glutes.',
-      'Pump your arms naturally as you jog.'
+    "id": "decline_dumbbell_bench_press",
+    "name": "Decline Dumbbell Bench Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie on a decline bench with dumbbells at your chest.",
+      "Press the weights vertically upwards.",
+      "Lower slowly until dumbbells align with lower chest."
     ],
-    techniqueNotes: 'Keep your chest upright and do not lean too far forward.'
+    "techniqueNotes": "Control the dumbbells carefully to maintain balance."
   },
   {
-    id: 'leg_swings',
-    name: 'Leg Swings',
-    targetMuscleGroup: 'Warm-up',
-    instructions: [
-      'Stand near a wall or sturdy support for balance, holding it with one hand.',
-      'Swing one leg forward and backward in a controlled, fluid motion.',
-      'Repeat for 10-15 swings, then switch sides.',
-      'Perform lateral swings (across your body) to warm up hip abductors.'
+    "id": "close_grip_barbell_bench_press",
+    "name": "Close-Grip Barbell Bench Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie on a bench and grip the barbell shoulder-width or slightly narrower.",
+      "Lower the bar to your lower chest while keeping your elbows close to your torso.",
+      "Press the bar back up powerfully."
     ],
-    techniqueNotes: 'Do not swing your leg so high that it arches your lower back. Control the motion.'
+    "techniqueNotes": "Mainly targets inner chest and triceps. Avoid a grip too narrow to protect wrists."
   },
   {
-    id: 'dynamic_lunges',
-    name: 'Dynamic Lunges',
-    targetMuscleGroup: 'Warm-up',
-    instructions: [
-      'Stand tall with your feet hip-width apart.',
-      'Take a controlled step forward with your right leg, lowering your hips until both knees are bent at about 90 degrees.',
-      'Press through the right heel to push back up and return to standing.',
-      'Alternate legs with each repetition.'
+    "id": "close_grip_dumbbell_press",
+    "name": "Close-Grip Dumbbell Press (Hex Press)",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie flat on a bench, holding dumbbells together over your chest.",
+      "Squeeze the dumbbells together as hard as possible.",
+      "Lower them to your chest while keeping them pressed together, then press up."
     ],
-    techniqueNotes: 'Keep your front knee aligned directly over your ankle. Do not let it slide past your toes.'
-  },
-
-  // --- STRETCHING (GIÃN CƠ) ---
-  {
-    id: 'cobra_stretch',
-    name: 'Cobra Stretch',
-    targetMuscleGroup: 'Stretching',
-    instructions: [
-      'Lie face down on the floor with your hands flat under your shoulders.',
-      'Keep your elbows tucked close to your body.',
-      'Press your tops of feet and thighs firmly to the floor.',
-      'Inhale and press your hands to lift your chest off the floor, keeping a slight bend in your elbows.',
-      'Hold the stretch for 15-30 seconds while breathing deeply.'
-    ],
-    techniqueNotes: 'Do not squeeze your shoulders up towards your ears. Keep your neck long.'
+    "techniqueNotes": "Maintain constant tension by pushing the dumbbells together throughout the rep."
   },
   {
-    id: 'childs_pose',
-    name: 'Child\'s Pose',
-    targetMuscleGroup: 'Stretching',
-    instructions: [
-      'Kneel on the floor, bring your big toes together and sit on your heels.',
-      'Separate your knees about hip-width apart.',
-      'Exhale and lay your torso down between your thighs.',
-      'Extend your arms forward on the floor, palms down, and rest your forehead on the mat.',
-      'Hold for 30-60 seconds, relaxing your shoulders and back.'
+    "id": "reverse_grip_barbell_bench_press",
+    "name": "Reverse-Grip Barbell Bench Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie on a flat bench.",
+      "Grip the barbell with an underhand grip (palms facing your face).",
+      "Lower the bar to your lower chest and press up."
     ],
-    techniqueNotes: 'Breathe deeply into your lower back. If sitting on your heels is uncomfortable, place a cushion between your hips and heels.'
+    "techniqueNotes": "This variation shifts emphasis to the upper chest and reduces shoulder strain."
   },
   {
-    id: 'hamstring_stretch_lying',
-    name: 'Lying Hamstring Stretch',
-    targetMuscleGroup: 'Stretching',
-    instructions: [
-      'Lie flat on your back with your legs extended.',
-      'Raise one leg straight up, keeping the knee slightly bent.',
-      'Grasp behind your thigh or calf with both hands and gently pull the leg towards your chest.',
-      'Hold for 20-30 seconds, then release and repeat with the other leg.'
+    "id": "dumbbell_chest_fly",
+    "name": "Dumbbell Chest Fly",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie flat on a bench holding dumbbells above your chest, palms facing each other.",
+      "Lower your arms out to the sides in a wide arc, maintaining a slight bend in your elbows.",
+      "Squeeze your chest muscles to return to the starting position."
     ],
-    techniqueNotes: 'Keep your lower back pressed to the floor. Do not pull on the back of the knee joint itself.'
+    "techniqueNotes": "Do not lower weights past shoulder level to protect shoulder joints."
   },
   {
-    id: 'quad_stretch_standing',
-    name: 'Standing Quad Stretch',
-    targetMuscleGroup: 'Stretching',
-    instructions: [
-      'Stand tall, holding a wall or chair for balance if needed.',
-      'Bend one knee and reach back to grasp your ankle with your hand.',
-      'Gently pull your heel toward your glutes until you feel a stretch in the front of your thigh.',
-      'Keep your knees tucked close together and stand straight.',
-      'Hold for 20-30 seconds and switch legs.'
+    "id": "incline_dumbbell_chest_fly",
+    "name": "Incline Dumbbell Chest Fly",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie on an incline bench holding dumbbells over your face.",
+      "Lower the weights in a wide arc to your sides.",
+      "Squeeze chest to return weights to the top."
     ],
-    techniqueNotes: 'Tuck your tailbone and keep your hips pushed slightly forward to deepen the stretch.'
+    "techniqueNotes": "Keeps tension on the upper chest fibers."
   },
   {
-    id: 'chest_opener_stretch',
-    name: 'Chest Opener Stretch',
-    targetMuscleGroup: 'Stretching',
-    instructions: [
-      'Stand tall with your feet hip-width apart.',
-      'Interlace your fingers behind your lower back.',
-      'Straighten your arms and gently lift your hands upward, pulling your shoulder blades together.',
-      'Keep your chest high and hold the stretch for 15-30 seconds.'
+    "id": "decline_dumbbell_chest_fly",
+    "name": "Decline Dumbbell Chest Fly",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Lie on a decline bench holding dumbbells over your chest.",
+      "Lower the weights out in a wide arc.",
+      "Return to top by squeezing your chest."
     ],
-    techniqueNotes: 'Keep your chin tucked and avoid arching your lower back.'
+    "techniqueNotes": "Targets lower chest fibers. Use a slow, controlled range."
   },
   {
-    id: 'shoulder_stretch_cross_arm',
-    name: 'Cross-Arm Shoulder Stretch',
-    targetMuscleGroup: 'Stretching',
-    instructions: [
-      'Bring your right arm straight across your chest.',
-      'Hold it at the forearm or elbow with your left hand.',
-      'Gently pull the arm in close to your body until you feel a stretch in the shoulder.',
-      'Hold for 20-30 seconds, then switch sides.'
+    "id": "standing_cable_crossover_high_to_low",
+    "name": "Standing Cable Crossover (High-to-Low)",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Set pulleys at high height, grab handles, and step forward.",
+      "Keep a slight bend in your elbows, bring hands down and forward to meet at waist height.",
+      "Slowly return to start under control."
     ],
-    techniqueNotes: 'Keep your shoulder dropped down, away from your ear.'
+    "techniqueNotes": "Engages lower and inner chest. Squeeze chest at the bottom."
   },
   {
-    id: 'butterfly_stretch',
-    name: 'Butterfly Stretch',
-    targetMuscleGroup: 'Stretching',
-    instructions: [
-      'Sit on the floor with your knees bent and the soles of your feet touching.',
-      'Hold your feet or ankles and pull them in towards your groin.',
-      'Keep your back flat and sit tall.',
-      'Gently press your knees towards the floor using your elbows if comfortable.',
-      'Hold for 30 seconds.'
+    "id": "low_to_high_cable_crossover",
+    "name": "Low-to-High Cable Crossover",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Set pulleys at lowest setting, grab handles, step forward.",
+      "Bring hands forward and upward to meet at chest/chin height.",
+      "Lower back to start under control."
     ],
-    techniqueNotes: 'Do not bounce your knees. Maintain steady breathing and relax your hips.'
+    "techniqueNotes": "Highly isolates upper pectorals. Do not swing your body."
   },
   {
-    id: 'tricep_stretch_overhead',
-    name: 'Overhead Tricep Stretch',
-    targetMuscleGroup: 'Stretching',
-    instructions: [
-      'Raise one arm overhead and bend the elbow, reaching your hand down your upper back.',
-      'Use your other hand to gently pull your elbow inward and downward.',
-      'Hold for 20 seconds, then repeat on the opposite side.'
+    "id": "flat_bench_cable_fly",
+    "name": "Flat Bench Cable Fly",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Place a flat bench between two cable stations.",
+      "Lie on your back, grab low pulley handles, and bring them over your chest.",
+      "Perform fly motion, lowering hands to side and squeezing up."
     ],
-    techniqueNotes: 'Stand straight and avoid leaning your head forward.'
-  },
-
-  // --- CARDIO ---
-  {
-    id: 'treadmill_running',
-    name: 'Running (Treadmill)',
-    targetMuscleGroup: 'Cardio',
-    instructions: [
-      'Step onto the treadmill, set a moderate speed, and start with a brisk walk.',
-      'Increase the speed to a jogging or running pace.',
-      'Maintain an upright posture and let your arms swing naturally.',
-      'Cool down at a walking pace for 2-3 minutes at the end.'
-    ],
-    techniqueNotes: 'Land on the mid-foot rather than striking hard on the heel to reduce impact on your knees.'
+    "techniqueNotes": "Cables provide constant tension unlike dumbbells."
   },
   {
-    id: 'stationary_cycling',
-    name: 'Stationary Cycling',
-    targetMuscleGroup: 'Cardio',
-    instructions: [
-      'Adjust the seat height so there is a slight bend in your knee at the bottom of the pedal stroke.',
-      'Sit tall, grip the handlebars lightly, and pedal at a steady cadence.',
-      'Adjust the resistance level to match your fitness target.'
+    "id": "incline_bench_cable_fly",
+    "name": "Incline Bench Cable Fly",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Set an incline bench between cable columns.",
+      "Grab low pulley handles and perform fly motion over your upper chest.",
+      "Squeeze at the top of the range."
     ],
-    techniqueNotes: 'Keep your knees pointing straight forward and avoid flaring them out to the sides.'
+    "techniqueNotes": "Maintains peak tension at the top contraction of the upper chest."
   },
   {
-    id: 'elliptical_trainer',
-    name: 'Elliptical Trainer',
-    targetMuscleGroup: 'Cardio',
-    instructions: [
-      'Step onto the pedals and grip the moving handlebars.',
-      'Begin pedaling forward with a smooth, gliding motion.',
-      'Push and pull the handles to engage your upper body.',
-      'Vary the incline and resistance to adjust intensity.'
+    "id": "machine_chest_press",
+    "name": "Machine Chest Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Adjust machine seat so handles align with mid-chest.",
+      "Press handles forward until arms are extended.",
+      "Return handles slowly to start position."
     ],
-    techniqueNotes: 'Keep your feet flat on the pedals and distribute your weight evenly.'
+    "techniqueNotes": "Great for safe hypertrophy without stabilizer fatigue."
   },
   {
-    id: 'jump_rope',
-    name: 'Jump Rope',
-    targetMuscleGroup: 'Cardio',
-    instructions: [
-      'Hold the jump rope handles with your hands at hip height, elbows close to your body.',
-      'Rotate your wrists to swing the rope overhead.',
-      'Jump just high enough to clear the rope, landing softly on the balls of your feet.'
+    "id": "incline_machine_chest_press",
+    "name": "Incline Machine Chest Press",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Sit in the incline press machine.",
+      "Press handles forward and upward along the guided track.",
+      "Lower slowly under control."
     ],
-    techniqueNotes: 'Keep your knees slightly soft and jump using your calves rather than bending your knees deeply.'
+    "techniqueNotes": "Isolates upper pectorals with guided safety."
   },
   {
-    id: 'burpees',
-    name: 'Burpees',
-    targetMuscleGroup: 'Cardio',
-    instructions: [
-      'Stand upright, then drop down into a squat and place your hands on the floor.',
-      'Jump your feet back into a push-up plank position.',
-      'Lower your chest to the floor, then press back up.',
-      'Jump your feet forward back under your hips.',
-      'Explode upward into a jump, reaching your hands overhead.'
+    "id": "pec_deck_fly",
+    "name": "Pec Deck Fly (Machine)",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Sit in the pec deck machine with back flat against pad.",
+      "Grip handles and bring pads/arms together in front of you.",
+      "Squeeze chest at peak contraction, then slowly return to start."
     ],
-    techniqueNotes: 'Brace your core to prevent your lower back from sagging in the plank position.'
+    "techniqueNotes": "Keep your elbows slightly bent and level with your chest."
   },
   {
-    id: 'jumping_jacks',
-    name: 'Jumping Jacks',
-    targetMuscleGroup: 'Cardio',
-    instructions: [
-      'Stand with your feet together and arms at your sides.',
-      'Jump your feet out to the sides while bringing your hands together above your head.',
-      'Jump back to the starting position immediately and repeat in a continuous rhythm.'
+    "id": "bodyweight_pushup",
+    "name": "Bodyweight Push-up",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Get into plank position, hands slightly wider than shoulder-width.",
+      "Lower chest nearly to floor, keeping body in straight line.",
+      "Push back up to plank position."
     ],
-    techniqueNotes: 'Keep your knees slightly bent to absorb impact upon landing.'
-  },
-
-  // --- CHEST (NGỰC) ---
-  {
-    id: 'bench_press',
-    name: 'Bench Press (Barbell)',
-    targetMuscleGroup: 'Chest',
-    instructions: [
-      'Lie flat on a bench and grip the barbell slightly wider than shoulder-width.',
-      'Unrack the bar and lower it slowly to your mid-chest.',
-      'Push the bar back up powerfully until your arms are fully extended.'
-    ],
-    techniqueNotes: 'Keep your feet flat on the floor and retract your shoulder blades to protect your shoulders.'
+    "techniqueNotes": "Keep core braced and elbows at a 45-degree angle to body."
   },
   {
-    id: 'incline_bench_press',
-    name: 'Incline Bench Press (Barbell)',
-    targetMuscleGroup: 'Chest',
-    instructions: [
-      'Lie on an incline bench set to about 30-45 degrees.',
-      'Unrack the barbell with a medium-wide grip and lower it to your upper chest.',
-      'Press the bar straight up until your elbows lock, then repeat.'
+    "id": "incline_pushup",
+    "name": "Incline Push-up (Hands Elevated)",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Place hands on a bench or elevated platform.",
+      "Perform push-up by lowering chest to platform edge.",
+      "Push back to starting position."
     ],
-    techniqueNotes: 'Keep your shoulders retracted and flat against the bench to maximize chest engagement.'
+    "techniqueNotes": "Easier variation focusing more on lower chest fibers."
   },
   {
-    id: 'dumbbell_bench_press',
-    name: 'Dumbbell Bench Press',
-    targetMuscleGroup: 'Chest',
-    instructions: [
-      'Sit on a flat bench with a dumbbell in each hand resting on your thighs.',
-      'Lie back and position the dumbbells over your chest with your elbows bent 90 degrees.',
-      'Press the dumbbells straight up over your chest, bringing them close together but not touching.',
-      'Lower the weights slowly back to the starting position.'
+    "id": "decline_pushup",
+    "name": "Decline Push-up (Feet Elevated)",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Place feet on a bench or step, hands on the floor in plank.",
+      "Lower chest to floor and press back up."
     ],
-    techniqueNotes: 'Focus on keeping a controlled descent; do not let the weights bounce at the bottom.'
+    "techniqueNotes": "Advanced variation focusing on upper chest and front deltoids."
   },
   {
-    id: 'incline_dumbbell_press',
-    name: 'Incline Dumbbell Bench Press',
-    targetMuscleGroup: 'Chest',
-    instructions: [
-      'Lie back on an incline bench with dumbbells held at the sides of your chest.',
-      'Press the weights straight up over your chest, contracting your pectorals.',
-      'Lower the weights under control to the start position.'
+    "id": "diamond_pushup",
+    "name": "Diamond Push-up",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Set hands close together under chest so index fingers and thumbs form a diamond.",
+      "Lower chest to hands and press back up."
     ],
-    techniqueNotes: 'Keep the dumbbells moving in a slight arc, bringing them closer together at the top.'
+    "techniqueNotes": "Focuses heavily on triceps and inner chest muscles."
   },
   {
-    id: 'chest_fly_dumbbell',
-    name: 'Chest Fly (Dumbbell)',
-    targetMuscleGroup: 'Chest',
-    instructions: [
-      'Lie flat on a bench holding dumbbells above your chest, palms facing each other.',
-      'With a slight bend in your elbows, lower your arms out to the sides in a wide arc.',
-      'Squeeze your chest muscles to bring the dumbbells back to the starting position.'
+    "id": "wide_grip_pushup",
+    "name": "Wide-Grip Push-up",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Place hands significantly wider than shoulder-width.",
+      "Lower chest and press back up."
     ],
-    techniqueNotes: 'Avoid bending your elbows too much or lowering the dumbbells past shoulder level.'
+    "techniqueNotes": "Shifts load outward onto the chest and away from triceps."
   },
   {
-    id: 'pushup',
-    name: 'Push-up',
-    targetMuscleGroup: 'Chest',
-    instructions: [
-      'Get into a high plank position with hands slightly wider than shoulder-width.',
-      'Lower your body by bending your elbows until your chest nearly touches the floor.',
-      'Push through your hands to extend your arms and return to the starting position.'
+    "id": "chest_dips",
+    "name": "Chest Dips",
+    "targetMuscleGroup": "Chest",
+    "instructions": [
+      "Grip parallel bars and lift body.",
+      "Lean torso forward slightly, bend knees, and lower hips until shoulders are below elbows.",
+      "Press back up to starting position."
     ],
-    techniqueNotes: 'Keep your body in a straight line from head to heels. Do not let your hips sag.'
+    "techniqueNotes": "Leaning forward shifts emphasis to the lower chest."
   },
   {
-    id: 'cable_crossover',
-    name: 'Cable Crossover',
-    targetMuscleGroup: 'Chest',
-    instructions: [
-      'Position pulleys at high level, grip handles, and step forward to create tension.',
-      'Keep a slight bend in your elbows and bring your hands forward and down to meet in front of your waist.',
-      'Slowly return to the starting position under control.'
+    "id": "conventional_barbell_deadlift",
+    "name": "Conventional Barbell Deadlift",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Stand with feet hip-width apart, barbell over mid-foot.",
+      "Bend hips and grip bar, keeping back flat and shins touching bar.",
+      "Stand up, dragging bar along shins, locking out at top."
     ],
-    techniqueNotes: 'Keep your torso stable and perform the movement entirely with your arms and chest.'
-  },
-
-  // --- BACK (LƯNG) ---
-  {
-    id: 'deadlift',
-    name: 'Deadlift (Barbell)',
-    targetMuscleGroup: 'Back',
-    instructions: [
-      'Stand with feet mid-foot under the barbell.',
-      'Bend over and grab the bar with a shoulder-width grip.',
-      'Keep your back flat, hinge at the hips, and stand up straight lifting the bar along your shins.'
-    ],
-    techniqueNotes: 'Engage your core and maintain a neutral spine. Do not round your lower back under weight.'
+    "techniqueNotes": "Keep back flat; do not round spine under load."
   },
   {
-    id: 'lat_pulldown',
-    name: 'Lat Pulldown (Cable)',
-    targetMuscleGroup: 'Back',
-    instructions: [
-      'Sit at a pulldown station and grip the bar slightly wider than shoulder-width.',
-      'Pull the bar down toward your upper chest, squeezing your shoulder blades together.',
-      'Extend your arms slowly to return the bar to the starting position.'
+    "id": "sumo_barbell_deadlift",
+    "name": "Sumo Barbell Deadlift",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Stand with wide stance, toes pointed outward.",
+      "Grip barbell inside knees.",
+      "Drive floor away with feet and lift bar straight up."
     ],
-    techniqueNotes: 'Avoid leaning back excessively to pull the weight; focus on pulling with your elbows.'
+    "techniqueNotes": "Keeps torso more upright and stresses hips/legs/inner back."
   },
   {
-    id: 'barbell_row',
-    name: 'Bent-Over Row (Barbell)',
-    targetMuscleGroup: 'Back',
-    instructions: [
-      'Hold a barbell with a shoulder-width grip, hinge at your hips, and lean forward with a flat back.',
-      'Pull the bar to your lower ribcage, squeezing your shoulder blades at the top.',
-      'Lower the bar slowly back to the starting hanging position.'
+    "id": "romanian_barbell_deadlift",
+    "name": "Romanian Barbell Deadlift",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Hold barbell at hips. Push hips back, sliding bar down thighs.",
+      "Keep knees slightly bent. Lower to mid-shin feeling hamstring stretch.",
+      "Squeeze glutes and return to standing."
     ],
-    techniqueNotes: 'Keep your knees slightly bent and ensure your back remains flat throughout the lift.'
+    "techniqueNotes": "Brace core and keep spine neutral. Do not round lower back."
   },
   {
-    id: 'dumbbell_row_one_arm',
-    name: 'One-Arm Dumbbell Row',
-    targetMuscleGroup: 'Back',
-    instructions: [
-      'Place one knee and same-side hand flat on a bench, keeping your back parallel to the ground.',
-      'Hold a dumbbell in your opposite hand, extending your arm towards the floor.',
-      'Pull the dumbbell up to your hip, keeping your elbow tucked close to your torso.',
-      'Lower the dumbbell under control.'
+    "id": "trap_bar_deadlift",
+    "name": "Trap Bar Deadlift",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Stand inside a hex bar, grip handles.",
+      "Lower hips, keep back flat, chest up.",
+      "Drive through heels to stand straight up."
     ],
-    techniqueNotes: 'Do not twist your shoulders or hips to swing the weight up.'
+    "techniqueNotes": "Keeps weight centered, reducing lower back strain compared to barbell deadlifts."
   },
   {
-    id: 'seated_cable_row',
-    name: 'Seated Cable Row',
-    targetMuscleGroup: 'Back',
-    instructions: [
-      'Sit at a cable row station, place feet on the platform, and grab the V-bar attachment.',
-      'Keep your back straight, pull the handle toward your abdomen while pulling your elbows back.',
-      'Slowly extend your arms back to the starting position.'
+    "id": "barbell_rack_pull",
+    "name": "Barbell Rack Pulls",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Set safety bars in power rack just above/below knees.",
+      "Hinge hips, grip bar, and pull it to upright lock position.",
+      "Lower back to safety pins under control."
     ],
-    techniqueNotes: 'Avoid rocking your torso back and forth. Keep your upper body stationary.'
+    "techniqueNotes": "Isolates the upper back and traps. Excellent overload movement."
   },
   {
-    id: 'pullup',
-    name: 'Pull-Up',
-    targetMuscleGroup: 'Back',
-    instructions: [
-      'Grasp a pull-up bar with an overhand grip (palms facing away), wider than shoulder-width.',
-      'Pull your chest up towards the bar by driving your elbows down towards your ribs.',
-      'Lower yourself slowly and fully extend your arms.'
+    "id": "wide_grip_lat_pulldown",
+    "name": "Wide-Grip Lat Pulldown",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Sit at machine, grip bar wide.",
+      "Pull bar down to upper chest, leading with elbows.",
+      "Return bar slowly to start."
     ],
-    techniqueNotes: 'Engage your core to prevent swinging. Focus on pulling with your back, not just your arms.'
+    "techniqueNotes": "Targets upper back and lats for wide V-taper look."
   },
   {
-    id: 'chinup',
-    name: 'Chin-Up',
-    targetMuscleGroup: 'Back',
-    instructions: [
-      'Grasp a pull-up bar with an underhand grip (palms facing you), shoulder-width apart.',
-      'Pull your chin over the bar, keeping your elbows close to your chest.',
-      'Lower yourself back down under control to a dead hang.'
+    "id": "close_grip_lat_pulldown",
+    "name": "Close-Grip Lat Pulldown",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Attach parallel grip handle (V-Bar) to pulldown station.",
+      "Sit and pull handle down to upper chest, leaning back slightly.",
+      "Return slowly."
     ],
-    techniqueNotes: 'Chin-ups place a higher emphasis on the biceps than traditional pull-ups.'
-  },
-
-  // --- LEGS (ĐÙI/CHÂN) ---
-  {
-    id: 'barbell_squat',
-    name: 'Barbell Squat',
-    targetMuscleGroup: 'Legs',
-    instructions: [
-      'Place the barbell on your upper back/traps and stand with feet shoulder-width apart.',
-      'Hinge at your hips and bend your knees to lower your body until thighs are parallel to the ground.',
-      'Push through your heels to return to the starting upright position.'
-    ],
-    techniqueNotes: 'Keep your chest up and do not let your knees cave inward during the lift.'
+    "techniqueNotes": "Emphasizes lower lat fibers and inner back muscles."
   },
   {
-    id: 'goblet_squat',
-    name: 'Goblet Squat (Dumbbell)',
-    targetMuscleGroup: 'Legs',
-    instructions: [
-      'Hold a dumbbell vertically by one end against your chest.',
-      'Stand with feet shoulder-width apart and toes flared slightly outwards.',
-      'Squat down deeply, keeping your back flat and chest upright.',
-      'Drive through your heels to return to standing.'
+    "id": "reverse_grip_lat_pulldown",
+    "name": "Reverse-Grip Lat Pulldown",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Sit at machine and grip bar with underhand grip.",
+      "Pull bar down to upper chest.",
+      "Extend arms slowly back to start."
     ],
-    techniqueNotes: 'Keep the weight tucked tight against your body throughout the entire movement.'
+    "techniqueNotes": "Increases bicep involvement and pulls lats through a long range."
   },
   {
-    id: 'leg_press',
-    name: 'Leg Press',
-    targetMuscleGroup: 'Legs',
-    instructions: [
-      'Sit in the leg press machine and place your feet shoulder-width apart on the sled platform.',
-      'Lower the safety locks and bend your knees to lower the platform towards your chest (90 degrees).',
-      'Push the sled away by extending your legs, without locking your knees at the top.'
+    "id": "underhand_bent_over_row",
+    "name": "Underhand Bent-Over Barbell Row",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Hinge hips, hold barbell with underhand grip.",
+      "Pull bar to lower stomach, squeezing elbows back.",
+      "Lower slowly."
     ],
-    techniqueNotes: 'Never lock your knees out completely at the top of the movement; keep them slightly bent.'
+    "techniqueNotes": "Also known as Yates Row, targets lower lats and biceps."
   },
   {
-    id: 'romanian_deadlift_barbell',
-    name: 'Romanian Deadlift (Barbell)',
-    targetMuscleGroup: 'Legs',
-    instructions: [
-      'Stand with feet hip-width apart, holding a barbell in front of your thighs.',
-      'Keep your back flat, hinge at your hips, and slide the bar down your legs while pushing your hips back.',
-      'Lower the bar until you feel a stretch in your hamstrings, then squeeze your glutes to stand up.'
+    "id": "overhand_bent_over_row",
+    "name": "Overhand Bent-Over Barbell Row",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Hinge hips, hold barbell with overhand grip.",
+      "Pull bar to upper abdomen, elbows out.",
+      "Lower bar slowly."
     ],
-    techniqueNotes: 'Keep the bar close to your body and maintain a neutral spine. Do not round your back.'
+    "techniqueNotes": "Focuses on mid-back, rear delts, and rhomboids."
   },
   {
-    id: 'leg_extension_machine',
-    name: 'Leg Extension',
-    targetMuscleGroup: 'Legs',
-    instructions: [
-      'Sit on the leg extension machine, securing your shins behind the padded bar.',
-      'Grip the handles at your sides to anchor your hips.',
-      'Extend your legs fully to lift the weight, holding the contraction briefly at the top.',
-      'Lower the weight slowly to the starting position.'
+    "id": "one_arm_dumbbell_row",
+    "name": "One-Arm Dumbbell Row",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Place knee and hand on flat bench.",
+      "Hold dumbbell in free hand.",
+      "Pull dumbbell to hip, squeezing lat."
     ],
-    techniqueNotes: 'Keep your toes pointed straight ahead or slightly outwards. Do not swing the weight up.'
+    "techniqueNotes": "Keep back flat and hips square to avoid twisting."
   },
   {
-    id: 'leg_curl_machine',
-    name: 'Lying Leg Curl',
-    targetMuscleGroup: 'Legs',
-    instructions: [
-      'Lie face down on the leg curl machine, positioning the roller pads just below your calf muscles.',
-      'Grip the handles and curl your heels up towards your glutes as far as possible.',
-      'Slowly lower your legs back to the starting position.'
+    "id": "chest_supported_dumbbell_row",
+    "name": "Chest-Supported Dumbbell Row",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Lie chest down on incline bench (30 degrees).",
+      "Hold dumbbells, arms hanging straight down.",
+      "Row dumbbells up, pulling elbows towards ceiling."
     ],
-    techniqueNotes: 'Keep your hips pressed firmly against the pad; do not let your lower back arch excessively.'
+    "techniqueNotes": "Prevents body momentum, isolating upper back and rhomboids."
   },
   {
-    id: 'dumbbell_lunge',
-    name: 'Dumbbell Lunge',
-    targetMuscleGroup: 'Legs',
-    instructions: [
-      'Hold a dumbbell in each hand at your sides, standing with feet hip-width apart.',
-      'Step forward with one foot and lower your hips until both knees are bent at 90 degrees.',
-      'Push off the front foot to return to the starting position.',
-      'Repeat on the opposite leg.'
+    "id": "seated_cable_row_vbar",
+    "name": "Seated Cable Row (V-Bar)",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Sit at cable row machine, grab V-Bar.",
+      "Keep torso tall, pull bar to abdomen.",
+      "Extend arms fully."
     ],
-    techniqueNotes: 'Ensure your front knee is aligned with your ankle, not drifting past your toes.'
+    "techniqueNotes": "Squeeze shoulder blades together at peak contraction."
   },
   {
-    id: 'bulgarian_split_squat',
-    name: 'Bulgarian Split Squat',
-    targetMuscleGroup: 'Legs',
-    instructions: [
-      'Stand about two feet in front of a bench, holding dumbbells at your sides.',
-      'Place the top of your back foot flat on the bench behind you.',
-      'Lower your hips until your back knee is just above the floor and front thigh is parallel.',
-      'Drive through your front heel to stand up.'
+    "id": "wide_grip_seated_cable_row",
+    "name": "Wide-Grip Seated Cable Row",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Use wide lat bar on seated cable row station.",
+      "Pull bar to chest, elbows wide.",
+      "Return under control."
     ],
-    techniqueNotes: 'Maintain an upright torso. Adjust your distance from the bench to find a comfortable balance.'
-  },
-
-  // --- SHOULDERS (VAI) ---
-  {
-    id: 'overhead_press',
-    name: 'Overhead Press (Barbell)',
-    targetMuscleGroup: 'Shoulders',
-    instructions: [
-      'Hold a barbell at shoulder height with palms facing forward.',
-      'Press the bar straight overhead by extending your arms and locking your elbows.',
-      'Lower the bar back down under control to shoulder height.'
-    ],
-    techniqueNotes: 'Squeeze your glutes and brace your core to prevent excessive arching in your lower back.'
+    "techniqueNotes": "Focuses heavily on upper back, rear delts, and rhomboids."
   },
   {
-    id: 'dumbbell_shoulder_press',
-    name: 'Dumbbell Shoulder Press',
-    targetMuscleGroup: 'Shoulders',
-    instructions: [
-      'Sit on a bench with a back support, holding dumbbells at shoulder level with an overhand grip.',
-      'Press the dumbbells straight up overhead until your arms are fully extended.',
-      'Lower the weights slowly back to shoulder height.'
+    "id": "one_arm_seated_cable_row",
+    "name": "One-Arm Seated Cable Row",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Attach single handle to cable row station.",
+      "Row handle to side of waist, rotating torso slightly at end.",
+      "Return under control."
     ],
-    techniqueNotes: 'Do not arch your back off the bench. Keep your wrists aligned over your elbows.'
+    "techniqueNotes": "Allows unilateral focus to balance strength differences."
   },
   {
-    id: 'lateral_raise_dumbbell',
-    name: 'Dumbbell Lateral Raise',
-    targetMuscleGroup: 'Shoulders',
-    instructions: [
-      'Stand with dumbbells at your sides, knees slightly bent, and core engaged.',
-      'With elbows slightly bent, raise your arms out to the sides until they are parallel to the floor.',
-      'Lower the dumbbells slowly back to your sides.'
+    "id": "t_bar_row",
+    "name": "T-Bar Row (Machine)",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Step onto platform, hold handles.",
+      "Hinge hips, back flat, row bar to chest.",
+      "Lower slowly."
     ],
-    techniqueNotes: 'Lead the movement with your elbows and avoid swinging your body to gain momentum.'
+    "techniqueNotes": "Keeps path guided, great for middle back mass."
   },
   {
-    id: 'front_raise_dumbbell',
-    name: 'Dumbbell Front Raise',
-    targetMuscleGroup: 'Shoulders',
-    instructions: [
-      'Stand tall holding dumbbells in front of your thighs, palms facing your legs.',
-      'Raise one dumbbell straight in front of you to shoulder level, keeping the arm straight.',
-      'Lower the dumbbell under control, then repeat with the other arm.'
+    "id": "pullup_overhand",
+    "name": "Pull-up (Overhand)",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Grip bar with overhand grip wider than shoulders.",
+      "Pull chest to bar, driving elbows down.",
+      "Lower slowly to dead hang."
     ],
-    techniqueNotes: 'Focus on keeping your shoulders relaxed and down. Do not shrug.'
+    "techniqueNotes": "Hard core back exercise. Keep core tight."
   },
   {
-    id: 'rear_delt_fly_dumbbell',
-    name: 'Dumbbell Rear Delt Fly',
-    targetMuscleGroup: 'Shoulders',
-    instructions: [
-      'Hinge at your hips and bend forward until your torso is nearly parallel to the floor, holding dumbbells.',
-      'With a slight bend in your elbows, raise the weights out to your sides, squeezing your rear delts.',
-      'Lower the weights under control back to the starting point.'
+    "id": "chinup_underhand",
+    "name": "Chin-up (Underhand)",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Grip bar with underhand grip shoulder-width.",
+      "Pull chin over bar.",
+      "Lower to full extension."
     ],
-    techniqueNotes: 'Keep your neck in a neutral position by looking at the floor slightly in front of you.'
+    "techniqueNotes": "High bicep and lower lat recruitment."
   },
   {
-    id: 'arnold_press',
-    name: 'Arnold Press (Dumbbell)',
-    targetMuscleGroup: 'Shoulders',
-    instructions: [
-      'Sit on a bench holding dumbbells at chest height, palms facing towards you.',
-      'Press the weights overhead while rotating your wrists so that your palms face forward at the top.',
-      'Lower the dumbbells back down, reversing the rotation back to the start.'
+    "id": "neutral_grip_pullup",
+    "name": "Neutral Grip Pull-up",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Grip parallel handles on pull-up bar.",
+      "Pull chest to handles.",
+      "Lower under control."
     ],
-    techniqueNotes: 'Perform the press and rotation in one continuous, smooth movement.'
-  },
-
-  // --- ARMS (TAY) ---
-  {
-    id: 'bicep_curl',
-    name: 'Dumbbell Bicep Curl',
-    targetMuscleGroup: 'Arms',
-    instructions: [
-      'Hold dumbbells at your sides with palms facing forward.',
-      'Flex your elbows to lift the dumbbells toward your shoulders.',
-      'Lower the weights under control back to the starting position.'
-    ],
-    techniqueNotes: 'Keep your elbows tucked into your sides and do not swing your torso to lift the weight.'
+    "techniqueNotes": "Easiest pull-up on wrists and shoulders."
   },
   {
-    id: 'barbell_curl',
-    name: 'Barbell Bicep Curl',
-    targetMuscleGroup: 'Arms',
-    instructions: [
-      'Stand tall holding a barbell with an underhand grip, shoulder-width apart.',
-      'Curl the barbell up towards your chest, keeping your elbows fixed at your sides.',
-      'Lower the bar slowly under control to full extension.'
+    "id": "lat_pushdown_cable",
+    "name": "Lat Pushdown (Cable)",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Stand at cable station, grab bar overhead.",
+      "Keep arms straight, hinge forward slightly.",
+      "Pull bar down to thighs using lats."
     ],
-    techniqueNotes: 'Avoid leaning back to swing the bar up; keep your posture steady.'
+    "techniqueNotes": "Isolates lats without bicep involvement."
   },
   {
-    id: 'hammer_curl_dumbbell',
-    name: 'Dumbbell Hammer Curl',
-    targetMuscleGroup: 'Arms',
-    instructions: [
-      'Hold dumbbells at your sides with neutral grip (palms facing each other).',
-      'Curl the dumbbells up towards your shoulders without rotating your wrists.',
-      'Lower the weights back to the start.'
+    "id": "back_extension_machine",
+    "name": "Back Extension (Hyperextension)",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Position hips on extension bench pads.",
+      "Hinge at hips to lower upper body.",
+      "Raise torso back up to align with legs."
     ],
-    techniqueNotes: 'This target the brachioradialis and brachialis muscles in the forearms and outer biceps.'
+    "techniqueNotes": "Do not hyperextend/arch lower spine past straight line."
   },
   {
-    id: 'tricep_pushdown',
-    name: 'Cable Tricep Pushdown',
-    targetMuscleGroup: 'Arms',
-    instructions: [
-      'Grip the cable attachment at chest level with elbows bent.',
-      'Push the attachment downward until your arms are fully extended at your sides.',
-      'Return the attachment slowly back to the starting point.'
+    "id": "machine_row_guided",
+    "name": "Guided Machine Row",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Sit facing pad on row machine.",
+      "Pull handles toward chest.",
+      "Return handles slowly."
     ],
-    techniqueNotes: 'Keep your upper arms pinned to your torso; only move your forearms.'
+    "techniqueNotes": "Focus purely on contracting back muscle fibers."
   },
   {
-    id: 'overhead_tricep_extension_dumbbell',
-    name: 'Dumbbell Overhead Tricep Extension',
-    targetMuscleGroup: 'Arms',
-    instructions: [
-      'Sit or stand upright holding a single dumbbell with both hands vertically overhead.',
-      'Lower the weight behind your head by bending your elbows, keeping your upper arms vertical.',
-      'Press the dumbbell back up overhead by extending your elbows.'
+    "id": "inverted_bodyweight_row",
+    "name": "Inverted Bodyweight Row",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Set barbell in rack at hip height.",
+      "Lie underneath bar, grip overhand, heels on floor.",
+      "Row chest up to bar, keeping body straight."
     ],
-    techniqueNotes: 'Keep your elbows pointing forward, not flaring out to the sides.'
+    "techniqueNotes": "Adjust difficulty by changing foot position height."
   },
   {
-    id: 'skull_crusher_ezbar',
-    name: 'Skull Crusher (EZ Bar)',
-    targetMuscleGroup: 'Arms',
-    instructions: [
-      'Lie on a flat bench, holding an EZ bar overhead with arms extended straight up.',
-      'Bend at your elbows to lower the bar towards your forehead, keeping your upper arms stationary.',
-      'Extend your elbows to press the bar back up to the starting position.'
+    "id": "single_arm_cable_row",
+    "name": "Single-Arm Cable Row (Standing)",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Stand at cable station with single handle.",
+      "Row handle to hip, keeping body square.",
+      "Extend arm fully."
     ],
-    techniqueNotes: 'Keep your elbows tucked in and pointed forward. Do not let them flare outwards.'
+    "techniqueNotes": "Increases core rotation stability requirements."
   },
   {
-    id: 'tricep_dips',
-    name: 'Tricep Dips (Bench)',
-    targetMuscleGroup: 'Arms',
-    instructions: [
-      'Sit on the edge of a bench and place your hands flat next to your hips.',
-      'Step your feet forward and lift your hips off the bench.',
-      'Lower your hips by bending your elbows to 90 degrees, keeping your back close to the bench.',
-      'Push through your palms to return to the starting position.'
+    "id": "face_pulls_upperback",
+    "name": "Face Pulls (Upper Back / Rear Delts)",
+    "targetMuscleGroup": "Back",
+    "instructions": [
+      "Attach rope to high cable column.",
+      "Pull rope towards forehead, pulling hands apart at end.",
+      "Slowly return."
     ],
-    techniqueNotes: 'Do not drop your hips too low to avoid excessive shoulder strain.'
-  },
-
-  // --- CORE (BỤNG/CƠ TRUNG TÂM) ---
-  {
-    id: 'hanging_leg_raise',
-    name: 'Hanging Leg Raise',
-    targetMuscleGroup: 'Core',
-    instructions: [
-      'Hang from a pull-up bar with arms straight.',
-      'Raise your legs slowly until they are parallel to the floor.',
-      'Lower your legs slowly back to the starting vertical position.'
-    ],
-    techniqueNotes: 'Perform the movement slowly under control to avoid swinging your body.'
+    "techniqueNotes": "Great for shoulder health and upper back posture."
   },
   {
-    id: 'abdominal_crunch',
-    name: 'Abdominal Crunch',
-    targetMuscleGroup: 'Core',
-    instructions: [
-      'Lie on your back with knees bent and feet flat on the floor.',
-      'Place your hands lightly behind your head or crossed over your chest.',
-      'Contract your abs to lift your shoulders off the floor, keeping your lower back pressed down.',
-      'Lower your shoulders back down slowly.'
+    "id": "barbell_back_squat",
+    "name": "Barbell Back Squat",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Place barbell on traps, stand feet shoulder-width.",
+      "Bend knees and push hips back to lower thighs parallel to floor.",
+      "Drive up through heels."
     ],
-    techniqueNotes: 'Do not pull on your neck with your hands; lift using your abdominal muscles.'
+    "techniqueNotes": "Keep chest up and knees tracking over toes."
   },
   {
-    id: 'plank_standard',
-    name: 'Standard Plank',
-    targetMuscleGroup: 'Core',
-    instructions: [
-      'Place your forearms on the floor, elbows aligned under your shoulders.',
-      'Extend your legs straight behind you, supporting your weight on your toes.',
-      'Keep your body in a straight line from head to heels.',
-      'Hold the position while maintaining deep, regular breathing.'
+    "id": "barbell_front_squat",
+    "name": "Barbell Front Squat",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Rest barbell on front shoulders, hold with clean grip or cross arms.",
+      "Keep torso upright, squat down parallel.",
+      "Drive back up."
     ],
-    techniqueNotes: 'Squeeze your glutes and pull your belly button towards your spine to engage the deep core.'
+    "techniqueNotes": "Focuses heavily on quadriceps and core strength."
   },
   {
-    id: 'russian_twist',
-    name: 'Russian Twist',
-    targetMuscleGroup: 'Core',
-    instructions: [
-      'Sit on the floor with knees bent, lift your feet slightly, and lean back at a 45-degree angle.',
-      'Hold your hands together at your chest (or hold a weight).',
-      'Twist your torso to the right, touching the floor next to your hip, then twist to the left.'
+    "id": "barbell_box_squat",
+    "name": "Barbell Box Squat",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Squat down with barbell until hips touch box behind you.",
+      "Pause briefly on box, then drive back up to stand."
     ],
-    techniqueNotes: 'Keep your spine flat and pull your shoulders back. Do not slouch.'
+    "techniqueNotes": "Builds explosive power out of the bottom of the squat."
   },
   {
-    id: 'ab_wheel_rollout',
-    name: 'Ab Wheel Rollout',
-    targetMuscleGroup: 'Core',
-    instructions: [
-      'Kneel on the floor holding the ab wheel handles.',
-      'Roll the wheel forward, extending your body until your torso is close to the floor.',
-      'Squeeze your abs and roll the wheel back to the starting kneeling position.'
+    "id": "goblet_squat_db",
+    "name": "Goblet Squat (Dumbbell)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Hold dumbbell vertically against chest.",
+      "Squat down until hips go below parallel.",
+      "Push back to starting position."
     ],
-    techniqueNotes: 'Maintain a slightly rounded lower back and tight core. Do not let your back arch or sag.'
+    "techniqueNotes": "Excellent for beginners learning squat depth."
   },
   {
-    id: 'mountain_climbers',
-    name: 'Mountain Climbers',
-    targetMuscleGroup: 'Core',
-    instructions: [
-      'Start in a push-up plank position.',
-      'Drive one knee forward under your chest, then quickly switch legs in a running motion.',
-      'Keep your hips low and body in alignment.'
+    "id": "walking_lunges_db",
+    "name": "Dumbbell Walking Lunges",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Step forward with dumbbells at sides.",
+      "Lower hips until back knee is near floor.",
+      "Step forward with opposite foot and repeat."
     ],
-    techniqueNotes: 'Avoid raising your hips too high; maintain a solid flat plank stance.'
+    "techniqueNotes": "Keep torso upright to avoid lower back pull."
   },
   {
-    id: 'bicycle_crunch',
-    name: 'Bicycle Crunch',
-    targetMuscleGroup: 'Core',
-    instructions: [
-      'Lie on your back, knees bent, hands behind your head.',
-      'Raise your shoulder blades off the floor and lift your feet.',
-      'Twist your torso to touch your right elbow to your left knee while extending your right leg straight.',
-      'Switch sides, touching left elbow to right knee.'
+    "id": "reverse_lunges_db",
+    "name": "Dumbbell Reverse Lunges",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Step backward with one leg and lower hips.",
+      "Push off back foot to return to stand.",
+      "Alternate sides."
     ],
-    techniqueNotes: 'Move slowly and focus on twisting from the ribs, not just pulling your elbows.'
+    "techniqueNotes": "Easier on knees than forward lunges."
+  },
+  {
+    "id": "side_lunges_db",
+    "name": "Dumbbell Side Lunges",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Step wide to side, bending knee of leading leg.",
+      "Keep trailing leg straight.",
+      "Push back to center."
+    ],
+    "techniqueNotes": "Works inner and outer thighs (adductors/abductors)."
+  },
+  {
+    "id": "bulgarian_split_squat_db",
+    "name": "Bulgarian Split Squat (Dumbbell)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Place back foot on bench, hold dumbbells.",
+      "Lower hips until back knee is just above floor.",
+      "Drive front heel into floor to stand up."
+    ],
+    "techniqueNotes": "Excellent single-leg isolation movement."
+  },
+  {
+    "id": "leg_press_horizontal",
+    "name": "Horizontal Leg Press (Machine)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Sit in horizontal machine, feet on plate.",
+      "Push plate away until legs are extended.",
+      "Lower under control."
+    ],
+    "techniqueNotes": "Good for high-reps volume safely."
+  },
+  {
+    "id": "leg_press_45degree",
+    "name": "45-Degree Leg Press (Machine)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Lie on back in leg press sled, feet shoulder-width.",
+      "Release safety pins, bend knees to lower sled to 90 degrees.",
+      "Push sled back up without locking knees."
+    ],
+    "techniqueNotes": "Do not let lower back lift off the pad."
+  },
+  {
+    "id": "hack_squat_machine",
+    "name": "Hack Squat (Machine)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Place shoulders under pads on hack squat slide.",
+      "Lower sled until thighs are parallel to footplate.",
+      "Press sled up."
+    ],
+    "techniqueNotes": "Emphasizes outer quad sweep."
+  },
+  {
+    "id": "leg_extension_guided",
+    "name": "Leg Extension (Machine)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Sit in extension machine, place shins behind roller pads.",
+      "Extend legs fully to lift weight.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Isolates the quadriceps. Squeeze at top."
+  },
+  {
+    "id": "lying_leg_curl_machine",
+    "name": "Lying Leg Curl (Machine)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Lie face down, secure roller pad behind calves.",
+      "Curl heels toward glutes.",
+      "Return slowly."
+    ],
+    "techniqueNotes": "Keeps hamstring under constant tension."
+  },
+  {
+    "id": "seated_leg_curl_machine",
+    "name": "Seated Leg Curl (Machine)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Sit in machine, thighs locked under pad, calves on roller.",
+      "Curl legs down and back under seat.",
+      "Extend slowly."
+    ],
+    "techniqueNotes": "Greater hamstring stretch than lying version."
+  },
+  {
+    "id": "standing_leg_curl_machine",
+    "name": "Standing Leg Curl (Machine)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Stand at machine, place one calf behind roller.",
+      "Curl heel to glute unilaterally.",
+      "Switch sides."
+    ],
+    "techniqueNotes": "Unilateral isolation for correcting hamstring imbalances."
+  },
+  {
+    "id": "romanian_deadlift_db",
+    "name": "Romanian Deadlift (Dumbbell)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Hold dumbbells in front of thighs.",
+      "Push hips back and slide weights down legs.",
+      "Stand back up, squeezing glutes."
+    ],
+    "techniqueNotes": "Focus on the hip hinge. Do not squat the weight."
+  },
+  {
+    "id": "stiff_legged_deadlift_barbell",
+    "name": "Stiff-Legged Deadlift (Barbell)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Stand with knees locked or slightly soft.",
+      "Hinge hips to lower bar to feet.",
+      "Pull back to upright position using glutes/hamstrings."
+    ],
+    "techniqueNotes": "Long range of motion. Do not round spine."
+  },
+  {
+    "id": "single_leg_romanian_deadlift_db",
+    "name": "Single-Leg Romanian Deadlift (Dumbbell)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Stand on one leg, hold dumbbell in opposite hand.",
+      "Hinge at hip, lifting back leg straight behind.",
+      "Return to standing."
+    ],
+    "techniqueNotes": "Builds ankle stability, balance, and unilateral glute strength."
+  },
+  {
+    "id": "glute_ham_raise",
+    "name": "Glute Ham Raise",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Lock ankles into GHR machine bench.",
+      "Lower torso forward until horizontal.",
+      "Pull body up using hamstrings and glutes."
+    ],
+    "techniqueNotes": "Highly advanced hamstring developer."
+  },
+  {
+    "id": "barbell_hip_thrust",
+    "name": "Barbell Hip Thrust",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Sit on floor, upper back against bench, barbell over hips.",
+      "Drive feet into floor and push hips up to ceiling.",
+      "Lower hips to floor."
+    ],
+    "techniqueNotes": "Best exercise for overall glute hypertrophy."
+  },
+  {
+    "id": "dumbbell_hip_thrust",
+    "name": "Dumbbell Hip Thrust",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Sit against bench, place dumbbell on pelvis.",
+      "Drive hips upward, pausing at lockout."
+    ],
+    "techniqueNotes": "Easy setup alternative to barbell hip thrusts."
+  },
+  {
+    "id": "cable_pull_through",
+    "name": "Cable Pull-Through",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Stand facing away from low pulley with rope between legs.",
+      "Hinge hips forward to let rope go back.",
+      "Snap hips forward to stand upright."
+    ],
+    "techniqueNotes": "Teaches the hip hinge pattern safely without axial loading."
+  },
+  {
+    "id": "standing_calf_raise_machine",
+    "name": "Standing Calf Raise (Machine)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Place shoulders under pads, balls of feet on block.",
+      "Lower heels as far as possible, then press up onto toes.",
+      "Hold contraction at top."
+    ],
+    "techniqueNotes": "Work through full range of motion. Do not bounce."
+  },
+  {
+    "id": "seated_calf_raise_machine",
+    "name": "Seated Calf Raise (Machine)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Sit, place thigh pads over knees, toes on block.",
+      "Lower heels, then press up onto toes."
+    ],
+    "techniqueNotes": "Emphasizes the soleus muscle under the knee bend."
+  },
+  {
+    "id": "donkey_calf_raise",
+    "name": "Donkey Calf Raise",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Hinge hips, rest elbows on pad, place partner or weight on lower back.",
+      "Perform calf raises on toe block."
+    ],
+    "techniqueNotes": "Stretches calves at a different hip angle."
+  },
+  {
+    "id": "leg_press_calf_raise",
+    "name": "Leg Press Calf Raise",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Sit in leg press, place balls of feet on bottom edge of sled.",
+      "Unlock sled, push forward and backward flexing ankles."
+    ],
+    "techniqueNotes": "Maintain slightly soft knees to avoid hyperextension."
+  },
+  {
+    "id": "bodyweight_air_squats",
+    "name": "Bodyweight Air Squats",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Stand feet shoulder-width, squat down past parallel.",
+      "Stand back up."
+    ],
+    "techniqueNotes": "Great high-rep warm up or endurance exercise."
+  },
+  {
+    "id": "jump_squats_bodyweight",
+    "name": "Jump Squats (Bodyweight)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Squat down and explode upward into jump.",
+      "Land softly and repeat immediately."
+    ],
+    "techniqueNotes": "Develops lower body plyometric power."
+  },
+  {
+    "id": "step_ups_db",
+    "name": "Dumbbell Step-ups",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Hold dumbbells, place one foot on box.",
+      "Step up using front leg strength.",
+      "Step down and alternate."
+    ],
+    "techniqueNotes": "Do not push off with the trailing leg."
+  },
+  {
+    "id": "sled_push_prowler",
+    "name": "Sled Push (Prowler)",
+    "targetMuscleGroup": "Legs",
+    "instructions": [
+      "Grip prowler handles, lean forward at 45 degrees.",
+      "Drive legs to push sled forward."
+    ],
+    "techniqueNotes": "Builds quad endurance and lung capacity."
+  },
+  {
+    "id": "seated_barbell_overhead_press",
+    "name": "Seated Barbell Overhead Press",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit upright on bench, unrack bar at shoulder height.",
+      "Press bar straight overhead.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Maintains vertical core support under heavy loads."
+  },
+  {
+    "id": "military_press_standing",
+    "name": "Military Press (Standing Barbell)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Stand feet together, hold barbell at collarbone.",
+      "Press barbell straight up.",
+      "Lower to starting position."
+    ],
+    "techniqueNotes": "Keep core tight to protect lower back."
+  },
+  {
+    "id": "seated_dumbbell_shoulder_press",
+    "name": "Seated Dumbbell Shoulder Press",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit, press dumbbells overhead from shoulders.",
+      "Lower under control."
+    ],
+    "techniqueNotes": "Keeps load distributed equally between shoulders."
+  },
+  {
+    "id": "standing_dumbbell_shoulder_press",
+    "name": "Standing Dumbbell Shoulder Press",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Stand holding dumbbells at shoulders.",
+      "Press weights straight overhead.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Requires more core stability than seated version."
+  },
+  {
+    "id": "arnold_press_db",
+    "name": "Arnold Press (Dumbbell)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold dumbbells at face, palms facing you.",
+      "Press weights overhead while twisting palms outward."
+    ],
+    "techniqueNotes": "Involves front and lateral delts in one movement."
+  },
+  {
+    "id": "dumbbell_lateral_raise_standing",
+    "name": "Dumbbell Lateral Raise (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Raise dumbbells to sides to shoulder height.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Lead with elbows, keep pinkies up slightly."
+  },
+  {
+    "id": "dumbbell_lateral_raise_seated",
+    "name": "Dumbbell Lateral Raise (Seated)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit on bench, raise dumbbells to sides.",
+      "Lower under control."
+    ],
+    "techniqueNotes": "Removes leg momentum for strict delt isolation."
+  },
+  {
+    "id": "cable_lateral_raise_behind_back",
+    "name": "Cable Lateral Raise (Behind Back)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Stand in front of cable machine, pull cable behind back to side."
+    ],
+    "techniqueNotes": "Keeps tension on side delts at the bottom."
+  },
+  {
+    "id": "cable_lateral_raise_front",
+    "name": "Cable Lateral Raise (In Front)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Cross handle in front of body, raise to side."
+    ],
+    "techniqueNotes": "Excellent continuous resistance path."
+  },
+  {
+    "id": "machine_lateral_raise_guided",
+    "name": "Machine Lateral Raise",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit in machine, place elbows against pads.",
+      "Raise elbows to sides against resistance."
+    ],
+    "techniqueNotes": "Great for finishing delts safely."
+  },
+  {
+    "id": "dumbbell_front_raise_standing",
+    "name": "Dumbbell Front Raise (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Raise dumbbells forward to shoulder height.",
+      "Lower under control."
+    ],
+    "techniqueNotes": "Isolates the anterior (front) deltoid."
+  },
+  {
+    "id": "barbell_front_raise_standing",
+    "name": "Barbell Front Raise (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold bar, raise straight forward in front of chest."
+    ],
+    "techniqueNotes": "Keep wrists straight."
+  },
+  {
+    "id": "plate_front_raise",
+    "name": "Plate Front Raise",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold weight plate at 9 and 3 o'clock.",
+      "Raise plate in front of face, lower slowly."
+    ],
+    "techniqueNotes": "Brace core to avoid swinging torso."
+  },
+  {
+    "id": "cable_front_raise_rope",
+    "name": "Cable Front Raise (Rope)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Straddle low cable, hold rope with neutral grip.",
+      "Raise arms forward to chest height."
+    ],
+    "techniqueNotes": "Constant tension for front delts."
+  },
+  {
+    "id": "dumbbell_rear_delt_fly_bentover",
+    "name": "Dumbbell Rear Delt Fly (Bent-Over)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hinge forward, raise dumbbells to sides.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Squeeze back of shoulders, not upper back."
+  },
+  {
+    "id": "dumbbell_rear_delt_fly_seated",
+    "name": "Dumbbell Rear Delt Fly (Seated)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit at end of bench, lean chest forward to knees.",
+      "Raise dumbbells to sides."
+    ],
+    "techniqueNotes": "Prevents torso rocking."
+  },
+  {
+    "id": "cable_rear_delt_fly_standing",
+    "name": "Cable Rear Delt Fly (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Cross cable cables in front of face without handles.",
+      "Pull arms wide to sides."
+    ],
+    "techniqueNotes": "Isolates rear deltoids perfectly."
+  },
+  {
+    "id": "cable_face_pull_rope",
+    "name": "Cable Face Pull",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Pull rope attachment to nose, flaring elbows wide."
+    ],
+    "techniqueNotes": "Promotes shoulder external rotation."
+  },
+  {
+    "id": "dumbbell_shrugs_standing",
+    "name": "Dumbbell Shrugs (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold dumbbells, raise shoulders to ears."
+    ],
+    "techniqueNotes": "Squeeze traps at the top; do not roll shoulders."
+  },
+  {
+    "id": "barbell_shrugs_standing",
+    "name": "Barbell Shrugs (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold barbell in front, shrug upward."
+    ],
+    "techniqueNotes": "Can handle heavier loads."
+  },
+  {
+    "id": "behind_back_barbell_shrug",
+    "name": "Behind-the-Back Barbell Shrugs",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold bar behind glutes, shrug shoulders up."
+    ],
+    "techniqueNotes": "Hits middle/lower traps differently."
+  },
+  {
+    "id": "smith_machine_upright_row",
+    "name": "Smith Machine Upright Row",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Grip Smith bar wide, pull up to chest, elbows high."
+    ],
+    "techniqueNotes": "Guided bar path reduces wrist twisting."
+  },
+  {
+    "id": "dumbbell_upright_row",
+    "name": "Dumbbell Upright Row",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Pull dumbbells up to chest, elbows pointing to ceiling."
+    ],
+    "techniqueNotes": "Safer on shoulder joints than barbell version."
+  },
+  {
+    "id": "barbell_upright_row",
+    "name": "Barbell Upright Row",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold bar close-grip, pull up to chest, elbows high."
+    ],
+    "techniqueNotes": "Avoid pulling too high if you experience shoulder pinching."
+  },
+  {
+    "id": "incline_dumbbell_yraise",
+    "name": "Incline Dumbbell Y-Raise",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Lie chest down on incline bench.",
+      "Raise dumbbells up and outward in Y shape."
+    ],
+    "techniqueNotes": "Excellent for lower traps and rear delts."
+  },
+  {
+    "id": "seated_barbell_overhead_press",
+    "name": "Seated Barbell Overhead Press",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit upright on bench, unrack bar at shoulder height.",
+      "Press bar straight overhead.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Maintains vertical core support under heavy loads."
+  },
+  {
+    "id": "military_press_standing",
+    "name": "Military Press (Standing Barbell)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Stand feet together, hold barbell at collarbone.",
+      "Press barbell straight up.",
+      "Lower to starting position."
+    ],
+    "techniqueNotes": "Keep core tight to protect lower back."
+  },
+  {
+    "id": "seated_dumbbell_shoulder_press",
+    "name": "Seated Dumbbell Shoulder Press",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit, press dumbbells overhead from shoulders.",
+      "Lower under control."
+    ],
+    "techniqueNotes": "Keeps load distributed equally between shoulders."
+  },
+  {
+    "id": "standing_dumbbell_shoulder_press",
+    "name": "Standing Dumbbell Shoulder Press",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Stand holding dumbbells at shoulders.",
+      "Press weights straight overhead.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Requires more core stability than seated version."
+  },
+  {
+    "id": "arnold_press_db",
+    "name": "Arnold Press (Dumbbell)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold dumbbells at face, palms facing you.",
+      "Press weights overhead while twisting palms outward."
+    ],
+    "techniqueNotes": "Involves front and lateral delts in one movement."
+  },
+  {
+    "id": "dumbbell_lateral_raise_standing",
+    "name": "Dumbbell Lateral Raise (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Raise dumbbells to sides to shoulder height.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Lead with elbows, keep pinkies up slightly."
+  },
+  {
+    "id": "dumbbell_lateral_raise_seated",
+    "name": "Dumbbell Lateral Raise (Seated)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit on bench, raise dumbbells to sides.",
+      "Lower under control."
+    ],
+    "techniqueNotes": "Removes leg momentum for strict delt isolation."
+  },
+  {
+    "id": "cable_lateral_raise_behind_back",
+    "name": "Cable Lateral Raise (Behind Back)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Stand in front of cable machine, pull cable behind back to side."
+    ],
+    "techniqueNotes": "Keeps tension on side delts at the bottom."
+  },
+  {
+    "id": "cable_lateral_raise_front",
+    "name": "Cable Lateral Raise (In Front)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Cross handle in front of body, raise to side."
+    ],
+    "techniqueNotes": "Excellent continuous resistance path."
+  },
+  {
+    "id": "machine_lateral_raise_guided",
+    "name": "Machine Lateral Raise",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit in machine, place elbows against pads.",
+      "Raise elbows to sides against resistance."
+    ],
+    "techniqueNotes": "Great for finishing delts safely."
+  },
+  {
+    "id": "dumbbell_front_raise_standing",
+    "name": "Dumbbell Front Raise (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Raise dumbbells forward to shoulder height.",
+      "Lower under control."
+    ],
+    "techniqueNotes": "Isolates the anterior (front) deltoid."
+  },
+  {
+    "id": "barbell_front_raise_standing",
+    "name": "Barbell Front Raise (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold bar, raise straight forward in front of chest."
+    ],
+    "techniqueNotes": "Keep wrists straight."
+  },
+  {
+    "id": "plate_front_raise",
+    "name": "Plate Front Raise",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold weight plate at 9 and 3 o'clock.",
+      "Raise plate in front of face, lower slowly."
+    ],
+    "techniqueNotes": "Brace core to avoid swinging torso."
+  },
+  {
+    "id": "cable_front_raise_rope",
+    "name": "Cable Front Raise (Rope)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Straddle low cable, hold rope with neutral grip.",
+      "Raise arms forward to chest height."
+    ],
+    "techniqueNotes": "Constant tension for front delts."
+  },
+  {
+    "id": "dumbbell_rear_delt_fly_bentover",
+    "name": "Dumbbell Rear Delt Fly (Bent-Over)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hinge forward, raise dumbbells to sides.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Squeeze back of shoulders, not upper back."
+  },
+  {
+    "id": "dumbbell_rear_delt_fly_seated",
+    "name": "Dumbbell Rear Delt Fly (Seated)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Sit at end of bench, lean chest forward to knees.",
+      "Raise dumbbells to sides."
+    ],
+    "techniqueNotes": "Prevents torso rocking."
+  },
+  {
+    "id": "cable_rear_delt_fly_standing",
+    "name": "Cable Rear Delt Fly (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Cross cable cables in front of face without handles.",
+      "Pull arms wide to sides."
+    ],
+    "techniqueNotes": "Isolates rear deltoids perfectly."
+  },
+  {
+    "id": "cable_face_pull_rope",
+    "name": "Cable Face Pull",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Pull rope attachment to nose, flaring elbows wide."
+    ],
+    "techniqueNotes": "Promotes shoulder external rotation."
+  },
+  {
+    "id": "dumbbell_shrugs_standing",
+    "name": "Dumbbell Shrugs (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold dumbbells, raise shoulders to ears."
+    ],
+    "techniqueNotes": "Squeeze traps at the top; do not roll shoulders."
+  },
+  {
+    "id": "barbell_shrugs_standing",
+    "name": "Barbell Shrugs (Standing)",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold barbell in front, shrug upward."
+    ],
+    "techniqueNotes": "Can handle heavier loads."
+  },
+  {
+    "id": "behind_back_barbell_shrug",
+    "name": "Behind-the-Back Barbell Shrugs",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold bar behind glutes, shrug shoulders up."
+    ],
+    "techniqueNotes": "Hits middle/lower traps differently."
+  },
+  {
+    "id": "smith_machine_upright_row",
+    "name": "Smith Machine Upright Row",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Grip Smith bar wide, pull up to chest, elbows high."
+    ],
+    "techniqueNotes": "Guided bar path reduces wrist twisting."
+  },
+  {
+    "id": "dumbbell_upright_row",
+    "name": "Dumbbell Upright Row",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Pull dumbbells up to chest, elbows pointing to ceiling."
+    ],
+    "techniqueNotes": "Safer on shoulder joints than barbell version."
+  },
+  {
+    "id": "barbell_upright_row",
+    "name": "Barbell Upright Row",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Hold bar close-grip, pull up to chest, elbows high."
+    ],
+    "techniqueNotes": "Avoid pulling too high if you experience shoulder pinching."
+  },
+  {
+    "id": "incline_dumbbell_yraise",
+    "name": "Incline Dumbbell Y-Raise",
+    "targetMuscleGroup": "Shoulders",
+    "instructions": [
+      "Lie chest down on incline bench.",
+      "Raise dumbbells up and outward in Y shape."
+    ],
+    "techniqueNotes": "Excellent for lower traps and rear delts."
+  },
+  {
+    "id": "dumbbell_bicep_curl_alt",
+    "name": "Alternating Dumbbell Bicep Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Stand tall, curl one dumbbell up, rotating palm up.",
+      "Lower slowly and repeat with other arm."
+    ],
+    "techniqueNotes": "Turn wrist at the top (supinate) for maximum bicep peak."
+  },
+  {
+    "id": "barbell_bicep_curl_standing",
+    "name": "Standing Barbell Bicep Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Hold barbell underhand, curl to chest.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Keep elbows pinned at sides. No swinging."
+  },
+  {
+    "id": "ez_bar_bicep_curl",
+    "name": "Standing EZ-Bar Bicep Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Curl EZ-bar using angled grips.",
+      "Lower slowly."
+    ],
+    "techniqueNotes": "Easier on wrists than straight barbell curls."
+  },
+  {
+    "id": "incline_dumbbell_curl",
+    "name": "Incline Dumbbell Bicep Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Lie on incline bench, let arms hang.",
+      "Curl weights up without moving elbows forward."
+    ],
+    "techniqueNotes": "Places bicep under intense stretch at start."
+  },
+  {
+    "id": "concentration_curl_db",
+    "name": "Concentration Bicep Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Sit, rest elbow against inner thigh.",
+      "Curl dumbbell toward face."
+    ],
+    "techniqueNotes": "Isolates the bicep, preventing stabilizer help."
+  },
+  {
+    "id": "preacher_ez_bar_curl",
+    "name": "Preacher EZ-Bar Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Rest arms on preacher pad, curl EZ-bar.",
+      "Extend fully, then curl up."
+    ],
+    "techniqueNotes": "Strict movement. Do not use momentum."
+  },
+  {
+    "id": "preacher_dumbbell_curl",
+    "name": "Preacher Dumbbell Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Rest arm on preacher pad, curl dumbbell unilaterally."
+    ],
+    "techniqueNotes": "Good for correcting arm size imbalances."
+  },
+  {
+    "id": "hammer_curl_standing",
+    "name": "Standing Dumbbell Hammer Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Curl dumbbells with palms facing each other (neutral grip)."
+    ],
+    "techniqueNotes": "Builds bicep width and forearm mass."
+  },
+  {
+    "id": "cable_rope_hammer_curl",
+    "name": "Cable Rope Hammer Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Grab rope at low pulley, curl upward."
+    ],
+    "techniqueNotes": "Provides constant tension throughout."
+  },
+  {
+    "id": "cable_bicep_curl_straight",
+    "name": "Standing Cable Bicep Curl (Straight Bar)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Curl straight bar attachment at low pulley."
+    ],
+    "techniqueNotes": "Keeps resistance loaded at contraction peak."
+  },
+  {
+    "id": "high_cable_bicep_curl",
+    "name": "High Cable Bicep Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Hold handles from high pulley stations, curl towards ears."
+    ],
+    "techniqueNotes": "Also known as double bicep cable curl."
+  },
+  {
+    "id": "spider_curl_db",
+    "name": "Spider Curl (Dumbbell)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Lie chest down on incline bench, curl weights upward."
+    ],
+    "techniqueNotes": "Creates peak tension at the top contraction."
+  },
+  {
+    "id": "zottman_curl_db",
+    "name": "Zottman Curl (Dumbbell)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Curl dumbbell underhand, rotate palms forward at top, lower overhand."
+    ],
+    "techniqueNotes": "Combines bicep curl with forearm wrist extension builder."
+  },
+  {
+    "id": "reverse_grip_barbell_curl",
+    "name": "Reverse-Grip Barbell Bicep Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Hold barbell overhand, curl to shoulders."
+    ],
+    "techniqueNotes": "Builds forearms and outer biceps brachii."
+  },
+  {
+    "id": "cable_tricep_pushdown_straight",
+    "name": "Cable Tricep Pushdown (Straight Bar)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Push straight bar cable attachment down to thighs."
+    ],
+    "techniqueNotes": "Allows for heavier loading."
+  },
+  {
+    "id": "cable_tricep_pushdown_rope",
+    "name": "Cable Tricep Pushdown (Rope)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Push rope attachment down, pulling ends apart at bottom."
+    ],
+    "techniqueNotes": "Squeezes outer head of triceps."
+  },
+  {
+    "id": "cable_tricep_pushdown_vbar",
+    "name": "Cable Tricep Pushdown (V-Bar)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Push V-Bar attachment down."
+    ],
+    "techniqueNotes": "Comfortable neutral-ish wrist angle."
+  },
+  {
+    "id": "overhead_tricep_extension_db_twoarms",
+    "name": "Dumbbell Overhead Tricep Extension (Two-Handed)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Hold dumbbell with both hands, lower behind head, press up."
+    ],
+    "techniqueNotes": "Keep elbows close to head."
+  },
+  {
+    "id": "overhead_tricep_extension_ezbar",
+    "name": "Overhead Tricep Extension (EZ-Bar)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Hold EZ Bar, lower behind neck, press up."
+    ],
+    "techniqueNotes": "Work through deep stretch at bottom."
+  },
+  {
+    "id": "overhead_tricep_extension_cable_rope",
+    "name": "Overhead Tricep Extension (Cable Rope)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Facing away from pulley, pull rope extension forward over head."
+    ],
+    "techniqueNotes": "Continuous stretch under constant load."
+  },
+  {
+    "id": "skull_crusher_ezbar_arms",
+    "name": "Skull Crusher (EZ-Bar / Triceps)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Lie flat, lower EZ bar to forehead, extend arms."
+    ],
+    "techniqueNotes": "Keep upper arm bone stationary."
+  },
+  {
+    "id": "dumbbell_tricep_kickback",
+    "name": "Dumbbell Tricep Kickback",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Bend forward, hold elbow up, extend forearm backward."
+    ],
+    "techniqueNotes": "Lock shoulder in place, only move forearm."
+  },
+  {
+    "id": "bench_dips_bodyweight",
+    "name": "Bench Dips (Bodyweight)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Lower hips between benches by bending elbows."
+    ],
+    "techniqueNotes": "Good finishing pump movement."
+  },
+  {
+    "id": "parallel_bar_dips_arms",
+    "name": "Parallel Bar Dips (Triceps Focus)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Keep torso upright, lower body, press up."
+    ],
+    "techniqueNotes": "Upright posture targets triceps over chest."
+  },
+  {
+    "id": "close_grip_bench_press_tricep",
+    "name": "Close-Grip Bench Press (Triceps)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Barbell press with narrow grip flat bench."
+    ],
+    "techniqueNotes": "Main builder for triceps power."
+  },
+  {
+    "id": "single_arm_cable_tricep_extension",
+    "name": "Single-Arm Cable Tricep Extension",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Push single handle down unilaterally."
+    ],
+    "techniqueNotes": "Ensures equal tricep balance."
+  },
+  {
+    "id": "dumbbell_wrist_curl_underhand",
+    "name": "Dumbbell Wrist Curl (Underhand)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Rest forearms on bench palms up, curl dumbbells up with wrists."
+    ],
+    "techniqueNotes": "Isolates wrist flexors."
+  },
+  {
+    "id": "dumbbell_wrist_curl_overhand",
+    "name": "Dumbbell Wrist Curl (Overhand)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Rest forearms on bench palms down, curl dumbbells up with wrists."
+    ],
+    "techniqueNotes": "Isolates wrist extensors."
+  },
+  {
+    "id": "reverse_barbell_wrist_curl",
+    "name": "Reverse Barbell Wrist Curl",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Curl barbell overhand using wrists only."
+    ],
+    "techniqueNotes": "Builds top forearms."
+  },
+  {
+    "id": "plate_pinches_forearm",
+    "name": "Plate Pinches (Forearms)",
+    "targetMuscleGroup": "Arms",
+    "instructions": [
+      "Pinch plates together between thumb and fingers, hold for time."
+    ],
+    "techniqueNotes": "Builds crushing grip strength."
+  },
+  {
+    "id": "hanging_leg_raise_core",
+    "name": "Hanging Leg Raise (Core)",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Hang from bar, raise straight legs to parallel."
+    ],
+    "techniqueNotes": "Control the swing."
+  },
+  {
+    "id": "hanging_knee_raise_core",
+    "name": "Hanging Knee Raise",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Hang from bar, pull knees to chest."
+    ],
+    "techniqueNotes": "Easier variation of leg raise."
+  },
+  {
+    "id": "abdominal_crunch_flat",
+    "name": "Abdominal Crunch",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Lie flat, bend knees, lift shoulders."
+    ],
+    "techniqueNotes": "Engage abs, do not pull head."
+  },
+  {
+    "id": "decline_crunch_weighted",
+    "name": "Decline Crunch",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Perform crunches on decline bench."
+    ],
+    "techniqueNotes": "Adds resistance due to angle."
+  },
+  {
+    "id": "cable_crunch_kneeling",
+    "name": "Cable Crunch (Kneeling)",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Hold rope at head, kneel, crunch torso down."
+    ],
+    "techniqueNotes": "Flex the spine, do not sit hips back."
+  },
+  {
+    "id": "flat_bench_leg_raise",
+    "name": "Flat Bench Leg Raise",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Lie on bench, raise legs to ceiling."
+    ],
+    "techniqueNotes": "Press lower back flat."
+  },
+  {
+    "id": "lying_knee_raise_reverse_crunch",
+    "name": "Reverse Crunch",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Lie flat, pull knees to face, lift hips."
+    ],
+    "techniqueNotes": "Hits lower ab fibers."
+  },
+  {
+    "id": "plank_elbow_standard",
+    "name": "Standard Elbow Plank",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Hold plank on forearms."
+    ],
+    "techniqueNotes": "Align head to heels in straight line."
+  },
+  {
+    "id": "plank_hand_standard",
+    "name": "Standard Hand Plank",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Hold plank on hands."
+    ],
+    "techniqueNotes": "Push floor away actively."
+  },
+  {
+    "id": "side_plank_left",
+    "name": "Side Elbow Plank (Left)",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Hold side plank on left elbow."
+    ],
+    "techniqueNotes": "Keep hips lifted high."
+  },
+  {
+    "id": "side_plank_right",
+    "name": "Side Elbow Plank (Right)",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Hold side plank on right elbow."
+    ],
+    "techniqueNotes": "Squeeze obliques."
+  },
+  {
+    "id": "russian_twist_weighted",
+    "name": "Russian Twist (Weighted)",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Sit, lean back, twist plate side to side."
+    ],
+    "techniqueNotes": "Excellent oblique developer."
+  },
+  {
+    "id": "ab_wheel_rollout_kneeling",
+    "name": "Ab Wheel Rollout",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Roll wheel out kneeling, pull back."
+    ],
+    "techniqueNotes": "Brace core strongly; do not sag lower back."
+  },
+  {
+    "id": "mountain_climbers_core",
+    "name": "Mountain Climbers",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Drive knees forward in plank speed position."
+    ],
+    "techniqueNotes": "Conditioning plus core."
+  },
+  {
+    "id": "bicycle_crunch_core",
+    "name": "Bicycle Crunch",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Twist elbow to opposite knee alternating."
+    ],
+    "techniqueNotes": "Keep shoulder blades off floor."
+  },
+  {
+    "id": "dead_bug_hold",
+    "name": "Dead Bug",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Lying, extend opposite arm and leg."
+    ],
+    "techniqueNotes": "Great core stabilizer control exercise."
+  },
+  {
+    "id": "bird_dog_hold",
+    "name": "Bird Dog",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Kneeling, extend opposite arm and leg."
+    ],
+    "techniqueNotes": "Strengthens lower back stabilizer muscles."
+  },
+  {
+    "id": "flutter_kicks_core",
+    "name": "Flutter Kicks",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Lying on back, raise heels slightly, kick up and down."
+    ],
+    "techniqueNotes": "Engages lower rectus abdominis."
+  },
+  {
+    "id": "toe_touches_lying",
+    "name": "Lying Toe Touches",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Raise legs straight up, reach fingers to toes."
+    ],
+    "techniqueNotes": "Focus on upper abs flex."
+  },
+  {
+    "id": "woodchopper_high_to_low",
+    "name": "Woodchopper (High-to-Low Cable)",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Pull cable diagonally downward across body."
+    ],
+    "techniqueNotes": "Rotational power for obliques."
+  },
+  {
+    "id": "woodchopper_low_to_high",
+    "name": "Woodchopper (Low-to-High Cable)",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Pull cable diagonally upward across body."
+    ],
+    "techniqueNotes": "Builds dynamic rotational core strength."
+  },
+  {
+    "id": "captains_chair_leg_raise",
+    "name": "Captain's Chair Leg Raise",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Support weight on forearms, lift knees/legs."
+    ],
+    "techniqueNotes": "Avoid swinging. Keep hips pressed back."
+  },
+  {
+    "id": "windshield_wipers_lying",
+    "name": "Windshield Wipers (Lying)",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Lying on back, legs straight up, lower side to side."
+    ],
+    "techniqueNotes": "Works deep rotational obliques."
+  },
+  {
+    "id": "hollow_body_hold",
+    "name": "Hollow Body Hold",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Lie flat, raise legs and head slightly, hold shape."
+    ],
+    "techniqueNotes": "Press lower spine into the ground."
+  },
+  {
+    "id": "superman_hold",
+    "name": "Superman Hold",
+    "targetMuscleGroup": "Core",
+    "instructions": [
+      "Lie face down, lift hands and chest plus legs, hold."
+    ],
+    "techniqueNotes": "Excellent for lower back extensors."
+  },
+  {
+    "id": "arm_circles_forward",
+    "name": "Arm Circles (Forward)",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Stand tall, rotate arms forward in circle."
+    ],
+    "techniqueNotes": "Loosens shoulders."
+  },
+  {
+    "id": "arm_circles_backward",
+    "name": "Arm Circles (Backward)",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Rotate arms backward in circles."
+    ],
+    "techniqueNotes": "Shoulder joint warmup."
+  },
+  {
+    "id": "neck_rotations_warmup",
+    "name": "Neck Rotations",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Slowly roll neck in circles."
+    ],
+    "techniqueNotes": "Releases neck stiffness."
+  },
+  {
+    "id": "torso_twists_warmup",
+    "name": "Torso Twists",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Rotate torso side to side, swing arms."
+    ],
+    "techniqueNotes": "T-spine mobility."
+  },
+  {
+    "id": "hip_circles_cw",
+    "name": "Hip Circles (Clockwise)",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Circle hips clockwise."
+    ],
+    "techniqueNotes": "Loosens hip joint."
+  },
+  {
+    "id": "hip_circles_ccw",
+    "name": "Hip Circles (Counter-Clockwise)",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Circle hips counter-clockwise."
+    ],
+    "techniqueNotes": "Mobility builder."
+  },
+  {
+    "id": "high_knees_warmup_fast",
+    "name": "High Knees",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Jog in place driving knees high."
+    ],
+    "techniqueNotes": "Increases heart rate."
+  },
+  {
+    "id": "butt_kicks_warmup_fast",
+    "name": "Butt Kicks",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Jog in place kicking glutes."
+    ],
+    "techniqueNotes": "Warms up hamstrings."
+  },
+  {
+    "id": "leg_swings_fb",
+    "name": "Leg Swings (Forward/Backward)",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Swing one leg forward and backward."
+    ],
+    "techniqueNotes": "Hip flexor/glute warmup."
+  },
+  {
+    "id": "leg_swings_side",
+    "name": "Leg Swings (Side-to-Side)",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Swing leg laterally across body."
+    ],
+    "techniqueNotes": "Adductor/abductor warmup."
+  },
+  {
+    "id": "dynamic_lunges_alt",
+    "name": "Dynamic Lunges",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Step forward into lunge, alternate legs."
+    ],
+    "techniqueNotes": "Lower body blood flow."
+  },
+  {
+    "id": "cat_cow_dynamic",
+    "name": "Cat-Cow Stretch (Dynamic)",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Move between arching and rounding back."
+    ],
+    "techniqueNotes": "Spinal lubrication."
+  },
+  {
+    "id": "wrist_circles_warmup",
+    "name": "Wrist Circles",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Rotate wrists in circles."
+    ],
+    "techniqueNotes": "Prepare wrists for presses."
+  },
+  {
+    "id": "ankle_rotations_warmup",
+    "name": "Ankle Rotations",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Rotate ankles in circles."
+    ],
+    "techniqueNotes": "Avoid ankle rolling."
+  },
+  {
+    "id": "shoulder_shrugs_warmup",
+    "name": "Shoulder Shrugs",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Roll shoulders up and back."
+    ],
+    "techniqueNotes": "Traps activation."
+  },
+  {
+    "id": "jumping_jacks_warmup",
+    "name": "Jumping Jacks",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Jump wide raising hands overhead."
+    ],
+    "techniqueNotes": "Full body warmup."
+  },
+  {
+    "id": "inchworms_mobility",
+    "name": "Inchworms",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Walk hands out to plank, then feet to hands."
+    ],
+    "techniqueNotes": "Hamstring and shoulder prep."
+  },
+  {
+    "id": "walkouts_to_plank",
+    "name": "Walkouts to Plank",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Stand, reach toes, walk hands to plank, walk back."
+    ],
+    "techniqueNotes": "Core and shoulder warmup."
+  },
+  {
+    "id": "worlds_greatest_stretch_mobility",
+    "name": "World's Greatest Stretch",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Deep lunge, rotate arm to ceiling, hamstring stretch."
+    ],
+    "techniqueNotes": "Full body joint prep."
+  },
+  {
+    "id": "cossack_squats_bodyweight",
+    "name": "Cossack Squats",
+    "targetMuscleGroup": "Warm-up",
+    "instructions": [
+      "Squat side to side, straight leg heels up."
+    ],
+    "techniqueNotes": "Inner thigh flexibility."
+  },
+  {
+    "id": "cobra_stretch_static",
+    "name": "Cobra Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Lie down, press hands to lift chest."
+    ],
+    "techniqueNotes": "Stretch abdominals/lower back."
+  },
+  {
+    "id": "childs_pose_static",
+    "name": "Child's Pose",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Sit on heels, reach arms forward on floor."
+    ],
+    "techniqueNotes": "Lower back relaxation."
+  },
+  {
+    "id": "lying_hamstring_stretch_static",
+    "name": "Lying Hamstring Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Lie flat, raise one leg and pull closer."
+    ],
+    "techniqueNotes": "Deep hamstring stretch."
+  },
+  {
+    "id": "standing_quad_stretch_static",
+    "name": "Standing Quad Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Hold ankle behind glute standing."
+    ],
+    "techniqueNotes": "Front thigh stretch."
+  },
+  {
+    "id": "chest_opener_stretch_static",
+    "name": "Chest Opener Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Clasp hands behind back, lift arms."
+    ],
+    "techniqueNotes": "Pectoral opening."
+  },
+  {
+    "id": "cross_arm_shoulder_stretch_static",
+    "name": "Cross-Arm Shoulder Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Pull arm straight across chest."
+    ],
+    "techniqueNotes": "Deltoid release."
+  },
+  {
+    "id": "butterfly_stretch_static",
+    "name": "Butterfly Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Sit soles of feet together, knees down."
+    ],
+    "techniqueNotes": "Inner thigh opener."
+  },
+  {
+    "id": "overhead_tricep_stretch_static",
+    "name": "Overhead Tricep Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Pull elbow behind head downward."
+    ],
+    "techniqueNotes": "Tricep stretching."
+  },
+  {
+    "id": "pigeon_pose_stretch",
+    "name": "Pigeon Pose",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Fold forward over bent leg on floor."
+    ],
+    "techniqueNotes": "Glute and hip opener."
+  },
+  {
+    "id": "calf_stretch_wall",
+    "name": "Calf Stretch (Against Wall)",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Push wall, extend one calf back flat heel."
+    ],
+    "techniqueNotes": "Gastrocnemius stretch."
+  },
+  {
+    "id": "seated_forward_fold",
+    "name": "Seated Forward Fold",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Sit legs straight, reach to toes."
+    ],
+    "techniqueNotes": "Posterior chain stretch."
+  },
+  {
+    "id": "standing_forward_fold_stretch",
+    "name": "Standing Forward Fold",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Stand, fold torso to floor let arms hang."
+    ],
+    "techniqueNotes": "Spine decompression."
+  },
+  {
+    "id": "lying_figure_four",
+    "name": "Figure-Four Glute Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Lie down, cross ankle over knee, pull thigh."
+    ],
+    "techniqueNotes": "Piriformis release."
+  },
+  {
+    "id": "cat_cow_hold",
+    "name": "Cat-Cow Stretch (Hold)",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Hold cat pose, then cow pose for 15s."
+    ],
+    "techniqueNotes": "Deep spine stretch."
+  },
+  {
+    "id": "sphinx_pose_stretch",
+    "name": "Sphinx Pose",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Support chest on forearms lying down."
+    ],
+    "techniqueNotes": "Gentle lower spine curve."
+  },
+  {
+    "id": "upward_facing_dog_stretch",
+    "name": "Upward Facing Dog",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Lift thighs off floor supported by hands."
+    ],
+    "techniqueNotes": "Advanced back extension."
+  },
+  {
+    "id": "thread_the_needle_stretch",
+    "name": "Thread the Needle",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Kneeling, slide one arm under opposite shoulder."
+    ],
+    "techniqueNotes": "Thoracic spin rotation."
+  },
+  {
+    "id": "wrist_extensor_stretch_static",
+    "name": "Wrist Extensor Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Pull fingers back pointing down, palm away."
+    ],
+    "techniqueNotes": "Forearm flexor release."
+  },
+  {
+    "id": "wrist_flexor_stretch_static",
+    "name": "Wrist Flexor Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Pull fingers back pointing up, palm out."
+    ],
+    "techniqueNotes": "Forearm extensor release."
+  },
+  {
+    "id": "side_bend_stretch_standing",
+    "name": "Side Bend Stretch",
+    "targetMuscleGroup": "Stretching",
+    "instructions": [
+      "Reach one hand over head bending to side."
+    ],
+    "techniqueNotes": "Lats and oblique stretch."
+  },
+  {
+    "id": "running_treadmill",
+    "name": "Running (Treadmill)",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Run on treadmill at desired pace."
+    ],
+    "techniqueNotes": "Heart health builder."
+  },
+  {
+    "id": "running_outdoor",
+    "name": "Running (Outdoor)",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Run outdoors on trail/road."
+    ],
+    "techniqueNotes": "Varying foot strikes."
+  },
+  {
+    "id": "stationary_cycling_cardio",
+    "name": "Stationary Cycling",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Cycle on stationary bike."
+    ],
+    "techniqueNotes": "Low impact cardiovascular."
+  },
+  {
+    "id": "outdoor_cycling_cardio",
+    "name": "Outdoor Cycling",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Ride bicycle outdoors."
+    ],
+    "techniqueNotes": "Road resistance."
+  },
+  {
+    "id": "elliptical_trainer_cardio",
+    "name": "Elliptical Trainer",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Use elliptical machine glide."
+    ],
+    "techniqueNotes": "Very low impact cardio."
+  },
+  {
+    "id": "row_machine_cardio",
+    "name": "Row Machine",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Perform rows on sliding machine."
+    ],
+    "techniqueNotes": "Full body cardiovascular."
+  },
+  {
+    "id": "stair_climber_cardio",
+    "name": "Stair Climber",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Step continuously on revolving stairs."
+    ],
+    "techniqueNotes": "High glute/quad cardio."
+  },
+  {
+    "id": "jump_rope_double_under",
+    "name": "Jump Rope (Double Under)",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Spin rope twice per single jump."
+    ],
+    "techniqueNotes": "Advanced speed/crossover."
+  },
+  {
+    "id": "jump_rope_single_under",
+    "name": "Jump Rope (Single Under)",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Spin rope once per jump."
+    ],
+    "techniqueNotes": "Classic endurance."
+  },
+  {
+    "id": "burpees_cardio",
+    "name": "Burpees",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Drop to push-up, jump up, repeat."
+    ],
+    "techniqueNotes": "High intensity HIIT."
+  },
+  {
+    "id": "jumping_jacks_cardio",
+    "name": "Jumping Jacks",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Jump hands high legs wide continuously."
+    ],
+    "techniqueNotes": "Simple warm-up/HIIT."
+  },
+  {
+    "id": "kettlebell_swings_cardio",
+    "name": "Kettlebell Swings",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Swing kettlebell to shoulder height using hips."
+    ],
+    "techniqueNotes": "Posterior chain cardio."
+  },
+  {
+    "id": "shadow_boxing_cardio",
+    "name": "Shadow Boxing",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Punch air while moving feet."
+    ],
+    "techniqueNotes": "Shoulders/cardio speed."
+  },
+  {
+    "id": "swimming_cardio",
+    "name": "Swimming",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Swim laps in pool."
+    ],
+    "techniqueNotes": "Perfect low-joint full body cardio."
+  },
+  {
+    "id": "mountain_climbers_fast",
+    "name": "Mountain Climbers (HIIT)",
+    "targetMuscleGroup": "Cardio",
+    "instructions": [
+      "Run knees in plank quickly."
+    ],
+    "techniqueNotes": "Fast-paced core cardio."
   }
 ];
