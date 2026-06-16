@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Modal, ScrollView, Alert, Switch } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Modal, ScrollView, Alert, Switch, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '../components/Screen';
@@ -126,66 +126,71 @@ export const ManageRemindersScreen: React.FC = () => {
 
       {/* Add Reminder Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <View style={styles.modalHeader}>
-              <AppText variant="h3">Create Daily Reminder</AppText>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color={theme.text} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView contentContainerStyle={styles.modalForm}>
-              <AppText variant="label" color="textSecondary" style={styles.formLabel}>Reminder Title</AppText>
-              <TextInput
-                style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                placeholder="e.g. Afternoon Water Intake"
-                placeholderTextColor={theme.textMuted}
-                value={remTitle}
-                onChangeText={setRemTitle}
-              />
-
-              <AppText variant="label" color="textSecondary" style={styles.formLabel}>Alert Time (24h HH:MM format)</AppText>
-              <TextInput
-                style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                placeholder="e.g. 14:30"
-                placeholderTextColor={theme.textMuted}
-                value={remTime}
-                onChangeText={setRemTime}
-              />
-
-              <AppText variant="label" color="textSecondary" style={styles.formLabel}>Type</AppText>
-              <View style={styles.segments}>
-                {(['workout', 'meal', 'water'] as const).map((type) => {
-                  const isSelected = remType === type;
-                  return (
-                    <TouchableOpacity
-                      key={type}
-                      style={[
-                        styles.segmentButton,
-                        {
-                          backgroundColor: isSelected ? theme.primary : theme.background,
-                          borderColor: isSelected ? theme.primary : theme.border,
-                        },
-                      ]}
-                      onPress={() => setRemType(type)}
-                    >
-                      <AppText variant="bodyBold" style={{ color: isSelected ? '#0c0f12' : theme.text }}>
-                        {type.toUpperCase()}
-                      </AppText>
-                    </TouchableOpacity>
-                  );
-                })}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
+          <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+            <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <View style={styles.modalHeader}>
+                <AppText variant="h3">Create Daily Reminder</AppText>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Ionicons name="close" size={24} color={theme.text} />
+                </TouchableOpacity>
               </View>
 
-              <PrimaryButton
-                title="Create Reminder"
-                onPress={handleCreateReminder}
-                style={styles.modalSubmitBtn}
-              />
-            </ScrollView>
+              <ScrollView contentContainerStyle={styles.modalForm}>
+                <AppText variant="label" color="textSecondary" style={styles.formLabel}>Reminder Title</AppText>
+                <TextInput
+                  style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                  placeholder="e.g. Afternoon Water Intake"
+                  placeholderTextColor={theme.textMuted}
+                  value={remTitle}
+                  onChangeText={setRemTitle}
+                />
+
+                <AppText variant="label" color="textSecondary" style={styles.formLabel}>Alert Time (24h HH:MM format)</AppText>
+                <TextInput
+                  style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                  placeholder="e.g. 14:30"
+                  placeholderTextColor={theme.textMuted}
+                  value={remTime}
+                  onChangeText={setRemTime}
+                />
+
+                <AppText variant="label" color="textSecondary" style={styles.formLabel}>Type</AppText>
+                <View style={styles.segments}>
+                  {(['workout', 'meal', 'water'] as const).map((type) => {
+                    const isSelected = remType === type;
+                    return (
+                      <TouchableOpacity
+                        key={type}
+                        style={[
+                          styles.segmentButton,
+                          {
+                            backgroundColor: isSelected ? theme.primary : theme.background,
+                            borderColor: isSelected ? theme.primary : theme.border,
+                          },
+                        ]}
+                        onPress={() => setRemType(type)}
+                      >
+                        <AppText variant="bodyBold" style={{ color: isSelected ? '#0c0f12' : theme.text }}>
+                          {type.toUpperCase()}
+                        </AppText>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                <PrimaryButton
+                  title="Create Reminder"
+                  onPress={handleCreateReminder}
+                  style={styles.modalSubmitBtn}
+                />
+              </ScrollView>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </Screen>
   );

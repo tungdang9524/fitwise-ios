@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, TextInput, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { StyleSheet, View, FlatList, TextInput, TouchableOpacity, Modal, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -200,64 +200,69 @@ export const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({
 
       {/* Create Custom Exercise Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <View style={styles.modalHeader}>
-              <AppText variant="h3">New Custom Exercise</AppText>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color={theme.text} />
-              </TouchableOpacity>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
+          <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+            <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <View style={styles.modalHeader}>
+                <AppText variant="h3">New Custom Exercise</AppText>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Ionicons name="close" size={24} color={theme.text} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView contentContainerStyle={styles.modalForm}>
+                <AppText variant="label" color="textSecondary" style={styles.formLabel}>Exercise Name</AppText>
+                <TextInput
+                  style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                  placeholder="e.g. Incline Dumbbell Press"
+                  placeholderTextColor={theme.textMuted}
+                  value={customName}
+                  onChangeText={setCustomName}
+                />
+
+                <AppText variant="label" color="textSecondary" style={styles.formLabel}>Target Muscle Group</AppText>
+                <TextInput
+                  style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                  placeholder="e.g. Chest, Legs, Shoulders"
+                  placeholderTextColor={theme.textMuted}
+                  value={customMuscle}
+                  onChangeText={setCustomMuscle}
+                />
+
+                <AppText variant="label" color="textSecondary" style={styles.formLabel}>Instructions (One per line)</AppText>
+                <TextInput
+                  style={[styles.modalInput, styles.multilineInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                  placeholder="Step 1: Lower the weights..."
+                  placeholderTextColor={theme.textMuted}
+                  multiline
+                  numberOfLines={3}
+                  value={customInstructions}
+                  onChangeText={setCustomInstructions}
+                />
+
+                <AppText variant="label" color="textSecondary" style={styles.formLabel}>Technique Notes</AppText>
+                <TextInput
+                  style={[styles.modalInput, styles.multilineInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                  placeholder="Keep your elbows tucked..."
+                  placeholderTextColor={theme.textMuted}
+                  multiline
+                  numberOfLines={2}
+                  value={customNotes}
+                  onChangeText={setCustomNotes}
+                />
+
+                <PrimaryButton
+                  title="Create Exercise"
+                  onPress={handleCreateCustom}
+                  style={styles.modalSubmitBtn}
+                />
+              </ScrollView>
             </View>
-
-            <ScrollView contentContainerStyle={styles.modalForm}>
-              <AppText variant="label" color="textSecondary" style={styles.formLabel}>Exercise Name</AppText>
-              <TextInput
-                style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                placeholder="e.g. Incline Dumbbell Press"
-                placeholderTextColor={theme.textMuted}
-                value={customName}
-                onChangeText={setCustomName}
-              />
-
-              <AppText variant="label" color="textSecondary" style={styles.formLabel}>Target Muscle Group</AppText>
-              <TextInput
-                style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                placeholder="e.g. Chest, Legs, Shoulders"
-                placeholderTextColor={theme.textMuted}
-                value={customMuscle}
-                onChangeText={setCustomMuscle}
-              />
-
-              <AppText variant="label" color="textSecondary" style={styles.formLabel}>Instructions (One per line)</AppText>
-              <TextInput
-                style={[styles.modalInput, styles.multilineInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                placeholder="Step 1: Lower the weights..."
-                placeholderTextColor={theme.textMuted}
-                multiline
-                numberOfLines={3}
-                value={customInstructions}
-                onChangeText={setCustomInstructions}
-              />
-
-              <AppText variant="label" color="textSecondary" style={styles.formLabel}>Technique Notes</AppText>
-              <TextInput
-                style={[styles.modalInput, styles.multilineInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                placeholder="Keep your elbows tucked..."
-                placeholderTextColor={theme.textMuted}
-                multiline
-                numberOfLines={2}
-                value={customNotes}
-                onChangeText={setCustomNotes}
-              />
-
-              <PrimaryButton
-                title="Create Exercise"
-                onPress={handleCreateCustom}
-                style={styles.modalSubmitBtn}
-              />
-            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </Screen>
   );
