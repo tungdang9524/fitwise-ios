@@ -24,3 +24,44 @@ export const getDayOfWeekName = (dayIndex: number): string => {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   return days[dayIndex] || '';
 };
+
+export const calculateStreak = (
+  workoutDates: string[],
+  foodDates: string[]
+): number => {
+  const activeDates = new Set<string>([...workoutDates, ...foodDates]);
+  if (activeDates.size === 0) return 0;
+
+  const todayStr = getLocalDateString();
+  
+  // Calculate yesterday
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = getLocalDateString(yesterday);
+
+  // If neither today nor yesterday is active, streak is broken (0)
+  if (!activeDates.has(todayStr) && !activeDates.has(yesterdayStr)) {
+    return 0;
+  }
+
+  let streak = 0;
+  const checkDate = new Date(); // Start checking from today backward
+
+  // If today is not active but yesterday is, we start checking from yesterday backward
+  if (!activeDates.has(todayStr)) {
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+
+  while (true) {
+    const checkStr = getLocalDateString(checkDate);
+    if (activeDates.has(checkStr)) {
+      streak++;
+      // Move back 1 day
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+};

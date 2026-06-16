@@ -11,7 +11,7 @@ import { ProgressBar } from '../components/ProgressBar';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useFitness } from '../store/FitnessStore';
 import { useTheme } from '../theme/ThemeProvider';
-import { getLocalDateString, formatDisplayDate } from '../utils/dates';
+import { getLocalDateString, formatDisplayDate, calculateStreak } from '../utils/dates';
 import { MainTabParamList } from '../navigation/types';
 
 type DashboardNavProp = BottomTabNavigationProp<MainTabParamList, 'Dashboard'>;
@@ -23,6 +23,11 @@ export const DashboardScreen: React.FC = () => {
 
   const profile = state.profile;
   const todayStr = getLocalDateString();
+
+  // Calculate Streak
+  const workoutDates = state.workouts.map((w) => w.date);
+  const foodDates = state.foodEntries.map((f) => f.date);
+  const currentStreak = calculateStreak(workoutDates, foodDates);
 
   // Calories & Macros Math
   const todayFoods = state.foodEntries.filter((f) => f.date === todayStr);
@@ -57,13 +62,21 @@ export const DashboardScreen: React.FC = () => {
     <Screen scrollable>
       {/* Header section */}
       <View style={styles.header}>
-        <View>
+        <View style={styles.flex}>
           <AppText variant="caption" color="textMuted">
             {formatDisplayDate(todayStr).toUpperCase()}
           </AppText>
-          <AppText variant="h1" style={styles.title}>
-            Hey, {profile?.name || 'Athlete'}!
-          </AppText>
+          <View style={styles.nameRow}>
+            <AppText variant="h1" style={styles.title}>
+              Hey, {profile?.name || 'Athlete'}!
+            </AppText>
+            {currentStreak > 0 && (
+              <View style={[styles.streakBadge, { backgroundColor: 'rgba(255, 153, 0, 0.12)', borderColor: 'rgba(255, 153, 0, 0.25)' }]}>
+                <Ionicons name="flame" size={16} color="#ff9900" />
+                <AppText variant="caption" style={styles.streakText}>{currentStreak} Day Streak</AppText>
+              </View>
+            )}
+          </View>
         </View>
         <TouchableOpacity 
           style={[styles.profileButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
@@ -77,11 +90,18 @@ export const DashboardScreen: React.FC = () => {
       {profile && (
         <Card variant="glass" style={styles.goalCard}>
           <View style={styles.row}>
-            <View>
+            <View style={styles.flex}>
               <AppText variant="caption" color="textMuted">ACTIVE GOAL</AppText>
-              <AppText variant="h3" color="primary">{getGoalLabel(profile.fitnessGoal)}</AppText>
+              <AppText variant="bodyBold" color="primary">{getGoalLabel(profile.fitnessGoal)}</AppText>
             </View>
-            <View style={styles.goalDetail}>
+            <View style={[styles.goalDetail, styles.flex, { alignItems: 'center' }]}>
+              <AppText variant="caption" color="textMuted">ACTIVE STREAK</AppText>
+              <View style={styles.streakRow}>
+                <Ionicons name="flame" size={16} color="#ff9900" />
+                <AppText variant="bodyBold" style={{ color: '#ff9900' }}>{currentStreak} Days</AppText>
+              </View>
+            </View>
+            <View style={[styles.goalDetail, styles.flex, { alignItems: 'flex-end' }]}>
               <AppText variant="caption" color="textMuted">CURRENT WEIGHT</AppText>
               <AppText variant="bodyBold">{profile.weight} kg</AppText>
             </View>
@@ -235,7 +255,32 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   title: {
+    marginTop: 0,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
     marginTop: 4,
+  },
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  streakText: {
+    color: '#ff9900',
+    fontWeight: 'bold',
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   profileButton: {
     width: 44,
