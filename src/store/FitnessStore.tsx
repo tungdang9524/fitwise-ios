@@ -22,6 +22,7 @@ type FitnessAction =
   | { type: 'ADD_FOOD_PRESET'; payload: FoodPreset }
   | { type: 'UPDATE_FOOD_PRESET'; payload: FoodPreset }
   | { type: 'DELETE_FOOD_PRESET'; payload: string }
+  | { type: 'UPDATE_TARGETS'; payload: { targetCalories: number; targetProtein: number; targetCarbs: number; targetFats: number } }
   | { type: 'RESET_STATE' };
 
 const initialFitnessState: FitnessState = {
@@ -168,6 +169,19 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         foodPresets: state.foodPresets.map((f) => (f.id === action.payload.id ? action.payload : f)),
       };
 
+    case 'UPDATE_TARGETS':
+      if (!state.profile) return state;
+      return {
+        ...state,
+        profile: {
+          ...state.profile,
+          targetCalories: action.payload.targetCalories,
+          targetProtein: action.payload.targetProtein,
+          targetCarbs: action.payload.targetCarbs,
+          targetFats: action.payload.targetFats,
+        },
+      };
+
     case 'RESET_STATE':
       return initialFitnessState;
 
@@ -196,6 +210,7 @@ interface FitnessContextType {
   addFoodPreset: (preset: FoodPreset) => void;
   updateFoodPreset: (preset: FoodPreset) => void;
   deleteFoodPreset: (id: string) => void;
+  updateTargets: (targets: { targetCalories: number; targetProtein: number; targetCarbs: number; targetFats: number }) => void;
   resetState: () => void;
 }
 
@@ -293,6 +308,10 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'DELETE_FOOD_PRESET', payload: id });
   };
 
+  const updateTargets = (targets: { targetCalories: number; targetProtein: number; targetCarbs: number; targetFats: number }) => {
+    dispatch({ type: 'UPDATE_TARGETS', payload: targets });
+  };
+
   const resetState = async () => {
     await clearFitnessState();
     dispatch({ type: 'RESET_STATE' });
@@ -320,6 +339,7 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addFoodPreset,
         updateFoodPreset,
         deleteFoodPreset,
+        updateTargets,
         resetState,
       }}
     >

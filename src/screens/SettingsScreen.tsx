@@ -36,6 +36,13 @@ export const SettingsScreen: React.FC = () => {
       iconColor: theme.primary,
     },
     {
+      icon: 'calculator-outline',
+      title: 'Calorie & Macro Targets',
+      desc: 'Manually customize calories, protein, carbs, and fats.',
+      onPress: () => navigation.navigate('TargetSettings'),
+      iconColor: theme.primary,
+    },
+    {
       icon: 'color-palette-outline',
       title: 'Theme Settings',
       desc: 'Toggle between application Light Mode and Dark Mode.',

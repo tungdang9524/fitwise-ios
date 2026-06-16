@@ -11,6 +11,7 @@ export type RootStackParamList = {
   ManagePresets: undefined;
   BackupRestore: undefined;
   ThemeSettings: undefined;
+  TargetSettings: undefined;
 };
 
 export type MainTabParamList = {

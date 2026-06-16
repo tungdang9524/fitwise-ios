@@ -24,6 +24,7 @@ import ThemeSettingsScreen from '../screens/ThemeSettingsScreen';
 import BackupRestoreScreen from '../screens/BackupRestoreScreen';
 import ManageRemindersScreen from '../screens/ManageRemindersScreen';
 import ManagePresetsScreen from '../screens/ManagePresetsScreen';
+import TargetSettingsScreen from '../screens/TargetSettingsScreen';
 
 // Placeholders for secondary stacks (we will create actual screens for these soon)
 import { Text } from 'react-native';
@@ -181,6 +182,11 @@ export const AppNavigator = () => {
               name="ManagePresets"
               component={ManagePresetsScreen}
               options={{ title: 'Presets Suggestions' }}
+            />
+            <Stack.Screen
+              name="TargetSettings"
+              component={TargetSettingsScreen}
+              options={{ title: 'Target Settings' }}
             />
           </>
         )}
