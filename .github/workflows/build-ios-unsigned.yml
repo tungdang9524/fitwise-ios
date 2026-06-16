@@ -28,17 +28,17 @@ jobs:
           pod install --repo-update
 
       - name: List Xcode schemes
-        run: xcodebuild -list -workspace ios/Fitwise.xcworkspace
+        run: xcodebuild -list -workspace ios/FitWise.xcworkspace
 
       - name: Build unsigned archive
         run: |
           set -o pipefail
           xcodebuild archive \
-            -workspace ios/Fitwise.xcworkspace \
-            -scheme Fitwise \
+            -workspace ios/FitWise.xcworkspace \
+            -scheme FitWise \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath "$PWD/build/Fitwise.xcarchive" \
+            -archivePath "$PWD/build/FitWise.xcarchive" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
@@ -53,12 +53,12 @@ jobs:
         if: success()
         run: |
           mkdir -p Payload
-          cp -R build/Fitwise.xcarchive/Products/Applications/*.app Payload/
-          zip -r Fitwise-unsigned.ipa Payload
+          cp -R build/FitWise.xcarchive/Products/Applications/*.app Payload/
+          zip -r FitWise-unsigned.ipa Payload
 
       - name: Upload unsigned IPA
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: Fitwise-unsigned-ipa
-          path: Fitwise-unsigned.ipa
+          name: FitWise-unsigned-ipa
+          path: FitWise-unsigned.ipa
