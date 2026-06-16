@@ -20,6 +20,10 @@ import AddWorkoutSessionScreen from '../screens/AddWorkoutSessionScreen';
 import ExerciseDetailsScreen from '../screens/ExerciseDetailsScreen';
 import AddFoodItemScreen from '../screens/AddFoodItemScreen';
 import AddProgressLogScreen from '../screens/AddProgressLogScreen';
+import ThemeSettingsScreen from '../screens/ThemeSettingsScreen';
+import BackupRestoreScreen from '../screens/BackupRestoreScreen';
+import ManageRemindersScreen from '../screens/ManageRemindersScreen';
+import ManagePresetsScreen from '../screens/ManagePresetsScreen';
 
 // Placeholders for secondary stacks (we will create actual screens for these soon)
 import { Text } from 'react-native';
@@ -157,6 +161,26 @@ export const AppNavigator = () => {
               name="AddProgressLog"
               component={AddProgressLogScreen}
               options={{ title: 'Log Progress' }}
+            />
+            <Stack.Screen
+              name="ThemeSettings"
+              component={ThemeSettingsScreen}
+              options={{ title: 'Appearance' }}
+            />
+            <Stack.Screen
+              name="BackupRestore"
+              component={BackupRestoreScreen}
+              options={{ title: 'Backup & Restore' }}
+            />
+            <Stack.Screen
+              name="ManageReminders"
+              component={ManageRemindersScreen}
+              options={{ title: 'Configure Reminders' }}
+            />
+            <Stack.Screen
+              name="ManagePresets"
+              component={ManagePresetsScreen}
+              options={{ title: 'Presets Suggestions' }}
             />
           </>
         )}

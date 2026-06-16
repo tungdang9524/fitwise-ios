@@ -1,10 +1,9 @@
-import React from 'react';
-import { StyleSheet, View, ViewStyle, Pressable } from 'react-native';
+import { StyleSheet, View, ViewStyle, Pressable, StyleProp } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 
 interface CardProps {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   onPress?: () => void;
   variant?: 'normal' | 'glass' | 'elevated';
 }
