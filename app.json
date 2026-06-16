@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "temp-init",
-    "slug": "temp-init",
+    "name": "Fitwise",
+    "slug": "fitwise",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

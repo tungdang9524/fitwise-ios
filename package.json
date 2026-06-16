@@ -27,7 +27,10 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "expo:check": "npx expo install --check",
+    "typecheck": "tsc --noEmit",
+    "export:ios": "npx expo export -p ios"
   },
   "private": true
 }
