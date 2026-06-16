@@ -14,6 +14,21 @@ export const ManagePresetsScreen: React.FC = () => {
   const { state, addFoodPreset, deleteFoodPreset } = useFitness();
   const { theme } = useTheme();
 
+  const handleDeletePreset = (id: string, name: string) => {
+    Alert.alert(
+      'Delete Food Preset Suggestion',
+      `Are you sure you want to delete the food preset "${name}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteFoodPreset(id),
+        },
+      ]
+    );
+  };
+
   // Add Preset Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [preName, setPreName] = useState('');
@@ -90,7 +105,7 @@ export const ManagePresetsScreen: React.FC = () => {
                   {preset.calories} kcal • P: {preset.protein}g • C: {preset.carbohydrates}g • F: {preset.fats}g
                 </AppText>
               </View>
-              <TouchableOpacity onPress={() => deleteFoodPreset(preset.id)} style={styles.deleteBtn}>
+              <TouchableOpacity onPress={() => handleDeletePreset(preset.id, preset.name)} style={styles.deleteBtn}>
                 <Ionicons name="trash-outline" size={18} color={theme.error} />
               </TouchableOpacity>
             </View>

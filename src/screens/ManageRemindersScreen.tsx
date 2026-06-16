@@ -14,6 +14,21 @@ export const ManageRemindersScreen: React.FC = () => {
   const { state, addReminder, deleteReminder, updateReminder } = useFitness();
   const { theme } = useTheme();
 
+  const handleDeleteReminder = (id: string, title: string) => {
+    Alert.alert(
+      'Delete Reminder',
+      `Are you sure you want to delete the reminder "${title}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteReminder(id),
+        },
+      ]
+    );
+  };
+
   // Add Reminder Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [remTitle, setRemTitle] = useState('');
@@ -114,7 +129,7 @@ export const ManageRemindersScreen: React.FC = () => {
                     trackColor={{ false: theme.surfaceElevated, true: theme.primary }}
                     thumbColor={rem.enabled ? '#0c0f12' : theme.textMuted}
                   />
-                  <TouchableOpacity onPress={() => deleteReminder(rem.id)} style={styles.deleteBtn}>
+                  <TouchableOpacity onPress={() => handleDeleteReminder(rem.id, rem.title)} style={styles.deleteBtn}>
                     <Ionicons name="trash-outline" size={18} color={theme.error} />
                   </TouchableOpacity>
                 </View>

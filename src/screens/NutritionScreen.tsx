@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +20,21 @@ export const NutritionScreen: React.FC = () => {
   const { state, deleteFoodEntry } = useFitness();
   const { theme } = useTheme();
   const navigation = useNavigation<NutritionScreenNavProp>();
+
+  const handleDeleteFood = (id: string, name: string) => {
+    Alert.alert(
+      'Delete Food Entry',
+      `Are you sure you want to delete "${name}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteFoodEntry(id),
+        },
+      ]
+    );
+  };
 
   // Date switcher state
   const [selectedDate, setSelectedDate] = useState(getLocalDateString());
@@ -196,7 +211,7 @@ export const NutritionScreen: React.FC = () => {
                   <AppText variant="bodyBold">{food.calories} kcal</AppText>
                   <TouchableOpacity 
                     style={styles.deleteBtn} 
-                    onPress={() => deleteFoodEntry(food.id)}
+                    onPress={() => handleDeleteFood(food.id, food.name)}
                   >
                     <Ionicons name="trash-outline" size={18} color={theme.error} />
                   </TouchableOpacity>
