@@ -11,7 +11,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { FoodPreset } from '../models/fitness';
 
 export const ManagePresetsScreen: React.FC = () => {
-  const { state, addFoodPreset, deleteFoodPreset } = useFitness();
+  const { state, addFoodPreset, updateFoodPreset, deleteFoodPreset } = useFitness();
   const { theme } = useTheme();
 
   const handleDeletePreset = (id: string, name: string) => {
@@ -29,7 +29,8 @@ export const ManagePresetsScreen: React.FC = () => {
     );
   };
 
-  // Add Preset Modal State
+  // Add/Edit Preset Modal State
+  const [editingPreset, setEditingPreset] = useState<FoodPreset | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [preName, setPreName] = useState('');
   const [preIcon, setPreIcon] = useState('🍎');
@@ -38,6 +39,42 @@ export const ManagePresetsScreen: React.FC = () => {
   const [preCarbs, setPreCarbs] = useState('');
   const [preFats, setPreFats] = useState('');
   const [preServing, setPreServing] = useState('100g');
+
+  const handleOpenAddModal = () => {
+    setEditingPreset(null);
+    setPreName('');
+    setPreIcon('🍎');
+    setPreCalories('');
+    setPreProtein('');
+    setPreCarbs('');
+    setPreFats('');
+    setPreServing('100g');
+    setModalVisible(true);
+  };
+
+  const handleEditPreset = (preset: FoodPreset) => {
+    setEditingPreset(preset);
+    setPreName(preset.name);
+    setPreIcon(preset.icon);
+    setPreCalories(preset.calories.toString());
+    setPreProtein(preset.protein.toString());
+    setPreCarbs(preset.carbohydrates.toString());
+    setPreFats(preset.fats.toString());
+    setPreServing(preset.servingSize);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setEditingPreset(null);
+    setPreName('');
+    setPreIcon('🍎');
+    setPreCalories('');
+    setPreProtein('');
+    setPreCarbs('');
+    setPreFats('');
+    setPreServing('100g');
+    setModalVisible(false);
+  };
 
   const handleCreatePreset = () => {
     if (!preName.trim()) {
@@ -50,26 +87,34 @@ export const ManagePresetsScreen: React.FC = () => {
       return;
     }
 
-    const newPreset: FoodPreset = {
-      id: `preset_${Date.now()}`,
-      name: preName.trim(),
-      icon: preIcon.trim() || '🍎',
-      calories: calVal,
-      protein: parseFloat(preProtein) || 0,
-      carbohydrates: parseFloat(preCarbs) || 0,
-      fats: parseFloat(preFats) || 0,
-      servingSize: preServing.trim() || '100g',
-    };
+    if (editingPreset) {
+      updateFoodPreset({
+        ...editingPreset,
+        name: preName.trim(),
+        icon: preIcon.trim() || '🍎',
+        calories: calVal,
+        protein: parseFloat(preProtein) || 0,
+        carbohydrates: parseFloat(preCarbs) || 0,
+        fats: parseFloat(preFats) || 0,
+        servingSize: preServing.trim() || '100g',
+      });
+      Alert.alert('Success', 'Food preset updated successfully!');
+    } else {
+      const newPreset: FoodPreset = {
+        id: `preset_${Date.now()}`,
+        name: preName.trim(),
+        icon: preIcon.trim() || '🍎',
+        calories: calVal,
+        protein: parseFloat(preProtein) || 0,
+        carbohydrates: parseFloat(preCarbs) || 0,
+        fats: parseFloat(preFats) || 0,
+        servingSize: preServing.trim() || '100g',
+      };
+      addFoodPreset(newPreset);
+      Alert.alert('Success', 'Food preset created successfully!');
+    }
 
-    addFoodPreset(newPreset);
-    setPreName('');
-    setPreIcon('🍎');
-    setPreCalories('');
-    setPreProtein('');
-    setPreCarbs('');
-    setPreFats('');
-    setPreServing('100g');
-    setModalVisible(false);
+    handleCloseModal();
   };
 
   return (
@@ -83,7 +128,7 @@ export const ManagePresetsScreen: React.FC = () => {
 
       <PrimaryButton
         title="Add Custom Preset Suggestion"
-        onPress={() => setModalVisible(true)}
+        onPress={handleOpenAddModal}
         style={styles.addBtn}
       />
 
@@ -99,12 +144,16 @@ export const ManagePresetsScreen: React.FC = () => {
           state.foodPresets.map((preset) => (
             <View key={preset.id} style={styles.listItem}>
               <AppText variant="body" style={styles.itemIcon}>{preset.icon}</AppText>
-              <View style={styles.flex}>
+              <TouchableOpacity 
+                style={styles.flex}
+                onPress={() => handleEditPreset(preset)}
+                activeOpacity={0.7}
+              >
                 <AppText variant="bodyBold">{preset.name}</AppText>
                 <AppText variant="caption" color="textSecondary">
-                  {preset.calories} kcal • P: {preset.protein}g • C: {preset.carbohydrates}g • F: {preset.fats}g
+                  {preset.calories} kcal • P: {preset.protein}g • C: {preset.carbohydrates}g • F: {preset.fats}g (Tap to Edit)
                 </AppText>
-              </View>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDeletePreset(preset.id, preset.name)} style={styles.deleteBtn}>
                 <Ionicons name="trash-outline" size={18} color={theme.error} />
               </TouchableOpacity>
@@ -122,8 +171,8 @@ export const ManagePresetsScreen: React.FC = () => {
           <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
             <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.modalHeader}>
-                <AppText variant="h3">New Food Preset</AppText>
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <AppText variant="h3">{editingPreset ? 'Edit Food Preset' : 'New Food Preset'}</AppText>
+                <TouchableOpacity onPress={handleCloseModal}>
                   <Ionicons name="close" size={24} color={theme.text} />
                 </TouchableOpacity>
               </View>
@@ -214,7 +263,7 @@ export const ManagePresetsScreen: React.FC = () => {
                 </View>
 
                 <PrimaryButton
-                  title="Create Food Preset"
+                  title={editingPreset ? 'Save Changes' : 'Create Food Preset'}
                   onPress={handleCreatePreset}
                   style={styles.modalSubmitBtn}
                 />

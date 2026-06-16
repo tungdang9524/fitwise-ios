@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, TextInput, TouchableOpacity, Modal, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, FlatList, TextInput, TouchableOpacity, Modal, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,7 +25,7 @@ export const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({
   onSelectExercise,
   hideHeader = false,
 }) => {
-  const { state, addCustomExercise } = useFitness();
+  const { state, addCustomExercise, deleteExercise } = useFitness();
   const { theme } = useTheme();
   const navigation = useNavigation<ExerciseLibraryNavProp>();
 
@@ -39,8 +39,10 @@ export const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({
   const [customInstructions, setCustomInstructions] = useState('');
   const [customNotes, setCustomNotes] = useState('');
 
-  // Merge static and custom exercises
-  const allExercises = [...STATIC_EXERCISE_LIBRARY, ...state.customExercises];
+  // Merge static and custom exercises, filtering out deleted ones
+  const allExercises = [...STATIC_EXERCISE_LIBRARY, ...state.customExercises].filter(
+    (e) => !state.deletedExerciseIds?.includes(e.id)
+  );
 
   // Unique muscle groups for filters
   const muscleGroups = Array.from(new Set(allExercises.map((e) => e.targetMuscleGroup)));
@@ -79,6 +81,21 @@ export const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({
     }
   };
 
+  const handleDeleteExercise = (id: string, name: string) => {
+    Alert.alert(
+      'Delete Exercise',
+      `Are you sure you want to delete "${name}" from the exercise library?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteExercise(id),
+        },
+      ]
+    );
+  };
+
   const renderExerciseItem = ({ item }: { item: LibraryExercise }) => (
     <Card
       variant="glass"
@@ -98,11 +115,22 @@ export const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({
             {item.targetMuscleGroup}
           </AppText>
         </View>
-        <Ionicons
-          name={onSelectExercise ? 'add-circle' : 'chevron-forward'}
-          size={24}
-          color={theme.primary}
-        />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <TouchableOpacity 
+            onPress={(e) => {
+              e.stopPropagation();
+              handleDeleteExercise(item.id, item.name);
+            }}
+            style={{ padding: 6 }}
+          >
+            <Ionicons name="trash-outline" size={18} color={theme.error} />
+          </TouchableOpacity>
+          <Ionicons
+            name={onSelectExercise ? 'add-circle' : 'chevron-forward'}
+            size={24}
+            color={theme.primary}
+          />
+        </View>
       </View>
     </Card>
   );

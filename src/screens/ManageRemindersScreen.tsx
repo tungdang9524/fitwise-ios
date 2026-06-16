@@ -29,11 +29,36 @@ export const ManageRemindersScreen: React.FC = () => {
     );
   };
 
-  // Add Reminder Modal State
+  // Add/Edit Reminder Modal State
+  const [editingReminder, setEditingReminder] = useState<ReminderSetting | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [remTitle, setRemTitle] = useState('');
   const [remTime, setRemTime] = useState('08:00');
   const [remType, setRemType] = useState<'workout' | 'meal' | 'water'>('workout');
+
+  const handleOpenAddModal = () => {
+    setEditingReminder(null);
+    setRemTitle('');
+    setRemTime('08:00');
+    setRemType('workout');
+    setModalVisible(true);
+  };
+
+  const handleEditReminder = (rem: ReminderSetting) => {
+    setEditingReminder(rem);
+    setRemTitle(rem.title);
+    setRemTime(rem.time);
+    setRemType(rem.type);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setEditingReminder(null);
+    setRemTitle('');
+    setRemTime('08:00');
+    setRemType('workout');
+    setModalVisible(false);
+  };
 
   const handleReminderToggle = (reminder: ReminderSetting, val: boolean) => {
     updateReminder({
@@ -53,20 +78,28 @@ export const ManageRemindersScreen: React.FC = () => {
       return;
     }
 
-    const newReminder: ReminderSetting = {
-      id: `reminder_${Date.now()}`,
-      title: remTitle.trim(),
-      time: remTime.trim(),
-      type: remType,
-      enabled: true,
-      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-    };
+    if (editingReminder) {
+      updateReminder({
+        ...editingReminder,
+        title: remTitle.trim(),
+        time: remTime.trim(),
+        type: remType,
+      });
+      Alert.alert('Success', 'Reminder updated successfully!');
+    } else {
+      const newReminder: ReminderSetting = {
+        id: `reminder_${Date.now()}`,
+        title: remTitle.trim(),
+        time: remTime.trim(),
+        type: remType,
+        enabled: true,
+        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      };
+      addReminder(newReminder);
+      Alert.alert('Success', 'Reminder created successfully!');
+    }
 
-    addReminder(newReminder);
-    setRemTitle('');
-    setRemTime('08:00');
-    setRemType('workout');
-    setModalVisible(false);
+    handleCloseModal();
   };
 
   const getReminderIcon = (type: string) => {
@@ -98,7 +131,7 @@ export const ManageRemindersScreen: React.FC = () => {
 
       <PrimaryButton
         title="Add Custom Reminder"
-        onPress={() => setModalVisible(true)}
+        onPress={handleOpenAddModal}
         style={styles.addBtn}
       />
 
@@ -118,10 +151,14 @@ export const ManageRemindersScreen: React.FC = () => {
                 <View style={[styles.iconWrap, { backgroundColor: `${iconColor}1a` }]}>
                   <Ionicons name={getReminderIcon(rem.type)} size={20} color={iconColor} />
                 </View>
-                <View style={styles.flex}>
+                <TouchableOpacity 
+                  style={styles.flex}
+                  onPress={() => handleEditReminder(rem)}
+                  activeOpacity={0.7}
+                >
                   <AppText variant="bodyBold">{rem.title}</AppText>
-                  <AppText variant="caption" color="textSecondary">{rem.time}</AppText>
-                </View>
+                  <AppText variant="caption" color="textSecondary">{rem.time} (Tap to Edit)</AppText>
+                </TouchableOpacity>
                 <View style={styles.actions}>
                   <Switch 
                     value={rem.enabled} 
@@ -148,8 +185,8 @@ export const ManageRemindersScreen: React.FC = () => {
           <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
             <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
               <View style={styles.modalHeader}>
-                <AppText variant="h3">Create Daily Reminder</AppText>
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <AppText variant="h3">{editingReminder ? 'Edit Daily Reminder' : 'Create Daily Reminder'}</AppText>
+                <TouchableOpacity onPress={handleCloseModal}>
                   <Ionicons name="close" size={24} color={theme.text} />
                 </TouchableOpacity>
               </View>
@@ -198,7 +235,7 @@ export const ManageRemindersScreen: React.FC = () => {
                 </View>
 
                 <PrimaryButton
-                  title="Create Reminder"
+                  title={editingReminder ? 'Save Changes' : 'Create Reminder'}
                   onPress={handleCreateReminder}
                   style={styles.modalSubmitBtn}
                 />

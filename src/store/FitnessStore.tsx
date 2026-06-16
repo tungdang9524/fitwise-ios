@@ -15,10 +15,12 @@ type FitnessAction =
   | { type: 'ADD_PROGRESS_LOG'; payload: ProgressLog }
   | { type: 'DELETE_PROGRESS_LOG'; payload: string }
   | { type: 'ADD_CUSTOM_EXERCISE'; payload: LibraryExercise }
+  | { type: 'DELETE_EXERCISE'; payload: string }
   | { type: 'UPDATE_REMINDER'; payload: ReminderSetting }
   | { type: 'ADD_REMINDER'; payload: ReminderSetting }
   | { type: 'DELETE_REMINDER'; payload: string }
   | { type: 'ADD_FOOD_PRESET'; payload: FoodPreset }
+  | { type: 'UPDATE_FOOD_PRESET'; payload: FoodPreset }
   | { type: 'DELETE_FOOD_PRESET'; payload: string }
   | { type: 'RESET_STATE' };
 
@@ -36,6 +38,7 @@ const initialFitnessState: FitnessState = {
   customExercises: [],
   foodPresets: FOOD_PRESETS,
   hasCompletedSetup: false,
+  deletedExerciseIds: [],
 };
 
 const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessState => {
@@ -46,6 +49,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         ...loaded,
         foodPresets: loaded.foodPresets || FOOD_PRESETS,
         reminders: loaded.reminders || initialFitnessState.reminders,
+        deletedExerciseIds: loaded.deletedExerciseIds || [],
       };
     }
 
@@ -145,10 +149,23 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         foodPresets: [action.payload, ...state.foodPresets],
       };
 
+    case 'DELETE_EXERCISE':
+      return {
+        ...state,
+        customExercises: state.customExercises.filter((e) => e.id !== action.payload),
+        deletedExerciseIds: [...(state.deletedExerciseIds || []), action.payload],
+      };
+
     case 'DELETE_FOOD_PRESET':
       return {
         ...state,
         foodPresets: state.foodPresets.filter((f) => f.id !== action.payload),
+      };
+
+    case 'UPDATE_FOOD_PRESET':
+      return {
+        ...state,
+        foodPresets: state.foodPresets.map((f) => (f.id === action.payload.id ? action.payload : f)),
       };
 
     case 'RESET_STATE':
@@ -172,10 +189,12 @@ interface FitnessContextType {
   addProgressLog: (log: ProgressLog) => void;
   deleteProgressLog: (id: string) => void;
   addCustomExercise: (exercise: LibraryExercise) => void;
+  deleteExercise: (id: string) => void;
   updateReminder: (reminder: ReminderSetting) => void;
   addReminder: (reminder: ReminderSetting) => void;
   deleteReminder: (id: string) => void;
   addFoodPreset: (preset: FoodPreset) => void;
+  updateFoodPreset: (preset: FoodPreset) => void;
   deleteFoodPreset: (id: string) => void;
   resetState: () => void;
 }
@@ -246,6 +265,10 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'ADD_CUSTOM_EXERCISE', payload: exercise });
   };
 
+  const deleteExercise = (id: string) => {
+    dispatch({ type: 'DELETE_EXERCISE', payload: id });
+  };
+
   const updateReminder = (reminder: ReminderSetting) => {
     dispatch({ type: 'UPDATE_REMINDER', payload: reminder });
   };
@@ -260,6 +283,10 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addFoodPreset = (preset: FoodPreset) => {
     dispatch({ type: 'ADD_FOOD_PRESET', payload: preset });
+  };
+
+  const updateFoodPreset = (preset: FoodPreset) => {
+    dispatch({ type: 'UPDATE_FOOD_PRESET', payload: preset });
   };
 
   const deleteFoodPreset = (id: string) => {
@@ -286,10 +313,12 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addProgressLog,
         deleteProgressLog,
         addCustomExercise,
+        deleteExercise,
         updateReminder,
         addReminder,
         deleteReminder,
         addFoodPreset,
+        updateFoodPreset,
         deleteFoodPreset,
         resetState,
       }}

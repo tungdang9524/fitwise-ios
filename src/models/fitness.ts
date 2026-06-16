@@ -106,4 +106,5 @@ export interface FitnessState {
   customExercises: LibraryExercise[];
   foodPresets: FoodPreset[];
   hasCompletedSetup: boolean;
+  deletedExerciseIds?: string[];
 }
