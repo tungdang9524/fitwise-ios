@@ -36,7 +36,7 @@ export const AddWorkoutSessionScreen: React.FC = () => {
   // Exercise Selection Modal state
   const [libraryModalVisible, setLibraryModalVisible] = useState(false);
 
-  const availableMuscleGroups = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'];
+  const availableMuscleGroups = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio', 'Warm-up', 'Stretching'];
 
   const toggleMuscleGroup = (muscle: string) => {
     if (muscleGroups.includes(muscle)) {
