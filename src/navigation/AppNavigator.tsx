@@ -25,6 +25,7 @@ import BackupRestoreScreen from '../screens/BackupRestoreScreen';
 import ManageRemindersScreen from '../screens/ManageRemindersScreen';
 import ManagePresetsScreen from '../screens/ManagePresetsScreen';
 import TargetSettingsScreen from '../screens/TargetSettingsScreen';
+import BodyStatsScreen from '../screens/BodyStatsScreen';
 
 // Placeholders for secondary stacks (we will create actual screens for these soon)
 import { Text } from 'react-native';
@@ -187,6 +188,11 @@ export const AppNavigator = () => {
               name="TargetSettings"
               component={TargetSettingsScreen}
               options={{ title: 'Target Settings' }}
+            />
+            <Stack.Screen
+              name="BodyStats"
+              component={BodyStatsScreen}
+              options={{ title: 'Body Character Stats' }}
             />
           </>
         )}

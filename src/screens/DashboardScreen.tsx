@@ -58,6 +58,14 @@ export const DashboardScreen: React.FC = () => {
     }
   };
 
+  const getLevelTitle = (lvl: number) => {
+    if (lvl < 5) return 'Novice Recruit';
+    if (lvl < 10) return 'Steady Grinder';
+    if (lvl < 15) return 'Iron Builder';
+    if (lvl < 20) return 'Power Lifter';
+    return 'Elite Master';
+  };
+
   return (
     <Screen scrollable>
       {/* Header section */}
@@ -85,6 +93,29 @@ export const DashboardScreen: React.FC = () => {
           <Ionicons name="person" size={20} color={theme.primary} />
         </TouchableOpacity>
       </View>
+
+      {/* Gamified Level & XP Card */}
+      <Card variant="glass" style={styles.levelCard} onPress={() => navigation.navigate('BodyStats' as any)}>
+        <View style={styles.levelRow}>
+          <View style={[styles.levelBadge, { backgroundColor: `${theme.primary}20`, borderColor: `${theme.primary}50` }]}>
+            <AppText variant="bodyBold" color="primary">LVL {state.level || 1}</AppText>
+          </View>
+          <View style={styles.flex}>
+            <View style={styles.levelXpRow}>
+              <AppText variant="bodyBold">{getLevelTitle(state.level || 1)}</AppText>
+              <AppText variant="caption" color="textSecondary">
+                {state.xp || 0} / {(state.level || 1) * 500} XP
+              </AppText>
+            </View>
+            <ProgressBar
+              progress={(state.xp || 0) / ((state.level || 1) * 500)}
+              color={theme.primary}
+              style={styles.levelProgress}
+            />
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+        </View>
+      </Card>
 
       {/* Goal Summary Header */}
       {profile && (
@@ -394,6 +425,32 @@ const styles = StyleSheet.create({
   },
   emptyBtn: {
     width: '100%',
+  },
+  levelCard: {
+    marginVertical: 6,
+    padding: 12,
+  },
+  levelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  levelBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  levelXpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  levelProgress: {
+    height: 6,
   },
 });
 export default DashboardScreen;

@@ -97,6 +97,14 @@ export interface FoodPreset {
   icon: string;
 }
 
+export interface PersonalRecord {
+  exerciseId: string;
+  exerciseName: string;
+  weight: number;
+  reps: number;
+  date: string;
+}
+
 export interface FitnessState {
   profile: UserProfile | null;
   workouts: WorkoutSession[];
@@ -107,4 +115,10 @@ export interface FitnessState {
   foodPresets: FoodPreset[];
   hasCompletedSetup: boolean;
   deletedExerciseIds?: string[];
+  // Gamification fields
+  xp?: number;
+  level?: number;
+  unlockedAchievements?: string[];
+  lastNutritionXpDate?: string; // YYYY-MM-DD
+  personalRecords?: Record<string, PersonalRecord>; // exerciseId -> PersonalRecord
 }

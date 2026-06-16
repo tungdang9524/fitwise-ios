@@ -12,6 +12,7 @@ export type RootStackParamList = {
   BackupRestore: undefined;
   ThemeSettings: undefined;
   TargetSettings: undefined;
+  BodyStats: undefined;
 };
 
 export type MainTabParamList = {
