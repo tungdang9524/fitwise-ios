@@ -292,11 +292,11 @@ export const AddFoodItemScreen: React.FC = () => {
               <View style={styles.adjusterRow}>
                 <AppText variant="body">Portions / Quantity:</AppText>
                 <View style={styles.adjusterControls}>
+                  <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(-1)}>
+                    <AppText variant="bodyBold">-1</AppText>
+                  </TouchableOpacity>
                   <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(-0.5)}>
                     <AppText variant="bodyBold">-0.5</AppText>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(-0.1)}>
-                    <AppText variant="bodyBold">-0.1</AppText>
                   </TouchableOpacity>
                   
                   <TextInput
@@ -307,11 +307,11 @@ export const AddFoodItemScreen: React.FC = () => {
                     selectTextOnFocus
                   />
 
-                  <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(0.1)}>
-                    <AppText variant="bodyBold">+0.1</AppText>
-                  </TouchableOpacity>
                   <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(0.5)}>
                     <AppText variant="bodyBold">+0.5</AppText>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(1)}>
+                    <AppText variant="bodyBold">+1</AppText>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -408,11 +408,11 @@ export const AddFoodItemScreen: React.FC = () => {
           <View style={styles.customQuantityContainer}>
             <AppText variant="label" color="textSecondary" style={styles.label}>Quantity Eaten</AppText>
             <View style={styles.customQuantityAdjuster}>
+              <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustCustomQuantity(-1)}>
+                <AppText variant="bodyBold">-1</AppText>
+              </TouchableOpacity>
               <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustCustomQuantity(-0.5)}>
                 <AppText variant="bodyBold">-0.5</AppText>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustCustomQuantity(-0.1)}>
-                <AppText variant="bodyBold">-0.1</AppText>
               </TouchableOpacity>
               
               <TextInput
@@ -423,11 +423,11 @@ export const AddFoodItemScreen: React.FC = () => {
                 selectTextOnFocus
               />
 
-              <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustCustomQuantity(0.1)}>
-                <AppText variant="bodyBold">+0.1</AppText>
-              </TouchableOpacity>
               <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustCustomQuantity(0.5)}>
                 <AppText variant="bodyBold">+0.5</AppText>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustCustomQuantity(1)}>
+                <AppText variant="bodyBold">+1</AppText>
               </TouchableOpacity>
             </View>
           </View>
