@@ -1,36 +1,58 @@
-# Fitwise iOS 🏋️‍♂️🥗
+# Fitwise iOS 🏋️‍♂️🥗💧🌙
 
-Fitwise is a premium, feature-rich iOS fitness companion application built with React Native and Expo. It features a sleek, modern, glassmorphic dark-mode interface powered by an electric lime/coral color palette, designed to optimize workout logging, nutrition management, and progress tracking.
+Fitwise is a premium, feature-rich iOS fitness companion application built with React Native and Expo. It features a sleek, modern, glassmorphic dark-mode interface powered by an electric lime/coral color palette, designed to optimize workout logging, nutrition management, progress tracking, hydration, sleep, and physical recovery.
+
+This application is built as a **100% offline-first, local-only** system. It does not use any cloud databases, external web services, or network calls, keeping your fitness and recovery logs entirely private to your device.
 
 ---
 
-## ✨ Features
+## ✨ Core Features
 
-### 1. 👤 Profile & Fitness Goals Configuration
-* Personalized onboarding form setting up Name, Age, Height, Weight, Activity Levels, and Fitness Goals (*Fat Loss*, *Muscle Gain*, *Maintenance*).
+### 1. 👤 Profile & Setup
+* Personalized onboarding form setting up Name, Age, Height, Weight, Activity Levels, and Fitness Goals (*Fat Loss*, *Muscle Gain*, *Weight Maintenance*).
 * Basal Metabolic Rate (BMR) and Total Daily Energy Expenditure (TDEE) auto-calculations based on the **Mifflin-St Jeor** formula to estimate custom calorie and macronutrient targets (Protein, Carbs, Fats).
 * Settings panel allowing quick profile details and targets updates.
 
-### 2. 🏋️‍♂️ Gym Workout Logger & Exercise Library
-* **Fast Workout Session Tracker**: Log exercises, sets, reps, weight logs, and exercise notes instantly. Includes one-tap set completions.
+### 2. 🏋️‍♂️ Workout Tracker & Active Logging
+* **Collapsible Active Session Logging**: Log exercises, sets, reps, weight logs, and exercise notes instantly. Set metadata details are collapsed by default to keep the screen focused on active tracking.
+* **Stopwatch Timer**: Shows a real-time running timer (e.g. `⏱️ 00:05`) at the top of active sessions.
 * **Preloaded Exercise Library**: Comprehensive guide for standard gym movements with instructions and pro-tips.
-* **Custom Movements**: Create and save custom exercises directly into your search list.
-* **Log History Viewer**: Review past workouts grouped with date range filters (*Day*, *Week*, *Month*, *All*) and collapsible cards.
+* **History Pre-filling**: Automatically queries history to pre-fill sets, reps, and weights from your *most recent* completed workout session of the same exercise to minimize tracking friction.
 
-### 3. 🍎 Calorie Counter & Nutrition Tracker
-* Log consumed meals throughout the day with precise calorie and macronutrient inputs.
-* **Quick Add Presets suggestions**: Instantly log common fitness food items (e.g. Chicken Breast, Egg, Rice, Whey Shake) with pre-filled macros for frictionless logging.
-* **Custom Food Presets**: Save and delete custom preset items in the Settings panel.
-* **Date Switcher**: Flip between days to review previous dates' calorie logs and progress.
+### 3. 📅 Workout Calendar & Routines
+* **Consistency Calendar**: Visual monthly view highlighting completed workout days.
+* **GitHub-Style Heatmap**: Completed days are marked with green color-coded intensity mapping representing total set volumes.
+* **Workout Templates**: Create, manage, edit, duplicate, and delete custom workout routines to start them with one click.
 
-### 4. 📈 Transformation Progress & Reminders
-* Log body weight and core tape measurements (Waist, Chest, Biceps, Thighs).
-* **Dynamic Weight Charts**: Sleek weight change trend visualization drawn using custom `react-native-svg` line paths.
-* **Daily Alerts**: Toggle in-app reminders for workout times, hydration, and meal trackers.
+### 4. 📈 Volume Analytics & Muscle Balance
+* **Volume Metrics**: Visual charts compiling total training volume (`sets * reps * weight`) grouped by weeks and months.
+* **Muscle Group Breakdown**: Beautiful SVG bar charts highlighting weekly load distribution.
+* **Muscle Balance Analysis**: Computes Upper Body, Lower Body, and Core balance scores and generates custom training recommendations.
 
-### 5. ⚙️ Settings, Themes & Data Portability
+### 5. 💧 Hydration Tracker
+* **Hydration Dashboard**: Circular progress visual showing current intake against customizable daily targets.
+* **Quick Log Actions**: Quick-add buttons (`+250ml`, `+500ml`, `+1000ml`) and manual text inputs.
+* **Intake Trends**: Bar chart visualizing hydration totals over the last 7 days.
+* **Hydration Badges**: Unlock achievements like *Hydration Starter* (7 days) and *Hydration Master* (30 days).
+
+### 6. 🌙 Sleep Tracker & Recovery System
+* **Manual Sleep Logging**: Log bedtime, wake-up time, quality rating (1-10), and custom notes. Autocalculates sleep duration, supporting sleep logs spanning across midnight.
+* **Sleep Score System (0-100)**: Formulated from 50% sleep duration, 30% bedtime/wakeup consistency (calculating standard deviation over the last 5 logs), and 20% self-rated quality.
+* **Recovery Score (0-100%)**: Dynamically computes preparation percentage using last night's sleep score (70%) and a penalty for recent workout loads (Yesterday -20%, 2 Days Ago -10%, 3 Days Ago -5%) to provide training advice.
+* **Sleep-Workout Correlation**: Computes and compares average workout volume on days following 7h+ of sleep against poor sleep (<6h), providing custom training insights.
+* **Weekly Report**: Details average sleep duration, average score, and best/worst sleep days of the week.
+
+### 7. 🎨 Today-First Companion Dashboard
+* **Dynamic Header**: Warm greeting adapting to the time of day (`Good morning, Tung! 👋`).
+* **Level & XP Gamification**: Earn XP and level up by logging workouts, hitting nutrition goals, drinking water, and meeting sleep goals.
+* **Daily Score (0-100)**: Features a re-balanced daily target indicator: Workouts (25 pts), Calories (20 pts), Protein (20 pts), Hydration (15 pts), and Sleep (20 pts).
+* **SVG Circular Progress Rings**: 5 interactive circular breakdown widgets representing workouts, calories, protein, hydration, and sleep. They draw **dynamic SVG border rings** matching category colors (Coral, Orange, Emerald, Cyan, Purple) to show exact completion percentages.
+* **Quick Actions Grid**: One-tap access to *Start Gym*, *Calendar*, *Progress*, and *Log Water*.
+* **Recent Achievements Cabinet**: Displays recently unlocked badges.
+
+### 8. ⚙️ Data Portability & Settings
 * **Dynamic Theme Switcher**: Toggle instantly between Light Mode and Dark Mode.
-* **Data Portability (Backup & Import)**: Export your entire application state as a single JSON backup string, and verify/import it back anytime to restore data.
+* **Data Portability (Backup & Import)**: Export your entire application state as a single JSON backup string, and restore it back anytime.
 * **Clean Reset**: Purge all local data and configurations to start fresh.
 
 ---
@@ -42,7 +64,7 @@ Fitwise is a premium, feature-rich iOS fitness companion application built with 
 * **State Management:** React Context API + Reducer (`useReducer`)
 * **Persistence:** `@react-native-async-storage/async-storage`
 * **Navigation:** React Navigation (Bottom Tabs + Native Stacks)
-* **Graphics/Charts:** `react-native-svg`
+* **Graphics/SVG:** `react-native-svg`
 
 ---
 
@@ -61,7 +83,7 @@ fitwise-ios/
     ├── data/                  # Static exercise library and food presets suggestions
     ├── models/                # TypeScript type definitions (fitness.ts)
     ├── navigation/            # Navigation structure and router parameter types
-    ├── screens/               # Main view screens (Dashboard, Workouts, Nutrition, Settings, etc.)
+    ├── screens/               # Main view screens (Dashboard, SleepTracker, WorkoutCalendar, etc.)
     ├── store/                 # State reducer engine and AsyncStorage helpers
     ├── theme/                 # Dark/Light color schemes and theme provider
     └── utils/                 # Date helpers and calorie math formula utilities
