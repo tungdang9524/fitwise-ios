@@ -42,25 +42,15 @@ This application is built as a **100% offline-first, local-only** system. It doe
 * **Sleep-Workout Correlation**: Computes and compares average workout volume on days following 7h+ of sleep against poor sleep (<6h), providing custom training insights.
 * **Weekly Report**: Details average sleep duration, average score, and best/worst sleep days of the week.
 
-### 7. 🧍‍♂️ RPG-Style Body Visualizer
-* **Interactive Mannequin Models**: Switch between FRONT and BACK views to inspect 15 detailed muscle subgroups drawn using interactive SVG polygons.
-* **Vibrant Heatmap Tiers**: Polygons dynamically color-code themselves from Unused/Weak to Strong/Elite (Muted Gray, Rust Red, Bronze Orange, Electric Lime, Elite Cyan) based on development scores.
-* **Muscle Detail Inspector**: Tap any muscle to inspect its rank (Bronze/Silver/Gold/Elite), weekly/monthly volumes, training frequency, and monthly growth percentage.
-* **Volume Contributors**: Renders a clean progress bar list displaying exactly how much each exercise contributes to that muscle's development.
-* **Growth Sparklines**: A local SVG line chart representing historical development scores over the last 6 months.
-* **Balance Analysis & Insights**: Identifies lagging muscles and focus areas, generating tailored training recommendations (e.g. *"Leg volume is below your upper-body volume"*).
-* **Physique Evolution**: Logs milestone milestones reached in your training journey.
-
-### 8. 🎨 Today-First Companion Dashboard
+### 7. 🎨 Today-First Companion Dashboard
 * **Dynamic Header**: Warm greeting adapting to the time of day (`Good morning, Tung! 👋`).
 * **Level & XP Gamification**: Earn XP and level up by logging workouts, hitting nutrition goals, drinking water, and meeting sleep goals.
 * **Daily Score (0-100)**: Features a re-balanced daily target indicator: Workouts (25 pts), Calories (20 pts), Protein (20 pts), Hydration (15 pts), and Sleep (20 pts).
 * **SVG Circular Progress Rings**: 5 interactive circular breakdown widgets representing workouts, calories, protein, hydration, and sleep. They draw **dynamic SVG border rings** matching category colors (Coral, Orange, Emerald, Cyan, Purple) to show exact completion percentages.
 * **Quick Actions Grid**: One-tap access to *Start Gym*, *Calendar*, *Progress*, and *Log Water*.
-* **Recent Achievements Cabinet**: Displays recently unlocked badges, including new *Iron Builder* and *Gym Legend* milestones.
-* **Visualizer Status Card**: A compact card summarizing your Body Score, strongest muscle, lagging muscle, and recent improvement metrics with direct navigation links.
+* **Recent Achievements Cabinet**: Displays recently unlocked badges.
 
-### 9. ⚙️ Data Portability & Settings
+### 8. ⚙️ Data Portability & Settings
 * **Dynamic Theme Switcher**: Toggle instantly between Light Mode and Dark Mode.
 * **Data Portability (Backup & Import)**: Export your entire application state as a single JSON backup string, and restore it back anytime.
 * **Clean Reset**: Purge all local data and configurations to start fresh.

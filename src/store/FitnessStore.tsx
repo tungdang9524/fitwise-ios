@@ -3,7 +3,6 @@ import {
   FitnessState, UserProfile, WorkoutSession, FoodEntry, ProgressLog, ReminderSetting, 
   LibraryExercise, FoodPreset, PersonalRecord, WorkoutTemplate, WaterLog, SleepLog 
 } from '../models/fitness';
-import { calculateBodyVisualizerData } from '../utils/muscleMapping';
 import { saveFitnessState, loadFitnessState, clearFitnessState } from './storage';
 import { calculateCaloricTargets } from '../utils/formulas';
 import { FOOD_PRESETS } from '../data/foodPresets';
@@ -69,24 +68,9 @@ const checkAchievements = (
   waterLogs: WaterLog[] = [],
   waterGoal: number = 2000,
   sleepLogs: SleepLog[] = [],
-  sleepGoal: number = 480,
-  workouts: WorkoutSession[] = [],
-  profile: UserProfile | null = null,
-  customExercises: LibraryExercise[] = []
+  sleepGoal: number = 480
 ): string[] => {
   const list = [...unlockedList];
-
-  // Body Visualizer Achievements
-  if (workouts.length > 0 && profile) {
-    const visData = calculateBodyVisualizerData(workouts, customExercises, profile);
-    if (visData.overallScore >= 60 && !list.includes('iron_builder')) {
-      list.push('iron_builder');
-    }
-    if (visData.overallScore >= 75 && !list.includes('gym_legend')) {
-      list.push('gym_legend');
-    }
-  }
-
   if (workoutsCount >= 1 && !list.includes('first_workout')) {
     list.push('first_workout');
   }
@@ -414,10 +398,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         state.waterLogs || [],
         state.waterGoal || 2000,
         state.sleepLogs || [],
-        state.sleepGoal || 480,
-        newWorkoutsList,
-        state.profile,
-        state.customExercises || []
+        state.sleepGoal || 480
       );
       
       const targetProtein = state.profile?.targetProtein || 150;
@@ -645,10 +626,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         newWaterLogs,
         waterGoal,
         state.sleepLogs || [],
-        state.sleepGoal || 480,
-        state.workouts,
-        state.profile,
-        state.customExercises || []
+        state.sleepGoal || 480
       );
       
       return {
@@ -670,10 +648,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         state.waterLogs || [],
         newGoal,
         state.sleepLogs || [],
-        state.sleepGoal || 480,
-        state.workouts,
-        state.profile,
-        state.customExercises || []
+        state.sleepGoal || 480
       );
       return {
         ...state,
@@ -719,10 +694,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         state.waterLogs || [],
         state.waterGoal || 2000,
         newSleepLogs,
-        sleepGoal,
-        state.workouts,
-        state.profile,
-        state.customExercises || []
+        sleepGoal
       );
 
       return {
@@ -773,10 +745,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         state.waterLogs || [],
         state.waterGoal || 2000,
         state.sleepLogs || [],
-        newGoal,
-        state.workouts,
-        state.profile,
-        state.customExercises || []
+        newGoal
       );
 
       return {
