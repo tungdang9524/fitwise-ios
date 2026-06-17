@@ -121,4 +121,39 @@ export interface FitnessState {
   unlockedAchievements?: string[];
   lastNutritionXpDate?: string; // YYYY-MM-DD
   personalRecords?: Record<string, PersonalRecord>; // exerciseId -> PersonalRecord
+  
+  // Offline Expansion fields
+  templates?: WorkoutTemplate[];
+  waterLogs?: WaterLog[];
+  waterGoal?: number;
+  longestStreak?: number;
 }
+
+export interface TemplateSet {
+  id: string;
+  reps: number;
+  weight: number;
+}
+
+export interface TemplateExercise {
+  id: string;
+  exerciseId: string;
+  name: string;
+  muscleGroup: string;
+  sets: TemplateSet[];
+}
+
+export interface WorkoutTemplate {
+  id: string;
+  name: string;
+  muscleGroups: string[];
+  exercises: TemplateExercise[];
+  notes?: string;
+}
+
+export interface WaterLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  amount: number; // in ml
+}
+

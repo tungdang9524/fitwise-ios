@@ -92,6 +92,12 @@ export const WorkoutsScreen: React.FC = () => {
               style={styles.actionBtn}
               onPress={() => navigation.navigate('AddWorkoutSession')}
             />
+            <TouchableOpacity 
+              style={[styles.calendarBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+              onPress={() => navigation.navigate('WorkoutCalendar')}
+            >
+              <Ionicons name="calendar" size={22} color={theme.primary} />
+            </TouchableOpacity>
           </View>
 
           {/* Filters Segment */}
@@ -223,10 +229,21 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     marginVertical: 8,
   },
   actionBtn: {
-    width: '100%',
+    flex: 1,
+  },
+  calendarBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   filterSegment: {
     flexDirection: 'row',

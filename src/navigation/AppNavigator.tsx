@@ -26,6 +26,11 @@ import ManageRemindersScreen from '../screens/ManageRemindersScreen';
 import ManagePresetsScreen from '../screens/ManagePresetsScreen';
 import TargetSettingsScreen from '../screens/TargetSettingsScreen';
 import BodyStatsScreen from '../screens/BodyStatsScreen';
+import WorkoutCalendarScreen from '../screens/WorkoutCalendarScreen';
+import WorkoutTemplatesScreen from '../screens/WorkoutTemplatesScreen';
+import ManageTemplateScreen from '../screens/ManageTemplateScreen';
+import VolumeAnalyticsScreen from '../screens/VolumeAnalyticsScreen';
+import WaterTrackerScreen from '../screens/WaterTrackerScreen';
 
 // Placeholders for secondary stacks (we will create actual screens for these soon)
 import { Text } from 'react-native';
@@ -193,6 +198,31 @@ export const AppNavigator = () => {
               name="BodyStats"
               component={BodyStatsScreen}
               options={{ title: 'Body Character Stats' }}
+            />
+            <Stack.Screen
+              name="WorkoutCalendar"
+              component={WorkoutCalendarScreen}
+              options={{ title: 'Workout Calendar' }}
+            />
+            <Stack.Screen
+              name="WorkoutTemplates"
+              component={WorkoutTemplatesScreen}
+              options={{ title: 'Workout Templates' }}
+            />
+            <Stack.Screen
+              name="ManageTemplate"
+              component={ManageTemplateScreen}
+              options={{ title: 'Manage Template' }}
+            />
+            <Stack.Screen
+              name="VolumeAnalytics"
+              component={VolumeAnalyticsScreen}
+              options={{ title: 'Volume Analytics' }}
+            />
+            <Stack.Screen
+              name="WaterTracker"
+              component={WaterTrackerScreen}
+              options={{ title: 'Water Tracker' }}
             />
           </>
         )}

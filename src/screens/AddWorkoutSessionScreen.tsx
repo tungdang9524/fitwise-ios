@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Modal, Alert, SafeAreaView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -35,6 +35,81 @@ export const AddWorkoutSessionScreen: React.FC = () => {
 
   // Exercise Selection Modal state
   const [libraryModalVisible, setLibraryModalVisible] = useState(false);
+
+  const [showDetails, setShowDetails] = useState(!!existingWorkout);
+  const [secondsElapsed, setSecondsElapsed] = useState(0);
+
+  useEffect(() => {
+    // Only run timer if we are tracking a new workout session (not editing a past one)
+    if (!existingWorkout) {
+      const interval = setInterval(() => {
+        setSecondsElapsed((prev) => prev + 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [existingWorkout]);
+
+  const formatTimer = (sec: number) => {
+    const hrs = Math.floor(sec / 3600);
+    const mins = Math.floor((sec % 3600) / 60);
+    const secs = sec % 60;
+    return `${hrs > 0 ? `${hrs}:` : ''}${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  useEffect(() => {
+    const templateId = route.params?.templateId;
+    if (templateId && !existingWorkout) {
+      const template = (state.templates || []).find((t) => t.id === templateId);
+      if (template) {
+        setSessionName(template.name);
+        setNotes(template.notes || '');
+        setMuscleGroups(template.muscleGroups);
+
+        // Convert template exercises and pull historical data
+        const loadedExercises: ExerciseLog[] = template.exercises.map((tplEx) => {
+          let previousSets: SetLog[] = [];
+
+          // Walk back through workouts to find the most recent completed sets for this exerciseId
+          for (const workout of state.workouts) {
+            const historyEx = workout.exercises.find((e) => e.exerciseId === tplEx.exerciseId);
+            if (historyEx) {
+              const completedHistorySets = historyEx.sets.filter((s) => s.completed);
+              if (completedHistorySets.length > 0) {
+                previousSets = completedHistorySets.map((s, idx) => ({
+                  id: `set_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 4)}`,
+                  weight: s.weight,
+                  reps: s.reps,
+                  completed: false,
+                }));
+                break;
+              }
+            }
+          }
+
+          // Fallback to template defaults if no history is found
+          if (previousSets.length === 0) {
+            previousSets = tplEx.sets.map((s, idx) => ({
+              id: `set_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 4)}`,
+              weight: s.weight,
+              reps: s.reps,
+              completed: false,
+            }));
+          }
+
+          return {
+            id: `ex_log_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+            exerciseId: tplEx.exerciseId,
+            name: tplEx.name,
+            muscleGroup: tplEx.muscleGroup,
+            sets: previousSets,
+            notes: '',
+          };
+        });
+
+        setExercises(loadedExercises);
+      }
+    }
+  }, [route.params?.templateId, state.templates, state.workouts, existingWorkout]);
 
   const availableMuscleGroups = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio', 'Warm-up', 'Stretching'];
 
@@ -176,53 +251,93 @@ export const AddWorkoutSessionScreen: React.FC = () => {
   return (
     <Screen scrollable>
       <View style={styles.header}>
-        <AppText variant="h2">{existingWorkout ? 'Edit Workout Session' : 'Track Workout Session'}</AppText>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <AppText variant="h2">{existingWorkout ? 'Edit Session' : 'Track Session'}</AppText>
+          {!existingWorkout && (
+            <View style={[styles.timerContainer, { backgroundColor: theme.surfaceElevated, borderColor: theme.border }]}>
+              <Ionicons name="time-outline" size={16} color={theme.primary} />
+              <AppText variant="bodyBold" style={[styles.timerText, { color: theme.primary }]}>
+                {formatTimer(secondsElapsed)}
+              </AppText>
+            </View>
+          )}
+        </View>
       </View>
 
-      <Card variant="glass" style={styles.sessionCard}>
-        <AppText variant="label" color="textSecondary" style={styles.label}>Workout Title</AppText>
-        <TextInput
-          style={[styles.titleInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-          placeholder="e.g. Chest & Triceps"
-          placeholderTextColor={theme.textMuted}
-          value={sessionName}
-          onChangeText={setSessionName}
-        />
-
-        <AppText variant="label" color="textSecondary" style={styles.label}>Target Muscle Groups</AppText>
-        <View style={styles.muscleRow}>
-          {availableMuscleGroups.map((muscle) => {
-            const isSelected = muscleGroups.includes(muscle);
-            return (
-              <TouchableOpacity
-                key={muscle}
-                style={[
-                  styles.muscleBadge,
-                  {
-                    backgroundColor: isSelected ? theme.primary : theme.background,
-                    borderColor: isSelected ? theme.primary : theme.border,
-                  },
-                ]}
-                onPress={() => toggleMuscleGroup(muscle)}
-              >
-                <AppText variant="caption" style={{ color: isSelected ? '#0c0f12' : theme.text }}>
-                  {muscle}
+      {!showDetails ? (
+        <Card variant="glass" style={styles.compactDetailsCard}>
+          <View style={styles.compactRow}>
+            <View style={styles.flex}>
+              <AppText variant="caption" color="textSecondary" style={{ fontWeight: 'bold' }}>ACTIVE SESSION</AppText>
+              <AppText variant="bodyBold" style={{ fontSize: 16, marginTop: 4 }}>
+                {sessionName || 'Workout Session'}
+              </AppText>
+              {muscleGroups.length > 0 && (
+                <AppText variant="caption" color="textMuted" style={{ marginTop: 4 }}>
+                  Focus: {muscleGroups.join(', ')}
                 </AppText>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+              )}
+            </View>
+            <TouchableOpacity 
+              style={[styles.editDetailsBtn, { borderColor: theme.border }]}
+              onPress={() => setShowDetails(true)}
+            >
+              <Ionicons name="create-outline" size={14} color={theme.primary} />
+              <AppText variant="caption" color="primary" style={{ marginLeft: 4, fontWeight: 'bold' }}>Details</AppText>
+            </TouchableOpacity>
+          </View>
+        </Card>
+      ) : (
+        <Card variant="glass" style={styles.sessionCard}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+            <AppText variant="label" color="textSecondary" style={styles.label}>Workout Title</AppText>
+            <TouchableOpacity onPress={() => setShowDetails(false)} style={{ marginTop: 8 }}>
+              <AppText variant="caption" color="primary" style={{ fontWeight: 'bold' }}>Minimize</AppText>
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={[styles.titleInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+            placeholder="e.g. Chest & Triceps"
+            placeholderTextColor={theme.textMuted}
+            value={sessionName}
+            onChangeText={setSessionName}
+          />
 
-        <AppText variant="label" color="textSecondary" style={styles.label}>Session Notes</AppText>
-        <TextInput
-          style={[styles.notesInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-          placeholder="Feelings, workout summary, energy levels..."
-          placeholderTextColor={theme.textMuted}
-          value={notes}
-          onChangeText={setNotes}
-          multiline
-        />
-      </Card>
+          <AppText variant="label" color="textSecondary" style={styles.label}>Target Muscle Groups</AppText>
+          <View style={styles.muscleRow}>
+            {availableMuscleGroups.map((muscle) => {
+              const isSelected = muscleGroups.includes(muscle);
+              return (
+                <TouchableOpacity
+                  key={muscle}
+                  style={[
+                    styles.muscleBadge,
+                    {
+                      backgroundColor: isSelected ? theme.primary : theme.background,
+                      borderColor: isSelected ? theme.primary : theme.border,
+                    },
+                  ]}
+                  onPress={() => toggleMuscleGroup(muscle)}
+                >
+                  <AppText variant="caption" style={{ color: isSelected ? '#0c0f12' : theme.text }}>
+                    {muscle}
+                  </AppText>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <AppText variant="label" color="textSecondary" style={styles.label}>Session Notes</AppText>
+          <TextInput
+            style={[styles.notesInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+            placeholder="Feelings, workout summary, energy levels..."
+            placeholderTextColor={theme.textMuted}
+            value={notes}
+            onChangeText={setNotes}
+            multiline
+          />
+        </Card>
+      )}
 
       {/* Exercises Log Section */}
       <View style={styles.exercisesHeader}>
@@ -501,6 +616,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
+  },
+  timerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 6,
+  },
+  timerText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  compactDetailsCard: {
+    padding: 14,
+    marginVertical: 8,
+  },
+  compactRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  editDetailsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
   },
 });
 export default AddWorkoutSessionScreen;

@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { FitnessState, UserProfile, WorkoutSession, FoodEntry, ProgressLog, ReminderSetting, LibraryExercise, FoodPreset, PersonalRecord } from '../models/fitness';
+import { 
+  FitnessState, UserProfile, WorkoutSession, FoodEntry, ProgressLog, ReminderSetting, 
+  LibraryExercise, FoodPreset, PersonalRecord, WorkoutTemplate, WaterLog 
+} from '../models/fitness';
 import { saveFitnessState, loadFitnessState, clearFitnessState } from './storage';
 import { calculateCaloricTargets } from '../utils/formulas';
 import { FOOD_PRESETS } from '../data/foodPresets';
+import { getLocalDateString, calculateStreak } from '../utils/dates';
 
 type FitnessAction =
   | { type: 'INITIALIZE_STATE'; payload: FitnessState }
@@ -23,6 +27,13 @@ type FitnessAction =
   | { type: 'UPDATE_FOOD_PRESET'; payload: FoodPreset }
   | { type: 'DELETE_FOOD_PRESET'; payload: string }
   | { type: 'UPDATE_TARGETS'; payload: { targetCalories: number; targetProtein: number; targetCarbs: number; targetFats: number } }
+  | { type: 'ADD_TEMPLATE'; payload: WorkoutTemplate }
+  | { type: 'UPDATE_TEMPLATE'; payload: WorkoutTemplate }
+  | { type: 'DELETE_TEMPLATE'; payload: string }
+  | { type: 'DUPLICATE_TEMPLATE'; payload: string }
+  | { type: 'ADD_WATER'; payload: { amount: number; date: string } }
+  | { type: 'SET_WATER_GOAL'; payload: number }
+  | { type: 'DELETE_WATER_LOG'; payload: string }
   | { type: 'RESET_STATE' };
 
 // Gamification Helpers
@@ -49,7 +60,9 @@ const checkProteinMaster = (foodEntries: FoodEntry[], targetProtein: number): bo
 const checkAchievements = (
   workoutsCount: number,
   prCount: number,
-  unlockedList: string[]
+  unlockedList: string[],
+  waterLogs: WaterLog[] = [],
+  waterGoal: number = 2000
 ): string[] => {
   const list = [...unlockedList];
   if (workoutsCount >= 1 && !list.includes('first_workout')) {
@@ -64,6 +77,48 @@ const checkAchievements = (
   if (workoutsCount >= 100 && !list.includes('consistency_king')) {
     list.push('consistency_king');
   }
+
+  // Water Achievements
+  const totalsByDate: Record<string, number> = {};
+  (waterLogs || []).forEach((log) => {
+    totalsByDate[log.date] = (totalsByDate[log.date] || 0) + log.amount;
+  });
+  const totalCompletedDays = Object.keys(totalsByDate).filter(d => totalsByDate[d] >= waterGoal).length;
+
+  let streak = 0;
+  if (waterLogs && waterLogs.length > 0) {
+    const todayStr = getLocalDateString();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = getLocalDateString(yesterday);
+    const completedDates = new Set(
+      Object.keys(totalsByDate).filter((date) => totalsByDate[date] >= waterGoal)
+    );
+
+    if (completedDates.has(todayStr) || completedDates.has(yesterdayStr)) {
+      const checkDate = new Date();
+      if (!completedDates.has(todayStr)) {
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+      while (true) {
+        const checkStr = getLocalDateString(checkDate);
+        if (completedDates.has(checkStr)) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  if ((totalCompletedDays >= 7 || streak >= 7) && !list.includes('hydration_starter')) {
+    list.push('hydration_starter');
+  }
+  if ((totalCompletedDays >= 30 || streak >= 30) && !list.includes('hydration_master')) {
+    list.push('hydration_master');
+  }
+
   return list;
 };
 
@@ -87,6 +142,10 @@ const initialFitnessState: FitnessState = {
   unlockedAchievements: [],
   lastNutritionXpDate: '',
   personalRecords: {},
+  templates: [],
+  waterLogs: [],
+  waterGoal: 2000,
+  longestStreak: 0,
 };
 
 const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessState => {
@@ -103,6 +162,10 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         unlockedAchievements: loaded.unlockedAchievements || [],
         lastNutritionXpDate: loaded.lastNutritionXpDate || '',
         personalRecords: loaded.personalRecords || {},
+        templates: loaded.templates || [],
+        waterLogs: loaded.waterLogs || [],
+        waterGoal: loaded.waterGoal || 2000,
+        longestStreak: loaded.longestStreak || 0,
       };
     }
 
@@ -168,7 +231,20 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       
       const newWorkoutsList = [workout, ...state.workouts];
       const prCount = Object.keys(updatedPRs).length;
-      let newUnlocked = checkAchievements(newWorkoutsList.length, prCount, state.unlockedAchievements || []);
+
+      // Calculate streak and update longestStreak
+      const workoutDates = newWorkoutsList.map((w) => w.date);
+      const foodDates = state.foodEntries.map((f) => f.date);
+      const currentStreak = calculateStreak(workoutDates, foodDates);
+      const newLongestStreak = Math.max(state.longestStreak || 0, currentStreak);
+
+      let newUnlocked = checkAchievements(
+        newWorkoutsList.length,
+        prCount,
+        state.unlockedAchievements || [],
+        state.waterLogs || [],
+        state.waterGoal || 2000
+      );
       
       const targetProtein = state.profile?.targetProtein || 150;
       if (checkProteinMaster(state.foodEntries, targetProtein) && !newUnlocked.includes('protein_master')) {
@@ -182,6 +258,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         level: newLevel,
         personalRecords: updatedPRs,
         unlockedAchievements: newUnlocked,
+        longestStreak: newLongestStreak,
       };
     }
 
@@ -323,15 +400,119 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       };
     }
 
+    case 'ADD_TEMPLATE':
+      return {
+        ...state,
+        templates: [...(state.templates || []), action.payload],
+      };
+
+    case 'UPDATE_TEMPLATE':
+      return {
+        ...state,
+        templates: (state.templates || []).map((t) => (t.id === action.payload.id ? action.payload : t)),
+      };
+
+    case 'DELETE_TEMPLATE':
+      return {
+        ...state,
+        templates: (state.templates || []).filter((t) => t.id !== action.payload),
+      };
+
+    case 'DUPLICATE_TEMPLATE': {
+      const templateToCopy = (state.templates || []).find((t) => t.id === action.payload);
+      if (!templateToCopy) return state;
+      const duplicated: WorkoutTemplate = {
+        ...templateToCopy,
+        id: `tpl_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        name: `${templateToCopy.name} Copy`,
+        exercises: templateToCopy.exercises.map((ex) => ({
+          ...ex,
+          id: `ex_tpl_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+          sets: ex.sets.map((s) => ({
+            ...s,
+            id: `set_tpl_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+          })),
+        })),
+      };
+      return {
+        ...state,
+        templates: [...(state.templates || []), duplicated],
+      };
+    }
+
+    case 'ADD_WATER': {
+      const { amount, date } = action.payload;
+      const newLog: WaterLog = {
+        id: `water_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        date,
+        amount,
+      };
+      const newWaterLogs = [...(state.waterLogs || []), newLog];
+      
+      const waterGoal = state.waterGoal || 2000;
+      const dateLogsBefore = (state.waterLogs || []).filter((l) => l.date === date);
+      const totalBefore = dateLogsBefore.reduce((sum, l) => sum + l.amount, 0);
+      const totalAfter = totalBefore + amount;
+      
+      let xpEarned = 0;
+      if (totalBefore < waterGoal && totalAfter >= waterGoal) {
+        xpEarned = 20; // +20 XP for daily water goal completion
+      }
+      
+      const currentLevel = state.level || 1;
+      const currentXp = state.xp || 0;
+      const { xp: newXp, level: newLevel } = awardXP(xpEarned, currentXp, currentLevel);
+      
+      const prCount = Object.keys(state.personalRecords || {}).length;
+      const newUnlocked = checkAchievements(
+        state.workouts.length,
+        prCount,
+        state.unlockedAchievements || [],
+        newWaterLogs,
+        waterGoal
+      );
+      
+      return {
+        ...state,
+        waterLogs: newWaterLogs,
+        xp: newXp,
+        level: newLevel,
+        unlockedAchievements: newUnlocked,
+      };
+    }
+
+    case 'SET_WATER_GOAL': {
+      const newGoal = action.payload;
+      const prCount = Object.keys(state.personalRecords || {}).length;
+      const newUnlocked = checkAchievements(
+        state.workouts.length,
+        prCount,
+        state.unlockedAchievements || [],
+        state.waterLogs || [],
+        newGoal
+      );
+      return {
+        ...state,
+        waterGoal: newGoal,
+        unlockedAchievements: newUnlocked,
+      };
+    }
+
+    case 'DELETE_WATER_LOG': {
+      const newWaterLogs = (state.waterLogs || []).filter((l) => l.id !== action.payload);
+      return {
+        ...state,
+        waterLogs: newWaterLogs,
+      };
+    }
+
     case 'RESET_STATE':
       return initialFitnessState;
 
     default:
       return state;
   }
-};
-
-interface FitnessContextType {
+};interface FitnessContextType {
   state: FitnessState;
   dispatch: React.Dispatch<FitnessAction>;
   isLoading: boolean;
@@ -352,9 +533,15 @@ interface FitnessContextType {
   updateFoodPreset: (preset: FoodPreset) => void;
   deleteFoodPreset: (id: string) => void;
   updateTargets: (targets: { targetCalories: number; targetProtein: number; targetCarbs: number; targetFats: number }) => void;
+  addTemplate: (template: WorkoutTemplate) => void;
+  updateTemplate: (template: WorkoutTemplate) => void;
+  deleteTemplate: (id: string) => void;
+  duplicateTemplate: (id: string) => void;
+  addWater: (amount: number, date: string) => void;
+  setWaterGoal: (goal: number) => void;
+  deleteWaterLog: (id: string) => void;
   resetState: () => void;
 }
-
 const FitnessContext = createContext<FitnessContextType | undefined>(undefined);
 
 export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -453,6 +640,34 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'UPDATE_TARGETS', payload: targets });
   };
 
+  const addTemplate = (template: WorkoutTemplate) => {
+    dispatch({ type: 'ADD_TEMPLATE', payload: template });
+  };
+
+  const updateTemplate = (template: WorkoutTemplate) => {
+    dispatch({ type: 'UPDATE_TEMPLATE', payload: template });
+  };
+
+  const deleteTemplate = (id: string) => {
+    dispatch({ type: 'DELETE_TEMPLATE', payload: id });
+  };
+
+  const duplicateTemplate = (id: string) => {
+    dispatch({ type: 'DUPLICATE_TEMPLATE', payload: id });
+  };
+
+  const addWater = (amount: number, date: string) => {
+    dispatch({ type: 'ADD_WATER', payload: { amount, date } });
+  };
+
+  const setWaterGoal = (goal: number) => {
+    dispatch({ type: 'SET_WATER_GOAL', payload: goal });
+  };
+
+  const deleteWaterLog = (id: string) => {
+    dispatch({ type: 'DELETE_WATER_LOG', payload: id });
+  };
+
   const resetState = async () => {
     await clearFitnessState();
     dispatch({ type: 'RESET_STATE' });
@@ -481,6 +696,13 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updateFoodPreset,
         deleteFoodPreset,
         updateTargets,
+        addTemplate,
+        updateTemplate,
+        deleteTemplate,
+        duplicateTemplate,
+        addWater,
+        setWaterGoal,
+        deleteWaterLog,
         resetState,
       }}
     >

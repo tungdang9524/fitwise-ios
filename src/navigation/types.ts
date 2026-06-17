@@ -2,7 +2,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   SetupProfile: undefined;
   EditProfile: undefined;
-  AddWorkoutSession: { workoutId?: string } | undefined;
+  AddWorkoutSession: { workoutId?: string; templateId?: string } | undefined;
   ActiveWorkout: { sessionName: string; muscleGroups: string[] };
   AddFoodItem: undefined;
   ExerciseDetails: { exerciseId: string };
@@ -13,6 +13,11 @@ export type RootStackParamList = {
   ThemeSettings: undefined;
   TargetSettings: undefined;
   BodyStats: undefined;
+  WorkoutCalendar: undefined;
+  WorkoutTemplates: undefined;
+  ManageTemplate: { templateId?: string } | undefined;
+  VolumeAnalytics: undefined;
+  WaterTracker: undefined;
 };
 
 export type MainTabParamList = {

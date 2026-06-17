@@ -1,54 +1,143 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '../components/Screen';
 import { AppText } from '../components/AppText';
 import { Card } from '../components/Card';
 import { ProgressBar } from '../components/ProgressBar';
-import { PrimaryButton } from '../components/PrimaryButton';
 import { useFitness } from '../store/FitnessStore';
 import { useTheme } from '../theme/ThemeProvider';
-import { getLocalDateString, formatDisplayDate, calculateStreak } from '../utils/dates';
-import { MainTabParamList } from '../navigation/types';
+import { getLocalDateString, formatDisplayDate } from '../utils/dates';
+import { STATIC_EXERCISE_LIBRARY } from '../data/exerciseLibrary';
 
-type DashboardNavProp = BottomTabNavigationProp<MainTabParamList, 'Dashboard'>;
+const BODYWEIGHT_MULTIPLIERS: Record<string, number> = {
+  Chest: 1.4,
+  Back: 1.8,
+  Legs: 1.8,
+  Shoulders: 0.9,
+  Arms: 0.5,
+  Core: 0.4,
+};
+
+const ALL_ACHIEVEMENTS = [
+  { id: 'first_workout', name: 'First Workout', icon: 'trophy-outline', color: '#E040FB' },
+  { id: 'strength_builder', name: 'Strength Builder', icon: 'barbell-outline', color: '#FFD700' },
+  { id: 'protein_master', name: 'Protein Master', icon: 'nutrition-outline', color: '#00E5FF' },
+  { id: 'consistency_king', name: 'Consistency King', icon: 'ribbon-outline', color: '#4CAF50' },
+  { id: 'pr_hunter', name: 'PR Hunter', icon: 'flame-outline', color: '#FF5722' },
+  { id: 'hydration_starter', name: 'Hydration Starter', icon: 'water-outline', color: '#00E5FF' },
+  { id: 'hydration_master', name: 'Hydration Master', icon: 'trophy-outline', color: '#00E5FF' },
+];
 
 export const DashboardScreen: React.FC = () => {
-  const { state } = useFitness();
+  const { state, addWater } = useFitness();
   const { theme } = useTheme();
-  const navigation = useNavigation<DashboardNavProp>();
+  const navigation = useNavigation<any>();
 
   const profile = state.profile;
   const todayStr = getLocalDateString();
 
-  // Calculate Streak
+  // 1. Calculate Active Streak
   const workoutDates = state.workouts.map((w) => w.date);
   const foodDates = state.foodEntries.map((f) => f.date);
-  const currentStreak = calculateStreak(workoutDates, foodDates);
+  
+  const activeDates = new Set<string>([...workoutDates, ...foodDates]);
+  const currentStreak = useMemo(() => {
+    if (activeDates.size === 0) return 0;
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = getLocalDateString(yesterday);
 
-  // Calories & Macros Math
+    if (!activeDates.has(todayStr) && !activeDates.has(yesterdayStr)) {
+      return 0;
+    }
+
+    let streak = 0;
+    const checkDate = new Date();
+    if (!activeDates.has(todayStr)) {
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+
+    while (true) {
+      const checkStr = getLocalDateString(checkDate);
+      if (activeDates.has(checkStr)) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }, [activeDates, todayStr]);
+
+  // 2. Nutrition Math
   const todayFoods = state.foodEntries.filter((f) => f.date === todayStr);
   const consumedCalories = todayFoods.reduce((sum, f) => sum + f.calories, 0);
   const consumedProtein = todayFoods.reduce((sum, f) => sum + f.protein, 0);
-  const consumedCarbs = todayFoods.reduce((sum, f) => sum + f.carbohydrates, 0);
-  const consumedFats = todayFoods.reduce((sum, f) => sum + f.fats, 0);
 
   const targetCalories = profile?.targetCalories || 2000;
   const targetProtein = profile?.targetProtein || 150;
-  const targetCarbs = profile?.targetCarbs || 200;
-  const targetFats = profile?.targetFats || 70;
 
-  const remainingCalories = targetCalories - consumedCalories;
-  const calorieProgress = consumedCalories / targetCalories;
+  // 3. Water Intake Math
+  const todayWaterLogs = (state.waterLogs || []).filter((l) => l.date === todayStr);
+  const todayWater = todayWaterLogs.reduce((sum, l) => sum + l.amount, 0);
+  const waterGoal = state.waterGoal || 2000;
+  const waterProgress = Math.min(1.0, todayWater / waterGoal);
 
-  // Workouts Math
+  // 4. Today's Workout Math
   const todayWorkouts = state.workouts.filter((w) => w.date === todayStr);
   const completedWorkoutToday = todayWorkouts.length > 0;
 
-  // Goal naming mapping
+  // 5. Body Stats Summary Math
+  const bodySummary = useMemo(() => {
+    const categories = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core'];
+    const userWeight = state.profile?.weight || 70;
+    
+    const stats = categories.map((cat) => {
+      const relatedExIds = new Set(
+        STATIC_EXERCISE_LIBRARY.filter((e) => e.targetMuscleGroup === cat).map((e) => e.id)
+      );
+      state.customExercises.forEach((ex) => {
+        if (ex.targetMuscleGroup === cat) relatedExIds.add(ex.id);
+      });
+
+      const completedSetsInHistory: Array<{ weight: number }> = [];
+      state.workouts.forEach((w) => {
+        w.exercises.forEach((ex) => {
+          if (relatedExIds.has(ex.exerciseId)) {
+            ex.sets.forEach((set) => {
+              if (set.completed) completedSetsInHistory.push({ weight: set.weight });
+            });
+          }
+        });
+      });
+
+      let maxWeight = 0;
+      completedSetsInHistory.forEach((s) => {
+        if (s.weight > maxWeight) maxWeight = s.weight;
+      });
+      const targetWeight = (BODYWEIGHT_MULTIPLIERS[cat] || 1.0) * userWeight;
+      const score = maxWeight > 0 ? Math.min(100, Math.round((maxWeight / targetWeight) * 100)) : 30;
+      return { name: cat, score };
+    });
+
+    const overallScore = Math.round(stats.reduce((sum, s) => sum + s.score, 0) / stats.length);
+    const sorted = [...stats].sort((a, b) => b.score - a.score);
+
+    return {
+      overallScore,
+      strongest: sorted[0]?.name || 'N/A',
+      strongestScore: sorted[0]?.score || 0,
+      weakest: sorted[sorted.length - 1]?.name || 'N/A',
+      weakestScore: sorted[sorted.length - 1]?.score || 0,
+      stats,
+    };
+  }, [state.workouts, state.customExercises, state.profile]);
+
+  // Goal name mapping
   const getGoalLabel = (goal: string) => {
     switch (goal) {
       case 'muscle_gain': return 'Muscle Gain';
@@ -58,12 +147,52 @@ export const DashboardScreen: React.FC = () => {
     }
   };
 
-  const getLevelTitle = (lvl: number) => {
-    if (lvl < 5) return 'Novice Recruit';
-    if (lvl < 10) return 'Steady Grinder';
-    if (lvl < 15) return 'Iron Builder';
-    if (lvl < 20) return 'Power Lifter';
-    return 'Elite Master';
+  // 6. Today Score Game System
+  const todayScore = useMemo(() => {
+    const workoutCompleted = todayWorkouts.length > 0;
+    
+    const proteinRatio = targetProtein > 0 ? Math.min(1.0, consumedProtein / targetProtein) : 0;
+    const proteinPoints = Math.round(proteinRatio * 25);
+    
+    const calorieRatio = targetCalories > 0 ? Math.min(1.0, consumedCalories / targetCalories) : 0;
+    const caloriePoints = Math.round(calorieRatio * 25);
+    
+    const waterRatio = waterGoal > 0 ? Math.min(1.0, todayWater / waterGoal) : 0;
+    const waterPoints = Math.round(waterRatio * 20);
+    
+    const totalScore = (workoutCompleted ? 30 : 0) + caloriePoints + proteinPoints + waterPoints;
+    
+    return {
+      total: Math.min(100, totalScore),
+      breakdown: [
+        { name: 'Workout Logged', points: workoutCompleted ? 30 : 0, max: 30, achieved: workoutCompleted, icon: 'barbell-outline' },
+        { name: 'Calories Met', points: caloriePoints, max: 25, achieved: calorieRatio >= 0.85, icon: 'flame-outline' },
+        { name: 'Protein Met', points: proteinPoints, max: 25, achieved: proteinRatio >= 0.85, icon: 'nutrition-outline' },
+        { name: 'Hydration Met', points: waterPoints, max: 20, achieved: waterRatio >= 0.85, icon: 'water-outline' },
+      ],
+    };
+  }, [todayWorkouts, consumedCalories, targetCalories, consumedProtein, targetProtein, todayWater, waterGoal]);
+
+  // Target muscle parser for workout plan
+  const todayTargetMuscles = useMemo(() => {
+    if (todayWorkouts.length === 0) return '';
+    const muscles = new Set<string>();
+    todayWorkouts[0].exercises.forEach((ex) => {
+      const dbEx = STATIC_EXERCISE_LIBRARY.find((e) => e.id === ex.exerciseId) || state.customExercises.find((e) => e.id === ex.exerciseId);
+      if (dbEx) muscles.add(dbEx.targetMuscleGroup);
+    });
+    return Array.from(muscles).join(' • ');
+  }, [todayWorkouts, state.customExercises]);
+
+  const handleQuickAddWater = () => {
+    addWater(250, todayStr);
+  };
+
+  const getGreeting = () => {
+    const hrs = new Date().getHours();
+    if (hrs < 12) return 'Good morning';
+    if (hrs < 18) return 'Good afternoon';
+    return 'Good evening';
   };
 
   return (
@@ -76,12 +205,17 @@ export const DashboardScreen: React.FC = () => {
           </AppText>
           <View style={styles.nameRow}>
             <AppText variant="h1" style={styles.title}>
-              Hey, {profile?.name || 'Athlete'}!
+              {getGreeting()}, {profile?.name || 'Athlete'}! 👋
+            </AppText>
+          </View>
+          <View style={styles.headerSubtitleRow}>
+            <AppText variant="caption" color="textSecondary" style={styles.headerSubtitle}>
+              {profile?.weight || 70} kg • {getGoalLabel(profile?.fitnessGoal || '')}
             </AppText>
             {currentStreak > 0 && (
-              <View style={[styles.streakBadge, { backgroundColor: 'rgba(255, 153, 0, 0.12)', borderColor: 'rgba(255, 153, 0, 0.25)' }]}>
-                <Ionicons name="flame" size={16} color="#ff9900" />
-                <AppText variant="caption" style={styles.streakText}>{currentStreak} Day Streak</AppText>
+              <View style={[styles.streakBadge, { backgroundColor: 'rgba(255, 153, 0, 0.08)', borderColor: 'rgba(255, 153, 0, 0.2)' }]}>
+                <Ionicons name="flame" size={12} color="#ff9900" />
+                <AppText variant="caption" style={styles.streakText}>Streak: {currentStreak} days</AppText>
               </View>
             )}
           </View>
@@ -94,186 +228,188 @@ export const DashboardScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Gamified Level & XP Card */}
-      <Card variant="glass" style={styles.levelCard} onPress={() => navigation.navigate('BodyStats' as any)}>
-        <View style={styles.levelRow}>
-          <View style={[styles.levelBadge, { backgroundColor: `${theme.primary}20`, borderColor: `${theme.primary}50` }]}>
-            <AppText variant="bodyBold" color="primary">LVL {state.level || 1}</AppText>
-          </View>
-          <View style={styles.flex}>
-            <View style={styles.levelXpRow}>
-              <AppText variant="bodyBold">{getLevelTitle(state.level || 1)}</AppText>
-              <AppText variant="caption" color="textSecondary">
-                {state.xp || 0} / {(state.level || 1) * 500} XP
-              </AppText>
+      {/* Hero section: Daily Completion Score */}
+      <Card variant="glass" style={styles.todayScoreCard}>
+        <View style={styles.todayScoreHeader}>
+          <View>
+            <AppText variant="caption" color="textMuted">DAILY SCORE</AppText>
+            <View style={styles.todayScoreRow}>
+              <AppText variant="h1" color="primary" style={styles.bigScoreText}>{todayScore.total}</AppText>
+              <AppText variant="h3" color="textMuted" style={styles.scoreMax}>/100</AppText>
             </View>
-            <ProgressBar
-              progress={(state.xp || 0) / ((state.level || 1) * 500)}
-              color={theme.primary}
-              style={styles.levelProgress}
-            />
           </View>
-          <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+          <ProgressBar progress={todayScore.total / 100} color={theme.primary} style={styles.todayScoreProgress} />
         </View>
-      </Card>
-
-      {/* Goal Summary Header */}
-      {profile && (
-        <Card variant="glass" style={styles.goalCard}>
-          <View style={styles.row}>
-            <View style={styles.flex}>
-              <AppText variant="caption" color="textMuted">ACTIVE GOAL</AppText>
-              <AppText variant="bodyBold" color="primary">{getGoalLabel(profile.fitnessGoal)}</AppText>
-            </View>
-            <View style={[styles.goalDetail, styles.flex, { alignItems: 'center' }]}>
-              <AppText variant="caption" color="textMuted">ACTIVE STREAK</AppText>
-              <View style={styles.streakRow}>
-                <Ionicons name="flame" size={16} color="#ff9900" />
-                <AppText variant="bodyBold" style={{ color: '#ff9900' }}>{currentStreak} Days</AppText>
+        
+        <View style={styles.breakdownGrid}>
+          {todayScore.breakdown.map((item, index) => (
+            <View key={index} style={styles.breakdownItem}>
+              <View style={[styles.breakdownIconWrap, { backgroundColor: item.achieved ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.03)' }]}>
+                <Ionicons 
+                  name={item.achieved ? "checkmark" : (item.icon as any)} 
+                  size={14} 
+                  color={item.achieved ? theme.success : theme.textMuted} 
+                />
+              </View>
+              <View>
+                <AppText variant="caption" style={{ fontWeight: 'bold' }} color={item.achieved ? 'text' : 'textMuted'}>
+                  {item.points} pts
+                </AppText>
+                <AppText variant="caption" color="textMuted" style={{ fontSize: 10 }}>
+                  {item.name}
+                </AppText>
               </View>
             </View>
-            <View style={[styles.goalDetail, styles.flex, { alignItems: 'flex-end' }]}>
-              <AppText variant="caption" color="textMuted">CURRENT WEIGHT</AppText>
-              <AppText variant="bodyBold">{profile.weight} kg</AppText>
-            </View>
-          </View>
-        </Card>
-      )}
-
-      {/* Workout State Card */}
-      <Card variant="elevated" style={styles.workoutCard}>
-        <View style={styles.rowCentered}>
-          <View style={[styles.iconWrap, { backgroundColor: completedWorkoutToday ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 93, 59, 0.15)' }]}>
-            <Ionicons 
-              name={completedWorkoutToday ? "checkmark-circle" : "barbell"} 
-              size={24} 
-              color={completedWorkoutToday ? theme.success : theme.secondary} 
-            />
-          </View>
-          <View style={styles.flex}>
-            <AppText variant="bodyBold">Today's Workout</AppText>
-            <AppText variant="caption" color="textSecondary">
-              {completedWorkoutToday 
-                ? `Logged: ${todayWorkouts[0].name}`
-                : "No workout tracked today"}
-            </AppText>
-          </View>
-          {!completedWorkoutToday && (
-            <TouchableOpacity 
-              style={[styles.trackBtn, { backgroundColor: theme.primary }]}
-              onPress={() => navigation.navigate('Workouts')}
-            >
-              <AppText variant="caption" style={styles.trackBtnText}>Track</AppText>
-            </TouchableOpacity>
-          )}
+          ))}
         </View>
       </Card>
 
-      {/* Calories Card */}
-      <Card variant="normal" style={styles.caloriesCard}>
-        <View style={styles.row}>
-          <View>
-            <AppText variant="h2" style={styles.remainingVal}>
-              {remainingCalories >= 0 ? remainingCalories : 0}
-            </AppText>
-            <AppText variant="caption" color="textMuted">CALORIES REMAINING</AppText>
-          </View>
-          <View style={styles.rightAligned}>
-            <AppText variant="bodyBold">{consumedCalories} / {targetCalories}</AppText>
-            <AppText variant="caption" color="textMuted">KCAL CONSUMED</AppText>
-          </View>
-        </View>
-        
-        <ProgressBar progress={calorieProgress} color={remainingCalories < 0 ? theme.error : theme.primary} style={styles.calProgress} />
-        
-        {remainingCalories < 0 && (
-          <AppText variant="caption" color="error" style={styles.overCalorieWarning}>
-            ⚠️ You are {Math.abs(remainingCalories)} kcal over your daily target limit.
-          </AppText>
-        )}
-      </Card>
-
-      {/* Macros Section */}
-      <View style={styles.macrosSection}>
-        <AppText variant="h3" style={styles.sectionHeader}>Daily Macros</AppText>
-        <Card variant="glass" style={styles.macrosCard}>
-          {/* Protein */}
-          <View style={styles.macroRow}>
-            <View style={styles.macroHeader}>
-              <AppText variant="bodyBold" color="primary">Protein</AppText>
-              <AppText variant="caption" color="textSecondary">
-                {consumedProtein}g / {targetProtein}g
-              </AppText>
+      {/* Today's Plan section */}
+      <View style={styles.workoutSection}>
+        <AppText variant="h3" style={styles.sectionHeader}>Today's Workout</AppText>
+        {completedWorkoutToday ? (
+          <Card variant="elevated" style={[styles.workoutCard, { borderColor: 'rgba(16, 185, 129, 0.2)' }]}>
+            <View style={styles.rowCentered}>
+              <View style={[styles.iconWrap, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
+                <Ionicons name="checkmark-circle" size={24} color={theme.success} />
+              </View>
+              <View style={styles.flex}>
+                <AppText variant="bodyBold">{todayWorkouts[0].name}</AppText>
+                <AppText variant="caption" color="textSecondary" numberOfLines={1}>
+                  {todayTargetMuscles || 'Completed'} • {todayWorkouts[0].exercises.length} Exercises
+                </AppText>
+              </View>
+              <View style={styles.completedBadge}>
+                <AppText variant="caption" color="success" style={{ fontWeight: 'bold' }}>DONE</AppText>
+              </View>
             </View>
-            <ProgressBar progress={consumedProtein / targetProtein} color={theme.primary} />
-          </View>
-
-          {/* Carbs */}
-          <View style={styles.macroRow}>
-            <View style={styles.macroHeader}>
-              <AppText variant="bodyBold" color="secondary">Carbs</AppText>
-              <AppText variant="caption" color="textSecondary">
-                {consumedCarbs}g / {targetCarbs}g
-              </AppText>
-            </View>
-            <ProgressBar progress={consumedCarbs / targetCarbs} color={theme.secondary} />
-          </View>
-
-          {/* Fats */}
-          <View style={styles.macroRow}>
-            <View style={styles.macroHeader}>
-              <AppText variant="bodyBold" color="accent">Fats</AppText>
-              <AppText variant="caption" color="textSecondary">
-                {consumedFats}g / {targetFats}g
-              </AppText>
-            </View>
-            <ProgressBar progress={consumedFats / targetFats} color={theme.accent} />
-          </View>
-        </Card>
-      </View>
-
-      {/* Recent Workout History */}
-      <View style={styles.historySection}>
-        <View style={styles.row}>
-          <AppText variant="h3">Recent Activity</AppText>
-          {state.workouts.length > 0 && (
-            <TouchableOpacity onPress={() => navigation.navigate('Workouts')}>
-              <AppText variant="caption" color="primary">View All</AppText>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {state.workouts.length === 0 ? (
-          <Card variant="glass" style={styles.emptyHistoryCard}>
-            <Ionicons name="calendar-outline" size={36} color={theme.textMuted} style={styles.emptyIcon} />
-            <AppText variant="body" color="textSecondary" style={styles.emptyText}>
-              No workouts logged yet. Your fitness journey starts here!
-            </AppText>
-            <PrimaryButton 
-              title="Log First Workout" 
-              onPress={() => navigation.navigate('Workouts')}
-              style={styles.emptyBtn}
-            />
           </Card>
         ) : (
-          state.workouts.slice(0, 3).map((workout) => (
-            <Card key={workout.id} variant="glass" style={styles.workoutItem}>
-              <View style={styles.rowCentered}>
-                <View style={[styles.historyIconWrap, { backgroundColor: 'rgba(174, 255, 0, 0.1)' }]}>
-                  <Ionicons name="barbell-outline" size={20} color={theme.primary} />
-                </View>
-                <View style={styles.flex}>
-                  <AppText variant="bodyBold">{workout.name}</AppText>
-                  <AppText variant="caption" color="textSecondary">
-                    {formatDisplayDate(workout.date)} • {workout.exercises.length} Exercises
-                  </AppText>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
-              </View>
-            </Card>
-          ))
+          <Card variant="normal" style={styles.workoutCard}>
+            <View style={{ marginBottom: 12 }}>
+              <AppText variant="bodyBold" style={{ fontSize: 15 }}>No workout tracked today</AppText>
+              <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>
+                Train consistency. Start a blank workout or choose a saved template.
+              </AppText>
+            </View>
+            <View style={styles.workoutActionRow}>
+              <TouchableOpacity 
+                style={[styles.workoutActionBtn, { backgroundColor: theme.primary }]}
+                onPress={() => navigation.navigate('AddWorkoutSession')}
+              >
+                <Ionicons name="barbell-outline" size={16} color="#0c0f12" />
+                <AppText variant="caption" style={styles.workoutActionBtnText}>Start Workout</AppText>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.workoutActionBtnOutline, { borderColor: theme.border }]}
+                onPress={() => navigation.navigate('WorkoutTemplates')}
+              >
+                <Ionicons name="copy-outline" size={16} color={theme.text} />
+                <AppText variant="caption" style={{ fontWeight: 'bold', marginLeft: 6 }}>Templates</AppText>
+              </TouchableOpacity>
+            </View>
+          </Card>
         )}
       </View>
+
+      {/* Quick Actions Grid */}
+      <View style={styles.quickActionsSection}>
+        <AppText variant="h3" style={styles.sectionHeader}>Quick Actions</AppText>
+        <View style={styles.actionsGrid}>
+          <TouchableOpacity onPress={() => navigation.navigate('AddWorkoutSession')} style={[styles.actionItem, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="barbell-outline" size={18} color={theme.secondary} />
+            <AppText variant="caption" style={styles.actionLabel}>Start Gym</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('WorkoutCalendar')} style={[styles.actionItem, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="calendar-outline" size={18} color={theme.primary} />
+            <AppText variant="caption" style={styles.actionLabel}>Calendar</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Progress')} style={[styles.actionItem, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="trending-up-outline" size={18} color={theme.success} />
+            <AppText variant="caption" style={styles.actionLabel}>Progress</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('WaterTracker')} style={[styles.actionItem, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="water-outline" size={18} color={theme.accent} />
+            <AppText variant="caption" style={styles.actionLabel}>Log Water</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Nutrition')} style={[styles.actionItem, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="nutrition-outline" size={18} color={theme.secondary} />
+            <AppText variant="caption" style={styles.actionLabel}>Add Meal</AppText>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('WorkoutTemplates')} style={[styles.actionItem, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="copy-outline" size={18} color={theme.primary} />
+            <AppText variant="caption" style={styles.actionLabel}>Templates</AppText>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Body Overview Card */}
+      <View style={styles.bodyOverviewSection}>
+        <AppText variant="h3" style={styles.sectionHeader}>Body Status</AppText>
+        <Card variant="glass" style={styles.bodyCard} onPress={() => navigation.navigate('BodyStats')}>
+          <View style={styles.bodyCardHeader}>
+            <AppText variant="bodyBold">Muscle Balance</AppText>
+            <View style={[styles.bodyScoreBadge, { backgroundColor: 'rgba(174, 255, 0, 0.08)', borderColor: theme.primary }]}>
+              <AppText variant="caption" color="primary" style={{ fontWeight: 'bold' }}>
+                Overall: {bodySummary.overallScore}
+              </AppText>
+            </View>
+          </View>
+          <View style={styles.musclesOverviewGrid}>
+            {bodySummary.stats.map((m) => (
+              <View key={m.name} style={styles.muscleRow}>
+                <View style={styles.muscleRowHeader}>
+                  <AppText variant="caption" style={{ fontWeight: 'bold' }}>{m.name}</AppText>
+                  <AppText variant="caption" color="textSecondary">{m.score}/100</AppText>
+                </View>
+                <ProgressBar progress={m.score / 100} color={theme.primary} style={styles.muscleProgress} />
+              </View>
+            ))}
+          </View>
+        </Card>
+      </View>
+
+      {/* Water Tracker Widget */}
+      <View style={styles.waterSection}>
+        <Card variant="normal" style={styles.waterWidgetCard}>
+          <View style={styles.rowCentered}>
+            <View style={[styles.waterIconWrap, { backgroundColor: 'rgba(0, 229, 255, 0.08)' }]}>
+              <Ionicons name="water" size={20} color={theme.accent} />
+            </View>
+            <View style={styles.flex}>
+              <AppText variant="bodyBold">Water Intake</AppText>
+              <AppText variant="caption" color="textSecondary">
+                {todayWater} / {waterGoal} ml
+              </AppText>
+            </View>
+            <TouchableOpacity 
+              onPress={handleQuickAddWater} 
+              style={[styles.quickAddWaterBtn, { backgroundColor: `${theme.accent}10`, borderColor: theme.accent }]}
+            >
+              <AppText variant="caption" color="accent" style={{ fontWeight: 'bold' }}>+250ml</AppText>
+            </TouchableOpacity>
+          </View>
+        </Card>
+      </View>
+
+      {/* Achievements cabinet */}
+      {state.unlockedAchievements && state.unlockedAchievements.length > 0 && (
+        <View style={styles.achCabinetSection}>
+          <AppText variant="h3" style={styles.sectionHeader}>Recent Achievements</AppText>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.achScroll}>
+            {state.unlockedAchievements.slice(0, 4).map((id) => {
+              const ach = ALL_ACHIEVEMENTS.find(a => a.id === id);
+              if (!ach) return null;
+              return (
+                <View key={id} style={[styles.achBadge, { backgroundColor: `${ach.color}10`, borderColor: ach.color }]}>
+                  <Ionicons name={ach.icon as any} size={14} color={ach.color} />
+                  <AppText variant="caption" style={{ color: ach.color, fontWeight: 'bold' }}>{ach.name}</AppText>
+                </View>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
     </Screen>
   );
 };
@@ -295,42 +431,36 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginTop: 4,
   },
+  headerSubtitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 4,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+  },
   streakBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 3,
+    borderRadius: 8,
     borderWidth: 1,
   },
   streakText: {
     color: '#ff9900',
     fontWeight: 'bold',
-  },
-  streakRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+    fontSize: 10,
   },
   profileButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     borderWidth: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  goalCard: {
-    marginVertical: 4,
-    paddingVertical: 12,
-  },
-  workoutCard: {
-    marginVertical: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
   rowCentered: {
@@ -338,68 +468,210 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  goalDetail: {
-    alignItems: 'flex-end',
-  },
   iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   flex: {
     flex: 1,
   },
-  trackBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+  todayScoreCard: {
+    padding: 16,
+    marginVertical: 8,
   },
-  trackBtnText: {
-    color: '#0c0f12',
-    fontWeight: 'bold',
+  todayScoreHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  caloriesCard: {
-    marginTop: 8,
-    padding: 20,
+  todayScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginTop: 4,
   },
-  remainingVal: {
-    fontSize: 36,
+  bigScoreText: {
+    fontSize: 38,
     fontWeight: '800',
     lineHeight: 40,
   },
-  rightAligned: {
-    alignItems: 'flex-end',
-  },
-  calProgress: {
-    marginTop: 16,
-  },
-  overCalorieWarning: {
-    marginTop: 10,
+  scoreMax: {
+    fontSize: 16,
     fontWeight: '600',
+    color: '#64748b',
+    marginLeft: 2,
+    marginBottom: 4,
   },
-  macrosSection: {
-    marginTop: 20,
+  todayScoreProgress: {
+    width: 100,
+    height: 8,
+  },
+  breakdownGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  breakdownItem: {
+    width: '47%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    padding: 8,
+    borderRadius: 10,
+  },
+  breakdownIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  workoutSection: {
+    marginTop: 16,
   },
   sectionHeader: {
     marginBottom: 8,
   },
-  macrosCard: {
-    padding: 16,
-    gap: 16,
+  workoutCard: {
+    padding: 14,
+    marginVertical: 4,
   },
-  macroRow: {
+  completedBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+  },
+  workoutActionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 6,
+  },
+  workoutActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
     gap: 6,
   },
-  macroHeader: {
+  workoutActionBtnText: {
+    color: '#0c0f12',
+    fontWeight: 'bold',
+  },
+  workoutActionBtnOutline: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 9,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  quickActionsSection: {
+    marginTop: 16,
+  },
+  actionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
+  },
+  actionItem: {
+    width: '48.5%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  actionLabel: {
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  bodyOverviewSection: {
+    marginTop: 16,
+  },
+  bodyCard: {
+    padding: 16,
+    marginVertical: 4,
+  },
+  bodyCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  bodyScoreBadge: {
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  musclesOverviewGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  muscleRow: {
+    width: '48%',
+    gap: 4,
+  },
+  muscleRowHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  muscleProgress: {
+    height: 4,
+  },
+  waterSection: {
+    marginTop: 12,
+  },
+  waterWidgetCard: {
+    padding: 12,
+    marginVertical: 4,
+  },
+  waterIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quickAddWaterBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  achCabinetSection: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  achScroll: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  achBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
   historySection: {
     marginTop: 24,
-    paddingBottom: 20,
   },
   workoutItem: {
     marginVertical: 4,
@@ -426,31 +698,6 @@ const styles = StyleSheet.create({
   emptyBtn: {
     width: '100%',
   },
-  levelCard: {
-    marginVertical: 6,
-    padding: 12,
-  },
-  levelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  levelBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  levelXpRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  levelProgress: {
-    height: 6,
-  },
 });
+
 export default DashboardScreen;
