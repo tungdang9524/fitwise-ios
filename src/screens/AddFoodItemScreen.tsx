@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   presetsListContainer: {
-    height: 200,
+    flex: 1,
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 12,
