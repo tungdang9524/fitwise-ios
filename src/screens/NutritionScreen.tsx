@@ -192,7 +192,7 @@ export const NutritionScreen: React.FC = () => {
                 <View style={styles.flex}>
                   <AppText variant="bodyBold">{food.name}</AppText>
                   <AppText variant="caption" color="textSecondary">
-                    Serving: {food.servingSize} • {food.time}
+                    Serving: {food.servingSize}{food.quantity && food.quantity !== 1 ? ` (x${food.quantity})` : ''} • {food.time}
                   </AppText>
                   <View style={styles.macroPills}>
                     <View style={[styles.macroPill, { backgroundColor: 'rgba(174, 255, 0, 0.1)' }]}>

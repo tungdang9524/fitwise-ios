@@ -51,6 +51,7 @@ export interface FoodEntry {
   carbohydrates: number; // grams
   fats: number; // grams
   servingSize: string; // e.g. "100g", "1 cup"
+  quantity?: number; // e.g. 1.5
 }
 
 export interface LibraryExercise {

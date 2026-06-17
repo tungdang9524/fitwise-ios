@@ -472,6 +472,13 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       };
     }
 
+    case 'DELETE_FOOD_ENTRY': {
+      return {
+        ...state,
+        foodEntries: state.foodEntries.filter((f) => f.id !== action.payload),
+      };
+    }
+
     case 'ADD_PROGRESS_LOG':
       return {
         ...state,
