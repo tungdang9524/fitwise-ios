@@ -66,6 +66,7 @@ export const BodyVisualizerScreen: React.FC = () => {
   const navigation = useNavigation();
 
   // Local State
+  const [viewMode, setViewMode] = useState<'front' | 'back'>('front');
   const [selectedMuscle, setSelectedMuscle] = useState<MuscleSubGroup>('Chest');
 
   // Compute all analytics offline
@@ -89,6 +90,11 @@ export const BodyVisualizerScreen: React.FC = () => {
   };
 
   const selectedDetails = data.muscleGroups[selectedMuscle];
+
+  const handleToggleView = (mode: 'front' | 'back') => {
+    setViewMode(mode);
+    setSelectedMuscle(mode === 'front' ? 'Chest' : 'Traps');
+  };
 
   return (
     <Screen scrollable>
@@ -121,297 +127,298 @@ export const BodyVisualizerScreen: React.FC = () => {
         </View>
       </Card>
 
+      {/* View Mode Toggle Switch */}
+      <View style={[styles.toggleContainer, { backgroundColor: theme.surface }]}>
+        <TouchableOpacity
+          onPress={() => handleToggleView('front')}
+          style={[styles.toggleBtn, viewMode === 'front' && { backgroundColor: theme.surfaceElevated }]}
+        >
+          <AppText variant="bodyBold" color={viewMode === 'front' ? 'primary' : 'textMuted'}>
+            Front View
+          </AppText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleToggleView('back')}
+          style={[styles.toggleBtn, viewMode === 'back' && { backgroundColor: theme.surfaceElevated }]}
+        >
+          <AppText variant="bodyBold" color={viewMode === 'back' ? 'primary' : 'textMuted'}>
+            Back View
+          </AppText>
+        </TouchableOpacity>
+      </View>
+
       {/* Interactive Human Mannequin SVG Display */}
       <Card variant="glass" style={styles.mannequinCard}>
         <View style={styles.mannequinRow}>
-          {/* Front Mannequin */}
-          <View style={styles.mannequinCol}>
-            <AppText variant="caption" color="textMuted" style={styles.mannequinLabel}>FRONT VIEW</AppText>
-            <Svg width="135" height="260" viewBox="0 0 100 240">
-              {/* Head Outline */}
-              <Circle cx="50" cy="16" r="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-              {/* Neck Outline */}
-              <Path d="M47,21 L53,21 L53,28 L47,28 Z" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-              
-              {/* Front Silhouette Outline */}
-              <Path
-                d="M50,28 L38,32 L30,38 L25,62 L22,96 L27,99 L31,78 L35,92 L35,152 L35,225 L46,225 L48,155 L50,150 L52,155 L54,225 L65,225 L65,152 L65,92 L69,78 L73,99 L78,96 L75,62 L70,38 L62,32 Z"
-                fill="rgba(255,255,255,0.01)"
-                stroke="rgba(255,255,255,0.08)"
-                strokeWidth="1.2"
-              />
-
-              {/* Left Chest */}
-              <Polygon
-                points="50,34 38,34 36,48 50,48"
-                fill={getScoreColor(data.muscleGroups['Chest'].score)}
-                stroke={selectedMuscle === 'Chest' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Chest' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Chest')}
-              />
-              {/* Right Chest */}
-              <Polygon
-                points="50,34 62,34 64,48 50,48"
-                fill={getScoreColor(data.muscleGroups['Chest'].score)}
-                stroke={selectedMuscle === 'Chest' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Chest' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Chest')}
-              />
-
-              {/* Left Front Delt */}
-              <Polygon
-                points="38,32 30,38 33,48 38,44"
-                fill={getScoreColor(data.muscleGroups['Front Delts'].score)}
-                stroke={selectedMuscle === 'Front Delts' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Front Delts' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Front Delts')}
-              />
-              {/* Right Front Delt */}
-              <Polygon
-                points="62,32 70,38 67,48 62,44"
-                fill={getScoreColor(data.muscleGroups['Front Delts'].score)}
-                stroke={selectedMuscle === 'Front Delts' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Front Delts' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Front Delts')}
-              />
-
-              {/* Left Bicep */}
-              <Polygon
-                points="30,48 25,62 29,72 33,58"
-                fill={getScoreColor(data.muscleGroups['Biceps'].score)}
-                stroke={selectedMuscle === 'Biceps' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Biceps' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Biceps')}
-              />
-              {/* Right Bicep */}
-              <Polygon
-                points="70,48 75,62 71,72 67,58"
-                fill={getScoreColor(data.muscleGroups['Biceps'].score)}
-                stroke={selectedMuscle === 'Biceps' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Biceps' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Biceps')}
-              />
-
-              {/* Left Forearm */}
-              <Polygon
-                points="29,72 23,96 27,99 31,78"
-                fill={getScoreColor(data.muscleGroups['Forearms'].score)}
-                stroke={selectedMuscle === 'Forearms' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Forearms' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Forearms')}
-              />
-              {/* Right Forearm */}
-              <Polygon
-                points="71,72 77,96 73,99 69,78"
-                fill={getScoreColor(data.muscleGroups['Forearms'].score)}
-                stroke={selectedMuscle === 'Forearms' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Forearms' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Forearms')}
-              />
-
-              {/* Abs Core Center */}
-              <Polygon
-                points="44,50 56,50 55,95 45,95"
-                fill={getScoreColor(data.muscleGroups['Abs'].score)}
-                stroke={selectedMuscle === 'Abs' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Abs' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Abs')}
-              />
-
-              {/* Left Obliques */}
-              <Polygon
-                points="44,50 36,52 38,92 45,90"
-                fill={getScoreColor(data.muscleGroups['Obliques'].score)}
-                stroke={selectedMuscle === 'Obliques' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Obliques' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Obliques')}
-              />
-              {/* Right Obliques */}
-              <Polygon
-                points="56,50 64,52 62,92 55,90"
-                fill={getScoreColor(data.muscleGroups['Obliques'].score)}
-                stroke={selectedMuscle === 'Obliques' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Obliques' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Obliques')}
-              />
-
-              {/* Left Quadriceps */}
-              <Polygon
-                points="34,98 49,98 47,155 35,152"
-                fill={getScoreColor(data.muscleGroups['Quadriceps'].score)}
-                stroke={selectedMuscle === 'Quadriceps' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Quadriceps' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Quadriceps')}
-              />
-              {/* Right Quadriceps */}
-              <Polygon
-                points="66,98 51,98 53,155 65,152"
-                fill={getScoreColor(data.muscleGroups['Quadriceps'].score)}
-                stroke={selectedMuscle === 'Quadriceps' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Quadriceps' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Quadriceps')}
-              />
-            </Svg>
+          {/* Legend Tiers */}
+          <View style={styles.legendCabinet}>
+            <AppText variant="caption" color="textMuted" style={styles.legendTitle}>TIERS</AppText>
+            {[
+              { label: 'Elite (80+)', color: '#00e5ff' },
+              { label: 'Strong (60-80)', color: '#aeff00' },
+              { label: 'Developing (40-60)', color: '#f97316' },
+              { label: 'Weak (20-40)', color: '#ef4444' },
+              { label: 'Unused (0-20)', color: '#64748b' },
+            ].map((t) => (
+              <View key={t.label} style={styles.legendItem}>
+                <View style={[styles.legendIndicator, { backgroundColor: t.color }]} />
+                <AppText variant="caption" style={{ fontSize: 9 }} color="textSecondary">
+                  {t.label}
+                </AppText>
+              </View>
+            ))}
           </View>
 
-          {/* Back Mannequin */}
-          <View style={styles.mannequinCol}>
-            <AppText variant="caption" color="textMuted" style={styles.mannequinLabel}>BACK VIEW</AppText>
-            <Svg width="135" height="260" viewBox="0 0 100 240">
-              {/* Head Outline */}
-              <Circle cx="50" cy="16" r="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-              {/* Neck Outline */}
-              <Path d="M47,21 L53,21 L53,28 L47,28 Z" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-              
-              {/* Back Silhouette Outline */}
-              <Path
-                d="M50,28 L38,32 L30,38 L25,62 L29,72 L34,75 L36,102 L34,126 L34,180 L34,225 L48,225 L50,225 L52,225 L66,225 L66,180 L66,126 L64,102 L66,75 L71,72 L75,62 L70,38 L62,32 Z"
-                fill="rgba(255,255,255,0.01)"
-                stroke="rgba(255,255,255,0.08)"
-                strokeWidth="1.2"
-              />
+          {/* Mannequin Interactive SVG Viewport */}
+          <View style={styles.svgContainer}>
+            {viewMode === 'front' ? (
+              <Svg width="180" height="280" viewBox="0 0 200 320">
+                {/* Mannequin Static Silhouette Guides */}
+                <Circle cx="100" cy="35" r="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                <Path d="M100,50 L132,70 L144,95 L138,125 L124,175 L100,180 L76,175 L62,125 L56,95 L68,70 Z" fill="rgba(255,255,255,0.01)" />
+                <Path d="M72,180 L80,256 L90,312 M128,180 L120,256 L110,312" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
 
-              {/* Upper Traps / Neck */}
-              <Polygon
-                points="42,28 58,28 62,42 38,42"
-                fill={getScoreColor(data.muscleGroups['Traps'].score)}
-                stroke={selectedMuscle === 'Traps' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Traps' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Traps')}
-              />
+                {/* Left Chest */}
+                <Polygon
+                  points="101,80 132,80 128,105 101,105"
+                  fill={getScoreColor(data.muscleGroups['Chest'].score)}
+                  stroke={selectedMuscle === 'Chest' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Chest' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Chest')}
+                />
+                {/* Right Chest */}
+                <Polygon
+                  points="99,80 68,80 72,105 99,105"
+                  fill={getScoreColor(data.muscleGroups['Chest'].score)}
+                  stroke={selectedMuscle === 'Chest' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Chest' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Chest')}
+                />
 
-              {/* Left Rear Delt */}
-              <Polygon
-                points="38,32 30,38 33,48 38,44"
-                fill={getScoreColor(data.muscleGroups['Rear Delts'].score)}
-                stroke={selectedMuscle === 'Rear Delts' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Rear Delts' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Rear Delts')}
-              />
-              {/* Right Rear Delt */}
-              <Polygon
-                points="62,32 70,38 67,48 62,44"
-                fill={getScoreColor(data.muscleGroups['Rear Delts'].score)}
-                stroke={selectedMuscle === 'Rear Delts' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Rear Delts' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Rear Delts')}
-              />
+                {/* Left Front Delt */}
+                <Polygon
+                  points="132,80 148,92 140,112 128,105"
+                  fill={getScoreColor(data.muscleGroups['Front Delts'].score)}
+                  stroke={selectedMuscle === 'Front Delts' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Front Delts' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Front Delts')}
+                />
+                {/* Right Front Delt */}
+                <Polygon
+                  points="68,80 52,92 60,112 72,105"
+                  fill={getScoreColor(data.muscleGroups['Front Delts'].score)}
+                  stroke={selectedMuscle === 'Front Delts' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Front Delts' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Front Delts')}
+                />
 
-              {/* Left Triceps */}
-              <Polygon
-                points="30,48 25,62 29,72 33,58"
-                fill={getScoreColor(data.muscleGroups['Triceps'].score)}
-                stroke={selectedMuscle === 'Triceps' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Triceps' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Triceps')}
-              />
-              {/* Right Triceps */}
-              <Polygon
-                points="70,48 75,62 71,72 67,58"
-                fill={getScoreColor(data.muscleGroups['Triceps'].score)}
-                stroke={selectedMuscle === 'Triceps' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Triceps' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Triceps')}
-              />
+                {/* Left Bicep */}
+                <Polygon
+                  points="140,112 152,126 144,148 132,130"
+                  fill={getScoreColor(data.muscleGroups['Biceps'].score)}
+                  stroke={selectedMuscle === 'Biceps' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Biceps' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Biceps')}
+                />
+                {/* Right Bicep */}
+                <Polygon
+                  points="60,112 48,126 56,148 68,130"
+                  fill={getScoreColor(data.muscleGroups['Biceps'].score)}
+                  stroke={selectedMuscle === 'Biceps' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Biceps' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Biceps')}
+                />
 
-              {/* Left Lats */}
-              <Polygon
-                points="50,44 38,44 34,75 50,70"
-                fill={getScoreColor(data.muscleGroups['Lats'].score)}
-                stroke={selectedMuscle === 'Lats' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Lats' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Lats')}
-              />
-              {/* Right Lats */}
-              <Polygon
-                points="50,44 62,44 66,75 50,70"
-                fill={getScoreColor(data.muscleGroups['Lats'].score)}
-                stroke={selectedMuscle === 'Lats' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Lats' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Lats')}
-              />
+                {/* Left Forearms */}
+                <Polygon
+                  points="144,148 158,162 148,198 136,190"
+                  fill={getScoreColor(data.muscleGroups['Forearms'].score)}
+                  stroke={selectedMuscle === 'Forearms' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Forearms' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Forearms')}
+                />
+                {/* Right Forearms */}
+                <Polygon
+                  points="56,148 42,162 52,198 64,190"
+                  fill={getScoreColor(data.muscleGroups['Forearms'].score)}
+                  stroke={selectedMuscle === 'Forearms' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Forearms' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Forearms')}
+                />
 
-              {/* Lower Back */}
-              <Polygon
-                points="44,72 56,72 54,95 46,95"
-                fill={getScoreColor(data.muscleGroups['Lower Back'].score)}
-                stroke={selectedMuscle === 'Lower Back' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Lower Back' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Lower Back')}
-              />
+                {/* Abs Core Center */}
+                <Polygon
+                  points="85,108 115,108 112,170 88,170"
+                  fill={getScoreColor(data.muscleGroups['Abs'].score)}
+                  stroke={selectedMuscle === 'Abs' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Abs' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Abs')}
+                />
 
-              {/* Left Glute */}
-              <Polygon
-                points="50,96 36,102 38,125 50,125"
-                fill={getScoreColor(data.muscleGroups['Glutes'].score)}
-                stroke={selectedMuscle === 'Glutes' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Glutes' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Glutes')}
-              />
-              {/* Right Glute */}
-              <Polygon
-                points="50,96 64,102 62,125 50,125"
-                fill={getScoreColor(data.muscleGroups['Glutes'].score)}
-                stroke={selectedMuscle === 'Glutes' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Glutes' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Glutes')}
-              />
+                {/* Left Obliques */}
+                <Polygon
+                  points="115,108 128,122 120,170 112,170"
+                  fill={getScoreColor(data.muscleGroups['Obliques'].score)}
+                  stroke={selectedMuscle === 'Obliques' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Obliques' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Obliques')}
+                />
+                {/* Right Obliques */}
+                <Polygon
+                  points="85,108 72,122 80,170 88,170"
+                  fill={getScoreColor(data.muscleGroups['Obliques'].score)}
+                  stroke={selectedMuscle === 'Obliques' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Obliques' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Obliques')}
+                />
 
-              {/* Left Hamstring */}
-              <Polygon
-                points="34,126 49,126 47,180 35,178"
-                fill={getScoreColor(data.muscleGroups['Hamstrings'].score)}
-                stroke={selectedMuscle === 'Hamstrings' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Hamstrings' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Hamstrings')}
-              />
-              {/* Right Hamstring */}
-              <Polygon
-                points="66,126 51,126 53,180 65,178"
-                fill={getScoreColor(data.muscleGroups['Hamstrings'].score)}
-                stroke={selectedMuscle === 'Hamstrings' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Hamstrings' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Hamstrings')}
-              />
+                {/* Left Quadriceps */}
+                <Polygon
+                  points="101,180 128,180 118,255 101,250"
+                  fill={getScoreColor(data.muscleGroups['Quadriceps'].score)}
+                  stroke={selectedMuscle === 'Quadriceps' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Quadriceps' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Quadriceps')}
+                />
+                {/* Right Quadriceps */}
+                <Polygon
+                  points="99,180 72,180 82,255 99,250"
+                  fill={getScoreColor(data.muscleGroups['Quadriceps'].score)}
+                  stroke={selectedMuscle === 'Quadriceps' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Quadriceps' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Quadriceps')}
+                />
+              </Svg>
+            ) : (
+              <Svg width="180" height="280" viewBox="0 0 200 320">
+                {/* Mannequin Static Silhouette Guides */}
+                <Circle cx="100" cy="35" r="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                <Path d="M100,50 L132,70 L144,95 L138,125 L124,175 L100,180 L76,175 L62,125 L56,95 L68,70 Z" fill="rgba(255,255,255,0.01)" />
+                <Path d="M72,180 L80,256 L90,312 M128,180 L120,256 L110,312" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
 
-              {/* Left Calf */}
-              <Polygon
-                points="34,182 48,182 46,225 35,225"
-                fill={getScoreColor(data.muscleGroups['Calves'].score)}
-                stroke={selectedMuscle === 'Calves' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Calves' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Calves')}
-              />
-              {/* Right Calf */}
-              <Polygon
-                points="66,182 52,182 54,225 65,225"
-                fill={getScoreColor(data.muscleGroups['Calves'].score)}
-                stroke={selectedMuscle === 'Calves' ? '#ffffff' : 'rgba(255,255,255,0.1)'}
-                strokeWidth={selectedMuscle === 'Calves' ? 1.8 : 0.8}
-                onPress={() => setSelectedMuscle('Calves')}
-              />
-            </Svg>
+                {/* Upper Traps / Neck */}
+                <Polygon
+                  points="82,55 118,55 125,80 75,80"
+                  fill={getScoreColor(data.muscleGroups['Traps'].score)}
+                  stroke={selectedMuscle === 'Traps' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Traps' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Traps')}
+                />
+
+                {/* Left Rear Delt */}
+                <Polygon
+                  points="132,80 144,95 136,112 126,102"
+                  fill={getScoreColor(data.muscleGroups['Rear Delts'].score)}
+                  stroke={selectedMuscle === 'Rear Delts' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Rear Delts' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Rear Delts')}
+                />
+                {/* Right Rear Delt */}
+                <Polygon
+                  points="68,80 56,95 64,112 74,102"
+                  fill={getScoreColor(data.muscleGroups['Rear Delts'].score)}
+                  stroke={selectedMuscle === 'Rear Delts' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Rear Delts' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Rear Delts')}
+                />
+
+                {/* Left Lats */}
+                <Polygon
+                  points="112,105 130,138 118,170 101,170"
+                  fill={getScoreColor(data.muscleGroups['Lats'].score)}
+                  stroke={selectedMuscle === 'Lats' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Lats' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Lats')}
+                />
+                {/* Right Lats */}
+                <Polygon
+                  points="88,105 70,138 82,170 99,170"
+                  fill={getScoreColor(data.muscleGroups['Lats'].score)}
+                  stroke={selectedMuscle === 'Lats' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Lats' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Lats')}
+                />
+
+                {/* Left Triceps */}
+                <Polygon
+                  points="132,105 142,130 134,148 126,128"
+                  fill={getScoreColor(data.muscleGroups['Triceps'].score)}
+                  stroke={selectedMuscle === 'Triceps' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Triceps' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Triceps')}
+                />
+                {/* Right Triceps */}
+                <Polygon
+                  points="68,105 58,130 66,148 74,128"
+                  fill={getScoreColor(data.muscleGroups['Triceps'].score)}
+                  stroke={selectedMuscle === 'Triceps' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Triceps' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Triceps')}
+                />
+
+                {/* Lower Back */}
+                <Polygon
+                  points="88,170 112,170 108,195 92,195"
+                  fill={getScoreColor(data.muscleGroups['Lower Back'].score)}
+                  stroke={selectedMuscle === 'Lower Back' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Lower Back' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Lower Back')}
+                />
+
+                {/* Left Glute */}
+                <Polygon
+                  points="101,198 125,206 118,242 101,242"
+                  fill={getScoreColor(data.muscleGroups['Glutes'].score)}
+                  stroke={selectedMuscle === 'Glutes' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Glutes' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Glutes')}
+                />
+                {/* Right Glute */}
+                <Polygon
+                  points="99,198 75,206 82,242 99,242"
+                  fill={getScoreColor(data.muscleGroups['Glutes'].score)}
+                  stroke={selectedMuscle === 'Glutes' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Glutes' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Glutes')}
+                />
+
+                {/* Left Hamstring */}
+                <Polygon
+                  points="101,246 123,246 116,290 101,290"
+                  fill={getScoreColor(data.muscleGroups['Hamstrings'].score)}
+                  stroke={selectedMuscle === 'Hamstrings' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Hamstrings' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Hamstrings')}
+                />
+                {/* Right Hamstring */}
+                <Polygon
+                  points="99,246 77,246 84,290 99,290"
+                  fill={getScoreColor(data.muscleGroups['Hamstrings'].score)}
+                  stroke={selectedMuscle === 'Hamstrings' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Hamstrings' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Hamstrings')}
+                />
+
+                {/* Left Calf */}
+                <Polygon
+                  points="101,292 120,292 114,316 101,316"
+                  fill={getScoreColor(data.muscleGroups['Calves'].score)}
+                  stroke={selectedMuscle === 'Calves' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Calves' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Calves')}
+                />
+                {/* Right Calf */}
+                <Polygon
+                  points="99,292 80,292 86,316 99,316"
+                  fill={getScoreColor(data.muscleGroups['Calves'].score)}
+                  stroke={selectedMuscle === 'Calves' ? '#ffffff' : 'rgba(12,15,18,0.4)'}
+                  strokeWidth={selectedMuscle === 'Calves' ? 2 : 1}
+                  onPress={() => setSelectedMuscle('Calves')}
+                />
+              </Svg>
+            )}
           </View>
         </View>
-
-        {/* Legend Tiers */}
-        <View style={styles.legendRow}>
-          {[
-            { label: 'Elite (80+)', color: '#00e5ff' },
-            { label: 'Strong (60+)', color: '#aeff00' },
-            { label: 'Developing (40+)', color: '#f97316' },
-            { label: 'Weak (20+)', color: '#ef4444' },
-            { label: 'Unused (0+)', color: '#64748b' },
-          ].map((t) => (
-            <View key={t.label} style={styles.legendItemHorizontal}>
-              <View style={[styles.legendIndicator, { backgroundColor: t.color }]} />
-              <AppText variant="caption" style={{ fontSize: 9 }} color="textSecondary">
-                {t.label}
-              </AppText>
-            </View>
-          ))}
-        </View>
-
         <AppText variant="caption" color="textMuted" style={styles.interactiveHint}>
           👆 Tap any highlighted muscle group to view detailed logs and analytics.
         </AppText>
@@ -617,6 +624,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     lineHeight: 32,
   },
+  toggleContainer: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    padding: 4,
+    marginVertical: 12,
+  },
+  toggleBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
   mannequinCard: {
     padding: 16,
     alignItems: 'center',
@@ -624,36 +643,30 @@ const styles = StyleSheet.create({
   mannequinRow: {
     flexDirection: 'row',
     width: '100%',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  mannequinCol: {
-    flex: 1,
-    alignItems: 'center',
+  legendCabinet: {
+    width: '45%',
+    gap: 6,
   },
-  mannequinLabel: {
+  legendTitle: {
     fontWeight: 'bold',
-    marginBottom: 8,
-    fontSize: 10,
-    letterSpacing: 0.5,
+    marginBottom: 4,
   },
-  legendRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 12,
-    marginTop: 16,
-    width: '100%',
-  },
-  legendItemHorizontal: {
+  legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   legendIndicator: {
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  svgContainer: {
+    width: '50%',
+    alignItems: 'center',
   },
   interactiveHint: {
     textAlign: 'center',
