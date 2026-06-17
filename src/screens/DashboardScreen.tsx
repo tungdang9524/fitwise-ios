@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import Svg, { Circle } from 'react-native-svg';
 
 import { Screen } from '../components/Screen';
 import { AppText } from '../components/AppText';
@@ -270,11 +271,11 @@ export const DashboardScreen: React.FC = () => {
     return {
       total: Math.min(100, totalScore),
       breakdown: [
-        { name: 'Workout Logged', points: workoutPoints, max: 25, achieved: workoutCompleted, icon: 'barbell-outline' },
-        { name: 'Calories Met', points: caloriePoints, max: 20, achieved: calorieRatio >= 0.85, icon: 'flame-outline' },
-        { name: 'Protein Met', points: proteinPoints, max: 20, achieved: proteinRatio >= 0.85, icon: 'nutrition-outline' },
-        { name: 'Hydration Met', points: waterPoints, max: 15, achieved: waterRatio >= 0.85, icon: 'water-outline' },
-        { name: 'Sleep Goal Met', points: sleepPoints, max: 20, achieved: sleepRatio >= 0.85, icon: 'moon-outline' },
+        { name: 'Workout Logged', points: workoutPoints, max: 25, achieved: workoutCompleted, icon: 'barbell-outline', progress: workoutCompleted ? 1.0 : 0.0 },
+        { name: 'Calories Met', points: caloriePoints, max: 20, achieved: calorieRatio >= 0.85, icon: 'flame-outline', progress: calorieRatio },
+        { name: 'Protein Met', points: proteinPoints, max: 20, achieved: proteinRatio >= 0.85, icon: 'nutrition-outline', progress: proteinRatio },
+        { name: 'Hydration Met', points: waterPoints, max: 15, achieved: waterRatio >= 0.85, icon: 'water-outline', progress: waterRatio },
+        { name: 'Sleep Goal Met', points: sleepPoints, max: 20, achieved: sleepRatio >= 0.85, icon: 'moon-outline', progress: sleepRatio },
       ],
     };
   }, [todayWorkouts, consumedCalories, targetCalories, consumedProtein, targetProtein, todayWater, waterGoal, todaySleepMins, sleepGoal]);
@@ -351,18 +352,49 @@ export const DashboardScreen: React.FC = () => {
           {todayScore.breakdown.map((item, index) => {
             const isActive = item.points > 0;
             const activeColor = getBreakdownColor(item.icon, theme);
+            const radius = 22;
+            const strokeWidth = 2.5;
+            const size = 50;
+            const center = size / 2;
+            const circumference = 2 * Math.PI * radius;
+            const progressVal = item.progress ?? 0;
+            const strokeDashoffset = circumference - progressVal * circumference;
+
             return (
               <View key={index} style={styles.scoreCircleItem}>
                 <View style={[
-                  styles.scoreCircleIconWrap, 
-                  { 
-                    borderColor: isActive ? activeColor : theme.border,
-                    backgroundColor: theme.surfaceElevated,
-                  }
+                  styles.scoreCircleIconWrap,
+                  { backgroundColor: theme.surfaceElevated }
                 ]}>
+                  <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
+                    {/* Background Ring */}
+                    <Circle
+                      cx={center}
+                      cy={center}
+                      r={radius}
+                      stroke={theme.border}
+                      strokeWidth={strokeWidth}
+                      fill="transparent"
+                    />
+                    {/* Active Progress Ring */}
+                    {progressVal > 0 && (
+                      <Circle
+                        cx={center}
+                        cy={center}
+                        r={radius}
+                        stroke={activeColor}
+                        strokeWidth={strokeWidth}
+                        fill="transparent"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                        transform={`rotate(-90 ${center} ${center})`}
+                      />
+                    )}
+                  </Svg>
                   <Ionicons 
                     name={item.icon as any} 
-                    size={22} 
+                    size={20} 
                     color={isActive ? activeColor : theme.textMuted} 
                   />
                 </View>
@@ -687,10 +719,10 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    position: 'relative',
   },
   scoreCircleText: {
     fontSize: 11,
