@@ -29,6 +29,8 @@ const ALL_ACHIEVEMENTS = [
   { id: 'pr_hunter', name: 'PR Hunter', icon: 'flame-outline', color: '#FF5722' },
   { id: 'hydration_starter', name: 'Hydration Starter', icon: 'water-outline', color: '#00E5FF' },
   { id: 'hydration_master', name: 'Hydration Master', icon: 'trophy-outline', color: '#00E5FF' },
+  { id: 'early_sleeper', name: 'Early Sleeper', icon: 'moon-outline', color: '#8F00FF' },
+  { id: 'recovery_master', name: 'Recovery Master', icon: 'battery-charging-outline', color: '#00FF66' },
 ];
 
 export const DashboardScreen: React.FC = () => {
@@ -91,6 +93,88 @@ export const DashboardScreen: React.FC = () => {
   const todayWorkouts = state.workouts.filter((w) => w.date === todayStr);
   const completedWorkoutToday = todayWorkouts.length > 0;
 
+  // Sleep & Recovery Math
+  const todaySleepLogs = (state.sleepLogs || []).filter((l) => l.date === todayStr);
+  const todaySleepMins = todaySleepLogs.reduce((sum, l) => sum + l.duration, 0);
+  const todaySleepScore = todaySleepLogs.length > 0 ? todaySleepLogs[0].sleepScore : 0;
+  
+  const formatDurationHoursMins = (mins: number) => {
+    const hrs = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${hrs}h ${m}m`;
+  };
+  
+  const todaySleepDurationStr = todaySleepMins > 0 ? formatDurationHoursMins(todaySleepMins) : 'No log';
+  const sleepGoal = state.sleepGoal || 480;
+
+  const recoveryScore = useMemo(() => {
+    const lastNightSleep = (state.sleepLogs || []).find((l) => l.date === todayStr);
+    const sleepContribution = lastNightSleep ? lastNightSleep.sleepScore : 70;
+    
+    const getPastDateStr = (daysAgo: number) => {
+      const d = new Date();
+      d.setDate(d.getDate() - daysAgo);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const yesterdayStr = getPastDateStr(1);
+    const twoDaysAgoStr = getPastDateStr(2);
+    const threeDaysAgoStr = getPastDateStr(3);
+    
+    const workoutsYesterday = state.workouts.filter((w) => w.date === yesterdayStr);
+    const workouts2DaysAgo = state.workouts.filter((w) => w.date === twoDaysAgoStr);
+    const workouts3DaysAgo = state.workouts.filter((w) => w.date === threeDaysAgoStr);
+    
+    const penalty = 
+      (workoutsYesterday.length * 20) + 
+      (workouts2DaysAgo.length * 10) + 
+      (workouts3DaysAgo.length * 5);
+      
+    return Math.max(10, Math.min(100, sleepContribution - penalty));
+  }, [state.sleepLogs, state.workouts, todayStr]);
+  
+  const recoveryMessage = useMemo(() => {
+    if (recoveryScore >= 80) return 'Ready for workout 💪';
+    if (recoveryScore >= 50) return 'Moderate recovery';
+    return 'Consider a lighter workout';
+  }, [recoveryScore]);
+
+  const sleepStreak = useMemo(() => {
+    if (!state.sleepLogs || state.sleepLogs.length === 0) return 0;
+    
+    const metDates = new Set<string>();
+    state.sleepLogs.forEach((log) => {
+      if (log.duration >= sleepGoal) {
+        metDates.add(log.date);
+      }
+    });
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = getLocalDateString(yesterday);
+    
+    let streak = 0;
+    if (metDates.has(todayStr) || metDates.has(yesterdayStr)) {
+      let checkDate = new Date();
+      if (!metDates.has(todayStr)) {
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+      while (true) {
+        const checkStr = getLocalDateString(checkDate);
+        if (metDates.has(checkStr)) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+    return streak;
+  }, [state.sleepLogs, sleepGoal, todayStr]);
+
   // 5. Body Stats Summary Math
   const bodySummary = useMemo(() => {
     const categories = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core'];
@@ -150,28 +234,33 @@ export const DashboardScreen: React.FC = () => {
   // 6. Today Score Game System
   const todayScore = useMemo(() => {
     const workoutCompleted = todayWorkouts.length > 0;
+    const workoutPoints = workoutCompleted ? 25 : 0;
     
     const proteinRatio = targetProtein > 0 ? Math.min(1.0, consumedProtein / targetProtein) : 0;
-    const proteinPoints = Math.round(proteinRatio * 25);
+    const proteinPoints = Math.round(proteinRatio * 20);
     
     const calorieRatio = targetCalories > 0 ? Math.min(1.0, consumedCalories / targetCalories) : 0;
-    const caloriePoints = Math.round(calorieRatio * 25);
+    const caloriePoints = Math.round(calorieRatio * 20);
     
     const waterRatio = waterGoal > 0 ? Math.min(1.0, todayWater / waterGoal) : 0;
-    const waterPoints = Math.round(waterRatio * 20);
+    const waterPoints = Math.round(waterRatio * 15);
+
+    const sleepRatio = sleepGoal > 0 ? Math.min(1.0, todaySleepMins / sleepGoal) : 0;
+    const sleepPoints = Math.round(sleepRatio * 20);
     
-    const totalScore = (workoutCompleted ? 30 : 0) + caloriePoints + proteinPoints + waterPoints;
+    const totalScore = workoutPoints + caloriePoints + proteinPoints + waterPoints + sleepPoints;
     
     return {
       total: Math.min(100, totalScore),
       breakdown: [
-        { name: 'Workout Logged', points: workoutCompleted ? 30 : 0, max: 30, achieved: workoutCompleted, icon: 'barbell-outline' },
-        { name: 'Calories Met', points: caloriePoints, max: 25, achieved: calorieRatio >= 0.85, icon: 'flame-outline' },
-        { name: 'Protein Met', points: proteinPoints, max: 25, achieved: proteinRatio >= 0.85, icon: 'nutrition-outline' },
-        { name: 'Hydration Met', points: waterPoints, max: 20, achieved: waterRatio >= 0.85, icon: 'water-outline' },
+        { name: 'Workout Logged', points: workoutPoints, max: 25, achieved: workoutCompleted, icon: 'barbell-outline' },
+        { name: 'Calories Met', points: caloriePoints, max: 20, achieved: calorieRatio >= 0.85, icon: 'flame-outline' },
+        { name: 'Protein Met', points: proteinPoints, max: 20, achieved: proteinRatio >= 0.85, icon: 'nutrition-outline' },
+        { name: 'Hydration Met', points: waterPoints, max: 15, achieved: waterRatio >= 0.85, icon: 'water-outline' },
+        { name: 'Sleep Goal Met', points: sleepPoints, max: 20, achieved: sleepRatio >= 0.85, icon: 'moon-outline' },
       ],
     };
-  }, [todayWorkouts, consumedCalories, targetCalories, consumedProtein, targetProtein, todayWater, waterGoal]);
+  }, [todayWorkouts, consumedCalories, targetCalories, consumedProtein, targetProtein, todayWater, waterGoal, todaySleepMins, sleepGoal]);
 
   // Target muscle parser for workout plan
   const todayTargetMuscles = useMemo(() => {
@@ -336,9 +425,9 @@ export const DashboardScreen: React.FC = () => {
             <Ionicons name="nutrition-outline" size={18} color={theme.secondary} />
             <AppText variant="caption" style={styles.actionLabel}>Add Meal</AppText>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('WorkoutTemplates')} style={[styles.actionItem, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Ionicons name="copy-outline" size={18} color={theme.primary} />
-            <AppText variant="caption" style={styles.actionLabel}>Templates</AppText>
+          <TouchableOpacity onPress={() => navigation.navigate('SleepTracker')} style={[styles.actionItem, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="moon-outline" size={18} color="#c084fc" />
+            <AppText variant="caption" style={styles.actionLabel}>Sleep Tracker</AppText>
           </TouchableOpacity>
         </View>
       </View>
@@ -388,6 +477,49 @@ export const DashboardScreen: React.FC = () => {
             >
               <AppText variant="caption" color="accent" style={{ fontWeight: 'bold' }}>+250ml</AppText>
             </TouchableOpacity>
+          </View>
+        </Card>
+      </View>
+
+      {/* Sleep & Recovery Widget */}
+      <View style={styles.sleepSection}>
+        <Card variant="normal" style={styles.sleepWidgetCard} onPress={() => navigation.navigate('SleepTracker')}>
+          <View style={styles.rowCentered}>
+            <View style={[styles.sleepIconWrap, { backgroundColor: 'rgba(168, 85, 247, 0.08)' }]}>
+              <Ionicons name="moon" size={20} color="#c084fc" />
+            </View>
+            <View style={styles.flex}>
+              <AppText variant="bodyBold">Sleep & Recovery</AppText>
+              <AppText variant="caption" color="textSecondary">
+                Today: {todaySleepDurationStr} {todaySleepScore > 0 ? `• Score: ${todaySleepScore}` : ''}
+              </AppText>
+            </View>
+            <View style={{ alignItems: 'flex-end', gap: 4 }}>
+              <View style={[styles.recoveryBadge, { 
+                backgroundColor: recoveryScore >= 80 ? 'rgba(16, 185, 129, 0.1)' : recoveryScore >= 50 ? 'rgba(255, 193, 7, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                borderColor: recoveryScore >= 80 ? theme.success : recoveryScore >= 50 ? '#ffc107' : theme.error,
+                borderWidth: 1,
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+                borderRadius: 8
+              }]}>
+                <AppText variant="caption" style={{ 
+                  color: recoveryScore >= 80 ? theme.success : recoveryScore >= 50 ? '#ffc107' : theme.error, 
+                  fontWeight: 'bold', 
+                  fontSize: 10 
+                }}>
+                  Rec: {recoveryScore}%
+                </AppText>
+              </View>
+              {sleepStreak > 0 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="flame" size={12} color="#ff9900" />
+                  <AppText variant="caption" style={{ color: '#ff9900', fontWeight: 'bold', fontSize: 10, marginLeft: 2 }}>
+                    {sleepStreak}d streak
+                  </AppText>
+                </View>
+              )}
+            </View>
           </View>
         </Card>
       </View>
@@ -697,6 +829,26 @@ const styles = StyleSheet.create({
   },
   emptyBtn: {
     width: '100%',
+  },
+  sleepSection: {
+    marginTop: 12,
+  },
+  sleepWidgetCard: {
+    padding: 12,
+    marginVertical: 4,
+  },
+  sleepIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recoveryBadge: {
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
 });
 

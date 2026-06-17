@@ -127,6 +127,11 @@ export interface FitnessState {
   waterLogs?: WaterLog[];
   waterGoal?: number;
   longestStreak?: number;
+
+  // Sleep Tracker fields
+  sleepLogs?: SleepLog[];
+  sleepGoal?: number; // target in minutes
+  longestSleepStreak?: number;
 }
 
 export interface TemplateSet {
@@ -155,5 +160,19 @@ export interface WaterLog {
   id: string;
   date: string; // YYYY-MM-DD
   amount: number; // in ml
+}
+
+export interface SleepLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  bedtime: string; // HH:MM
+  wakeupTime: string; // HH:MM
+  duration: number; // in minutes
+  quality: number; // 1-10 self rating
+  notes?: string;
+  sleepScore: number; // 0-100 overall score
+  durationScore: number; // 0-100 sub-score
+  consistencyScore: number; // 0-100 sub-score
+  qualityScore: number; // 0-100 sub-score
 }
 

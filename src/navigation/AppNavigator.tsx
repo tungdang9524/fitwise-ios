@@ -31,6 +31,7 @@ import WorkoutTemplatesScreen from '../screens/WorkoutTemplatesScreen';
 import ManageTemplateScreen from '../screens/ManageTemplateScreen';
 import VolumeAnalyticsScreen from '../screens/VolumeAnalyticsScreen';
 import WaterTrackerScreen from '../screens/WaterTrackerScreen';
+import SleepTrackerScreen from '../screens/SleepTrackerScreen';
 
 // Placeholders for secondary stacks (we will create actual screens for these soon)
 import { Text } from 'react-native';
@@ -223,6 +224,11 @@ export const AppNavigator = () => {
               name="WaterTracker"
               component={WaterTrackerScreen}
               options={{ title: 'Water Tracker' }}
+            />
+            <Stack.Screen
+              name="SleepTracker"
+              component={SleepTrackerScreen}
+              options={{ title: 'Sleep & Recovery' }}
             />
           </>
         )}

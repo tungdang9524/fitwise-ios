@@ -18,6 +18,7 @@ export type RootStackParamList = {
   ManageTemplate: { templateId?: string } | undefined;
   VolumeAnalytics: undefined;
   WaterTracker: undefined;
+  SleepTracker: undefined;
 };
 
 export type MainTabParamList = {

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { 
   FitnessState, UserProfile, WorkoutSession, FoodEntry, ProgressLog, ReminderSetting, 
-  LibraryExercise, FoodPreset, PersonalRecord, WorkoutTemplate, WaterLog 
+  LibraryExercise, FoodPreset, PersonalRecord, WorkoutTemplate, WaterLog, SleepLog 
 } from '../models/fitness';
 import { saveFitnessState, loadFitnessState, clearFitnessState } from './storage';
 import { calculateCaloricTargets } from '../utils/formulas';
@@ -34,6 +34,10 @@ type FitnessAction =
   | { type: 'ADD_WATER'; payload: { amount: number; date: string } }
   | { type: 'SET_WATER_GOAL'; payload: number }
   | { type: 'DELETE_WATER_LOG'; payload: string }
+  | { type: 'ADD_SLEEP'; payload: SleepLog }
+  | { type: 'UPDATE_SLEEP'; payload: SleepLog }
+  | { type: 'DELETE_SLEEP'; payload: string }
+  | { type: 'SET_SLEEP_GOAL'; payload: number }
   | { type: 'RESET_STATE' };
 
 // Gamification Helpers
@@ -62,7 +66,9 @@ const checkAchievements = (
   prCount: number,
   unlockedList: string[],
   waterLogs: WaterLog[] = [],
-  waterGoal: number = 2000
+  waterGoal: number = 2000,
+  sleepLogs: SleepLog[] = [],
+  sleepGoal: number = 480
 ): string[] => {
   const list = [...unlockedList];
   if (workoutsCount >= 1 && !list.includes('first_workout')) {
@@ -119,7 +125,148 @@ const checkAchievements = (
     list.push('hydration_master');
   }
 
+  // Early Sleeper check
+  let earlySleepDays = 0;
+  (sleepLogs || []).forEach((log) => {
+    const [h] = log.bedtime.split(':').map(Number);
+    if (h >= 18 && h < 23) {
+      earlySleepDays++;
+    }
+  });
+  if (earlySleepDays >= 7 && !list.includes('early_sleeper')) {
+    list.push('early_sleeper');
+  }
+
+  // Recovery Master check
+  let recoveryMasterDays = 0;
+  (sleepLogs || []).forEach((log) => {
+    if (log.duration >= 480) { // 8 hours
+      recoveryMasterDays++;
+    }
+  });
+  if (recoveryMasterDays >= 30 && !list.includes('recovery_master')) {
+    list.push('recovery_master');
+  }
+
   return list;
+};
+
+const calculateSleepScores = (
+  durationMins: number,
+  quality: number, // 1-10
+  bedtimeStr: string, // "HH:MM"
+  wakeupStr: string, // "HH:MM"
+  pastLogs: SleepLog[],
+  sleepGoal: number
+): {
+  sleepScore: number;
+  durationScore: number;
+  consistencyScore: number;
+  qualityScore: number;
+} => {
+  const durationScore = Math.min(100, Math.round((durationMins / sleepGoal) * 100));
+  const qualityScore = quality * 10;
+
+  let consistencyScore = 85;
+  if (pastLogs.length >= 2) {
+    const allLogs = [...pastLogs.slice(0, 4), { bedtime: bedtimeStr, wakeupTime: wakeupStr }];
+    
+    const getBedtimeMins = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return h >= 12 ? (h - 12) * 60 + m : (h + 12) * 60 + m;
+    };
+
+    const getWakeupMins = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const bedTimes = allLogs.map((l) => getBedtimeMins(l.bedtime));
+    const wakeTimes = allLogs.map((l) => getWakeupMins(l.wakeupTime));
+
+    const avgBed = bedTimes.reduce((s, val) => s + val, 0) / bedTimes.length;
+    const avgWake = wakeTimes.reduce((s, val) => s + val, 0) / wakeTimes.length;
+
+    const devBed = bedTimes.map((t) => Math.abs(t - avgBed)).reduce((s, val) => s + val, 0) / bedTimes.length;
+    const devWake = wakeTimes.map((t) => Math.abs(t - avgWake)).reduce((s, val) => s + val, 0) / wakeTimes.length;
+
+    const totalDev = devBed + devWake;
+    consistencyScore = Math.max(50, Math.min(100, Math.round(100 - totalDev * 0.25)));
+  }
+
+  const sleepScore = Math.round(durationScore * 0.5 + consistencyScore * 0.3 + qualityScore * 0.2);
+
+  return {
+    sleepScore,
+    durationScore,
+    consistencyScore,
+    qualityScore,
+  };
+};
+
+const calculateSleepStreak = (logs: SleepLog[], sleepGoal: number): { currentStreak: number; longestStreak: number } => {
+  if (!logs || logs.length === 0) return { currentStreak: 0, longestStreak: 0 };
+  
+  const metDates = new Set<string>();
+  logs.forEach((log) => {
+    if (log.duration >= sleepGoal) {
+      metDates.add(log.date);
+    }
+  });
+
+  if (metDates.size === 0) return { currentStreak: 0, longestStreak: 0 };
+
+  const sortedDates = Array.from(metDates).sort();
+  
+  const todayStr = getLocalDateString();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = getLocalDateString(yesterday);
+  
+  let currentStreak = 0;
+  if (metDates.has(todayStr) || metDates.has(yesterdayStr)) {
+    let checkDate = new Date();
+    if (!metDates.has(todayStr)) {
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+    while (true) {
+      const checkStr = getLocalDateString(checkDate);
+      if (metDates.has(checkStr)) {
+        currentStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+  }
+
+  let longestStreak = 0;
+  let prevDate: Date | null = null;
+  let currentRun = 0;
+  
+  const datesChronological = sortedDates.map(d => new Date(d)).sort((a,b) => a.getTime() - b.getTime());
+  datesChronological.forEach((d) => {
+    if (prevDate === null) {
+      currentRun = 1;
+    } else {
+      const diffTime = Math.abs(d.getTime() - prevDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) {
+        currentRun++;
+      } else if (diffDays > 1) {
+        if (currentRun > longestStreak) longestStreak = currentRun;
+        currentRun = 1;
+      }
+    }
+    prevDate = d;
+  });
+
+  if (currentRun > longestStreak) longestStreak = currentRun;
+
+  return {
+    currentStreak,
+    longestStreak: Math.max(longestStreak, currentStreak),
+  };
 };
 
 const initialFitnessState: FitnessState = {
@@ -146,6 +293,9 @@ const initialFitnessState: FitnessState = {
   waterLogs: [],
   waterGoal: 2000,
   longestStreak: 0,
+  sleepLogs: [],
+  sleepGoal: 480,
+  longestSleepStreak: 0,
 };
 
 const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessState => {
@@ -166,6 +316,9 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         waterLogs: loaded.waterLogs || [],
         waterGoal: loaded.waterGoal || 2000,
         longestStreak: loaded.longestStreak || 0,
+        sleepLogs: loaded.sleepLogs || [],
+        sleepGoal: loaded.sleepGoal || 480,
+        longestSleepStreak: loaded.longestSleepStreak || 0,
       };
     }
 
@@ -243,7 +396,9 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         prCount,
         state.unlockedAchievements || [],
         state.waterLogs || [],
-        state.waterGoal || 2000
+        state.waterGoal || 2000,
+        state.sleepLogs || [],
+        state.sleepGoal || 480
       );
       
       const targetProtein = state.profile?.targetProtein || 150;
@@ -469,7 +624,9 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         prCount,
         state.unlockedAchievements || [],
         newWaterLogs,
-        waterGoal
+        waterGoal,
+        state.sleepLogs || [],
+        state.sleepGoal || 480
       );
       
       return {
@@ -489,7 +646,9 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         prCount,
         state.unlockedAchievements || [],
         state.waterLogs || [],
-        newGoal
+        newGoal,
+        state.sleepLogs || [],
+        state.sleepGoal || 480
       );
       return {
         ...state,
@@ -503,6 +662,96 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       return {
         ...state,
         waterLogs: newWaterLogs,
+      };
+    }
+
+    case 'ADD_SLEEP': {
+      const sleepLog = action.payload;
+      const newSleepLogs = [sleepLog, ...(state.sleepLogs || [])].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      
+      const sleepGoal = state.sleepGoal || 480;
+      const { currentStreak, longestStreak } = calculateSleepStreak(newSleepLogs, sleepGoal);
+      
+      let xpEarned = 0;
+      if (sleepLog.duration >= sleepGoal) {
+        const dateLogs = (state.sleepLogs || []).filter(l => l.date === sleepLog.date && l.duration >= sleepGoal);
+        if (dateLogs.length === 0) {
+          xpEarned = 20; // +20 XP for sleep goal met
+        }
+      }
+      
+      const currentLevel = state.level || 1;
+      const currentXp = state.xp || 0;
+      const { xp: newXp, level: newLevel } = awardXP(xpEarned, currentXp, currentLevel);
+      
+      const prCount = Object.keys(state.personalRecords || {}).length;
+      const newUnlocked = checkAchievements(
+        state.workouts.length,
+        prCount,
+        state.unlockedAchievements || [],
+        state.waterLogs || [],
+        state.waterGoal || 2000,
+        newSleepLogs,
+        sleepGoal
+      );
+
+      return {
+        ...state,
+        sleepLogs: newSleepLogs,
+        longestSleepStreak: Math.max(state.longestSleepStreak || 0, longestStreak),
+        xp: newXp,
+        level: newLevel,
+        unlockedAchievements: newUnlocked,
+      };
+    }
+
+    case 'UPDATE_SLEEP': {
+      const updatedLog = action.payload;
+      const newSleepLogs = (state.sleepLogs || []).map((s) => (s.id === updatedLog.id ? updatedLog : s)).sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      
+      const sleepGoal = state.sleepGoal || 480;
+      const { longestStreak } = calculateSleepStreak(newSleepLogs, sleepGoal);
+
+      return {
+        ...state,
+        sleepLogs: newSleepLogs,
+        longestSleepStreak: Math.max(state.longestSleepStreak || 0, longestStreak),
+      };
+    }
+
+    case 'DELETE_SLEEP': {
+      const newSleepLogs = (state.sleepLogs || []).filter((s) => s.id !== action.payload);
+      const sleepGoal = state.sleepGoal || 480;
+      const { longestStreak } = calculateSleepStreak(newSleepLogs, sleepGoal);
+
+      return {
+        ...state,
+        sleepLogs: newSleepLogs,
+        longestSleepStreak: Math.max(state.longestSleepStreak || 0, longestStreak),
+      };
+    }
+
+    case 'SET_SLEEP_GOAL': {
+      const newGoal = action.payload;
+      const prCount = Object.keys(state.personalRecords || {}).length;
+      const newUnlocked = checkAchievements(
+        state.workouts.length,
+        prCount,
+        state.unlockedAchievements || [],
+        state.waterLogs || [],
+        state.waterGoal || 2000,
+        state.sleepLogs || [],
+        newGoal
+      );
+
+      return {
+        ...state,
+        sleepGoal: newGoal,
+        unlockedAchievements: newUnlocked,
       };
     }
 
@@ -540,6 +789,10 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
   addWater: (amount: number, date: string) => void;
   setWaterGoal: (goal: number) => void;
   deleteWaterLog: (id: string) => void;
+  addSleepLog: (sleep: Omit<SleepLog, 'id' | 'sleepScore' | 'durationScore' | 'consistencyScore' | 'qualityScore'>) => void;
+  updateSleepLog: (sleep: SleepLog) => void;
+  deleteSleepLog: (id: string) => void;
+  setSleepGoal: (goal: number) => void;
   resetState: () => void;
 }
 const FitnessContext = createContext<FitnessContextType | undefined>(undefined);
@@ -668,6 +921,52 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'DELETE_WATER_LOG', payload: id });
   };
 
+  const addSleepLog = (sleep: Omit<SleepLog, 'id' | 'sleepScore' | 'durationScore' | 'consistencyScore' | 'qualityScore'>) => {
+    const sleepGoal = state.sleepGoal || 480;
+    const scores = calculateSleepScores(
+      sleep.duration,
+      sleep.quality,
+      sleep.bedtime,
+      sleep.wakeupTime,
+      state.sleepLogs || [],
+      sleepGoal
+    );
+    
+    const newLog: SleepLog = {
+      ...sleep,
+      ...scores,
+      id: `sleep_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    };
+    dispatch({ type: 'ADD_SLEEP', payload: newLog });
+  };
+
+  const updateSleepLog = (sleep: SleepLog) => {
+    const sleepGoal = state.sleepGoal || 480;
+    const pastLogsFiltered = (state.sleepLogs || []).filter(s => s.id !== sleep.id);
+    const scores = calculateSleepScores(
+      sleep.duration,
+      sleep.quality,
+      sleep.bedtime,
+      sleep.wakeupTime,
+      pastLogsFiltered,
+      sleepGoal
+    );
+    
+    const updatedLog: SleepLog = {
+      ...sleep,
+      ...scores,
+    };
+    dispatch({ type: 'UPDATE_SLEEP', payload: updatedLog });
+  };
+
+  const deleteSleepLog = (id: string) => {
+    dispatch({ type: 'DELETE_SLEEP', payload: id });
+  };
+
+  const setSleepGoal = (goal: number) => {
+    dispatch({ type: 'SET_SLEEP_GOAL', payload: goal });
+  };
+
   const resetState = async () => {
     await clearFitnessState();
     dispatch({ type: 'RESET_STATE' });
@@ -703,6 +1002,10 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addWater,
         setWaterGoal,
         deleteWaterLog,
+        addSleepLog,
+        updateSleepLog,
+        deleteSleepLog,
+        setSleepGoal,
         resetState,
       }}
     >

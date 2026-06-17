@@ -237,6 +237,8 @@ export const BodyStatsScreen: React.FC = () => {
     { id: 'pr_hunter', name: 'PR Hunter', desc: 'Set 10 different personal records in your history.', icon: 'flame-outline', color: '#FF5722' },
     { id: 'hydration_starter', name: 'Hydration Starter', desc: 'Successfully hit your daily water goal for 7 days.', icon: 'water-outline', color: '#00E5FF' },
     { id: 'hydration_master', name: 'Hydration Master', desc: 'Successfully hit your daily water goal for 30 days.', icon: 'trophy-outline', color: '#00E5FF' },
+    { id: 'early_sleeper', name: 'Early Sleeper', desc: 'Sleep before 11 PM for 7 days.', icon: 'moon-outline', color: '#8F00FF' },
+    { id: 'recovery_master', name: 'Recovery Master', desc: 'Reach 8+ hours of sleep for 30 days.', icon: 'battery-charging-outline', color: '#00FF66' },
   ];
 
   const unlockedSet = new Set(state.unlockedAchievements || []);
