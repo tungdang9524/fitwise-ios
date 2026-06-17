@@ -3,6 +3,7 @@ import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Circle } from 'react-native-svg';
+import { calculateBodyVisualizerData } from '../utils/muscleMapping';
 
 import { Screen } from '../components/Screen';
 import { AppText } from '../components/AppText';
@@ -32,6 +33,8 @@ const ALL_ACHIEVEMENTS = [
   { id: 'hydration_master', name: 'Hydration Master', icon: 'trophy-outline', color: '#00E5FF' },
   { id: 'early_sleeper', name: 'Early Sleeper', icon: 'moon-outline', color: '#8F00FF' },
   { id: 'recovery_master', name: 'Recovery Master', icon: 'battery-charging-outline', color: '#00FF66' },
+  { id: 'iron_builder', name: 'Iron Builder', icon: 'shield-outline', color: '#FF9900' },
+  { id: 'gym_legend', name: 'Gym Legend', icon: 'ribbon-outline', color: '#00E5FF' },
 ];
 
 const getBreakdownColor = (iconName: string, theme: any) => {
@@ -58,6 +61,16 @@ export const DashboardScreen: React.FC = () => {
 
   const profile = state.profile;
   const todayStr = getLocalDateString();
+
+  const visualizerData = useMemo(() => {
+    return calculateBodyVisualizerData(
+      state.workouts,
+      state.customExercises || [],
+      state.profile,
+      state.xp || 0,
+      state.level || 1
+    );
+  }, [state.workouts, state.customExercises, state.profile, state.xp, state.level]);
 
   // 1. Calculate Active Streak
   const workoutDates = state.workouts.map((w) => w.date);
@@ -587,6 +600,33 @@ export const DashboardScreen: React.FC = () => {
         </Card>
       </View>
 
+      {/* Body Visualizer Widget Card */}
+      <View style={styles.visualizerSection}>
+        <Card variant="normal" style={styles.visualizerWidgetCard} onPress={() => navigation.navigate('BodyVisualizer')}>
+          <View style={styles.rowCentered}>
+            <View style={[styles.visualizerIconWrap, { backgroundColor: 'rgba(174, 255, 0, 0.08)' }]}>
+              <Ionicons name="body" size={20} color={theme.primary} />
+            </View>
+            <View style={styles.flex}>
+              <AppText variant="bodyBold">Body Visualizer</AppText>
+              <AppText variant="caption" color="textSecondary" numberOfLines={1}>
+                Strongest: {visualizerData.strongestMuscle} ({visualizerData.strongestScore}) • Focus: {visualizerData.needsFocus}
+              </AppText>
+            </View>
+            <View style={{ alignItems: 'flex-end', gap: 2 }}>
+              <View style={[styles.bodyScoreBadge, { backgroundColor: 'rgba(174, 255, 0, 0.08)', borderColor: theme.primary, borderWidth: 1, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }]}>
+                <AppText variant="caption" color="primary" style={{ fontWeight: 'bold', fontSize: 10 }}>
+                  Score: {visualizerData.overallScore}
+                </AppText>
+              </View>
+              <AppText variant="caption" style={{ color: theme.success, fontWeight: 'bold', fontSize: 9 }}>
+                Recent: {visualizerData.recentImprovementMsg}
+              </AppText>
+            </View>
+          </View>
+        </Card>
+      </View>
+
       {/* Achievements cabinet */}
       {state.unlockedAchievements && state.unlockedAchievements.length > 0 && (
         <View style={styles.achCabinetSection}>
@@ -915,6 +955,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
+  },
+  visualizerSection: {
+    marginTop: 12,
+  },
+  visualizerWidgetCard: {
+    padding: 12,
+    marginVertical: 4,
+  },
+  visualizerIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

@@ -19,6 +19,7 @@ export type RootStackParamList = {
   VolumeAnalytics: undefined;
   WaterTracker: undefined;
   SleepTracker: undefined;
+  BodyVisualizer: undefined;
 };
 
 export type MainTabParamList = {
