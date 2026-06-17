@@ -33,6 +33,23 @@ const ALL_ACHIEVEMENTS = [
   { id: 'recovery_master', name: 'Recovery Master', icon: 'battery-charging-outline', color: '#00FF66' },
 ];
 
+const getBreakdownColor = (iconName: string, theme: any) => {
+  switch (iconName) {
+    case 'barbell-outline':
+      return theme.secondary; // Coral
+    case 'flame-outline':
+      return '#ff9900'; // Amber/Orange
+    case 'nutrition-outline':
+      return theme.success; // Emerald Green
+    case 'water-outline':
+      return theme.accent; // Cyan
+    case 'moon-outline':
+      return '#c084fc'; // Purple/Lilac
+    default:
+      return theme.primary;
+  }
+};
+
 export const DashboardScreen: React.FC = () => {
   const { state, addWater } = useFitness();
   const { theme } = useTheme();
@@ -330,26 +347,40 @@ export const DashboardScreen: React.FC = () => {
           <ProgressBar progress={todayScore.total / 100} color={theme.primary} style={styles.todayScoreProgress} />
         </View>
         
-        <View style={styles.breakdownGrid}>
-          {todayScore.breakdown.map((item, index) => (
-            <View key={index} style={styles.breakdownItem}>
-              <View style={[styles.breakdownIconWrap, { backgroundColor: item.achieved ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.03)' }]}>
-                <Ionicons 
-                  name={item.achieved ? "checkmark" : (item.icon as any)} 
-                  size={14} 
-                  color={item.achieved ? theme.success : theme.textMuted} 
-                />
-              </View>
-              <View>
-                <AppText variant="caption" style={{ fontWeight: 'bold' }} color={item.achieved ? 'text' : 'textMuted'}>
+        <View style={styles.scoreCirclesRow}>
+          {todayScore.breakdown.map((item, index) => {
+            const isActive = item.points > 0;
+            const activeColor = getBreakdownColor(item.icon, theme);
+            return (
+              <View key={index} style={styles.scoreCircleItem}>
+                <View style={[
+                  styles.scoreCircleIconWrap, 
+                  { 
+                    borderColor: isActive ? activeColor : theme.border,
+                    backgroundColor: theme.surfaceElevated,
+                  }
+                ]}>
+                  <Ionicons 
+                    name={item.icon as any} 
+                    size={22} 
+                    color={isActive ? activeColor : theme.textMuted} 
+                  />
+                </View>
+                <AppText 
+                  variant="caption" 
+                  style={[
+                    styles.scoreCircleText, 
+                    { 
+                      color: isActive ? theme.text : theme.textMuted,
+                      fontWeight: isActive ? '700' : '500' 
+                    }
+                  ]}
+                >
                   {item.points} pts
                 </AppText>
-                <AppText variant="caption" color="textMuted" style={{ fontSize: 10 }}>
-                  {item.name}
-                </AppText>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       </Card>
 
@@ -641,26 +672,29 @@ const styles = StyleSheet.create({
     width: 100,
     height: 8,
   },
-  breakdownGrid: {
+  scoreCirclesRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  breakdownItem: {
-    width: '47%',
-    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    padding: 8,
-    borderRadius: 10,
+    marginTop: 8,
+    paddingHorizontal: 4,
   },
-  breakdownIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
+  scoreCircleItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  scoreCircleIconWrap: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 8,
+  },
+  scoreCircleText: {
+    fontSize: 11,
+    textAlign: 'center',
   },
   workoutSection: {
     marginTop: 16,
