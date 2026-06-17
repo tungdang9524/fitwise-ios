@@ -50,13 +50,6 @@ export const SettingsScreen: React.FC = () => {
       iconColor: theme.primary,
     },
     {
-      icon: 'alarm-outline',
-      title: 'Daily Reminders',
-      desc: 'Configure workout, hydration, and nutrition reminders.',
-      onPress: () => navigation.navigate('ManageReminders'),
-      iconColor: theme.secondary,
-    },
-    {
       icon: 'nutrition-outline',
       title: 'Quick Presets Suggestions',
       desc: 'Add or delete quick presets suggested in logging.',

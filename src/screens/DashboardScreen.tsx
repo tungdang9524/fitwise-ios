@@ -32,6 +32,18 @@ const ALL_ACHIEVEMENTS = [
   { id: 'hydration_master', name: 'Hydration Master', icon: 'trophy-outline', color: '#00E5FF' },
   { id: 'early_sleeper', name: 'Early Sleeper', icon: 'moon-outline', color: '#8F00FF' },
   { id: 'recovery_master', name: 'Recovery Master', icon: 'battery-charging-outline', color: '#00FF66' },
+  
+  // New Achievements
+  { id: 'workout_warrior', name: 'Workout Warrior', icon: 'barbell-outline', color: '#FF9800' },
+  { id: 'workout_legend', name: 'Workout Legend', icon: 'trophy-outline', color: '#F44336' },
+  { id: 'streak_starter', name: 'Streak Starter', icon: 'flame-outline', color: '#FFEB3B' },
+  { id: 'streak_master', name: 'Streak Master', icon: 'flame-outline', color: '#FF5722' },
+  { id: 'weight_tracker', name: 'Weight Tracker', icon: 'scale-outline', color: '#4CAF50' },
+  { id: 'sleep_champion', name: 'Sleep Champion', icon: 'moon-outline', color: '#9C27B0' },
+  { id: 'calorie_commander', name: 'Calorie Commander', icon: 'restaurant-outline', color: '#FF5722' },
+  { id: 'water_enthusiast', name: 'Water Enthusiast', icon: 'water-outline', color: '#00B0FF' },
+  { id: 'level_five', name: 'Level 5 Champion', icon: 'shield-checkmark-outline', color: '#673AB7' },
+  { id: 'level_ten', name: 'Level 10 Master', icon: 'shield-checkmark-outline', color: '#FFD700' },
 ];
 
 const getBreakdownColor = (iconName: string, theme: any) => {
@@ -46,6 +58,12 @@ const getBreakdownColor = (iconName: string, theme: any) => {
       return theme.accent; // Cyan
     case 'moon-outline':
       return '#c084fc'; // Purple/Lilac
+    case 'scale-outline':
+      return theme.success;
+    case 'restaurant-outline':
+      return '#ff7043';
+    case 'shield-checkmark-outline':
+      return '#8e24aa';
     default:
       return theme.primary;
   }
@@ -97,9 +115,13 @@ export const DashboardScreen: React.FC = () => {
   const todayFoods = state.foodEntries.filter((f) => f.date === todayStr);
   const consumedCalories = todayFoods.reduce((sum, f) => sum + f.calories, 0);
   const consumedProtein = todayFoods.reduce((sum, f) => sum + f.protein, 0);
+  const consumedCarbs = todayFoods.reduce((sum, f) => sum + f.carbohydrates, 0);
+  const consumedFats = todayFoods.reduce((sum, f) => sum + f.fats, 0);
 
   const targetCalories = profile?.targetCalories || 2000;
   const targetProtein = profile?.targetProtein || 150;
+  const targetCarbs = profile?.targetCarbs || 200;
+  const targetFats = profile?.targetFats || 70;
 
   // 3. Water Intake Math
   const todayWaterLogs = (state.waterLogs || []).filter((l) => l.date === todayStr);
@@ -255,7 +277,10 @@ export const DashboardScreen: React.FC = () => {
     const workoutPoints = workoutCompleted ? 25 : 0;
     
     const proteinRatio = targetProtein > 0 ? Math.min(1.0, consumedProtein / targetProtein) : 0;
-    const proteinPoints = Math.round(proteinRatio * 20);
+    const carbsRatio = targetCarbs > 0 ? Math.min(1.0, consumedCarbs / targetCarbs) : 0;
+    const fatsRatio = targetFats > 0 ? Math.min(1.0, consumedFats / targetFats) : 0;
+    const nutritionRatio = (proteinRatio + carbsRatio + fatsRatio) / 3;
+    const nutritionPoints = Math.round(nutritionRatio * 20);
     
     const calorieRatio = targetCalories > 0 ? Math.min(1.0, consumedCalories / targetCalories) : 0;
     const caloriePoints = Math.round(calorieRatio * 20);
@@ -266,19 +291,19 @@ export const DashboardScreen: React.FC = () => {
     const sleepRatio = sleepGoal > 0 ? Math.min(1.0, todaySleepMins / sleepGoal) : 0;
     const sleepPoints = Math.round(sleepRatio * 20);
     
-    const totalScore = workoutPoints + caloriePoints + proteinPoints + waterPoints + sleepPoints;
+    const totalScore = workoutPoints + caloriePoints + nutritionPoints + waterPoints + sleepPoints;
     
     return {
       total: Math.min(100, totalScore),
       breakdown: [
         { name: 'Workout Logged', points: workoutPoints, max: 25, achieved: workoutCompleted, icon: 'barbell-outline', progress: workoutCompleted ? 1.0 : 0.0 },
         { name: 'Calories Met', points: caloriePoints, max: 20, achieved: calorieRatio >= 0.85, icon: 'flame-outline', progress: calorieRatio },
-        { name: 'Protein Met', points: proteinPoints, max: 20, achieved: proteinRatio >= 0.85, icon: 'nutrition-outline', progress: proteinRatio },
+        { name: 'Nutrition Met', points: nutritionPoints, max: 20, achieved: nutritionRatio >= 0.85, icon: 'nutrition-outline', progress: nutritionRatio },
         { name: 'Hydration Met', points: waterPoints, max: 15, achieved: waterRatio >= 0.85, icon: 'water-outline', progress: waterRatio },
         { name: 'Sleep Goal Met', points: sleepPoints, max: 20, achieved: sleepRatio >= 0.85, icon: 'moon-outline', progress: sleepRatio },
       ],
     };
-  }, [todayWorkouts, consumedCalories, targetCalories, consumedProtein, targetProtein, todayWater, waterGoal, todaySleepMins, sleepGoal]);
+  }, [todayWorkouts, consumedCalories, targetCalories, consumedProtein, targetProtein, consumedCarbs, targetCarbs, consumedFats, targetFats, todayWater, waterGoal, todaySleepMins, sleepGoal]);
 
   // Target muscle parser for workout plan
   const todayTargetMuscles = useMemo(() => {
@@ -329,7 +354,7 @@ export const DashboardScreen: React.FC = () => {
         </View>
         <TouchableOpacity 
           style={[styles.profileButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
-          onPress={() => navigation.navigate('Settings')}
+          onPress={() => navigation.navigate('UserProfile')}
         >
           <Ionicons name="person" size={20} color={theme.primary} />
         </TouchableOpacity>

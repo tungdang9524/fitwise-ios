@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { 
-  FitnessState, UserProfile, WorkoutSession, FoodEntry, ProgressLog, ReminderSetting, 
+  FitnessState, UserProfile, WorkoutSession, FoodEntry, ProgressLog, 
   LibraryExercise, FoodPreset, PersonalRecord, WorkoutTemplate, WaterLog, SleepLog 
 } from '../models/fitness';
 import { saveFitnessState, loadFitnessState, clearFitnessState } from './storage';
@@ -20,9 +20,7 @@ type FitnessAction =
   | { type: 'DELETE_PROGRESS_LOG'; payload: string }
   | { type: 'ADD_CUSTOM_EXERCISE'; payload: LibraryExercise }
   | { type: 'DELETE_EXERCISE'; payload: string }
-  | { type: 'UPDATE_REMINDER'; payload: ReminderSetting }
-  | { type: 'ADD_REMINDER'; payload: ReminderSetting }
-  | { type: 'DELETE_REMINDER'; payload: string }
+
   | { type: 'ADD_FOOD_PRESET'; payload: FoodPreset }
   | { type: 'UPDATE_FOOD_PRESET'; payload: FoodPreset }
   | { type: 'DELETE_FOOD_PRESET'; payload: string }
@@ -68,7 +66,11 @@ const checkAchievements = (
   waterLogs: WaterLog[] = [],
   waterGoal: number = 2000,
   sleepLogs: SleepLog[] = [],
-  sleepGoal: number = 480
+  sleepGoal: number = 480,
+  progressLogs: ProgressLog[] = [],
+  foodEntries: FoodEntry[] = [],
+  level: number = 1,
+  activeStreak: number = 0
 ): string[] => {
   const list = [...unlockedList];
   if (workoutsCount >= 1 && !list.includes('first_workout')) {
@@ -84,47 +86,28 @@ const checkAchievements = (
     list.push('consistency_king');
   }
 
-  // Water Achievements
-  const totalsByDate: Record<string, number> = {};
-  (waterLogs || []).forEach((log) => {
-    totalsByDate[log.date] = (totalsByDate[log.date] || 0) + log.amount;
-  });
-  const totalCompletedDays = Object.keys(totalsByDate).filter(d => totalsByDate[d] >= waterGoal).length;
-
-  let streak = 0;
-  if (waterLogs && waterLogs.length > 0) {
-    const todayStr = getLocalDateString();
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = getLocalDateString(yesterday);
-    const completedDates = new Set(
-      Object.keys(totalsByDate).filter((date) => totalsByDate[date] >= waterGoal)
-    );
-
-    if (completedDates.has(todayStr) || completedDates.has(yesterdayStr)) {
-      const checkDate = new Date();
-      if (!completedDates.has(todayStr)) {
-        checkDate.setDate(checkDate.getDate() - 1);
-      }
-      while (true) {
-        const checkStr = getLocalDateString(checkDate);
-        if (completedDates.has(checkStr)) {
-          streak++;
-          checkDate.setDate(checkDate.getDate() - 1);
-        } else {
-          break;
-        }
-      }
-    }
+  // New workout achievements
+  if (workoutsCount >= 10 && !list.includes('workout_warrior')) {
+    list.push('workout_warrior');
+  }
+  if (workoutsCount >= 50 && !list.includes('workout_legend')) {
+    list.push('workout_legend');
   }
 
-  if ((totalCompletedDays >= 7 || streak >= 7) && !list.includes('hydration_starter')) {
-    list.push('hydration_starter');
+  // Streak achievements
+  if (activeStreak >= 3 && !list.includes('streak_starter')) {
+    list.push('streak_starter');
   }
-  if ((totalCompletedDays >= 30 || streak >= 30) && !list.includes('hydration_master')) {
-    list.push('hydration_master');
+  if (activeStreak >= 7 && !list.includes('streak_master')) {
+    list.push('streak_master');
   }
 
+  // Weight Tracker achievements
+  if ((progressLogs || []).length >= 5 && !list.includes('weight_tracker')) {
+    list.push('weight_tracker');
+  }
+
+  // Sleep achievements
   // Early Sleeper check
   let earlySleepDays = 0;
   (sleepLogs || []).forEach((log) => {
@@ -146,6 +129,68 @@ const checkAchievements = (
   });
   if (recoveryMasterDays >= 30 && !list.includes('recovery_master')) {
     list.push('recovery_master');
+  }
+
+  if ((sleepLogs || []).length >= 7 && !list.includes('sleep_champion')) {
+    list.push('sleep_champion');
+  }
+
+  // Food achievements
+  const distinctFoodDates = new Set((foodEntries || []).map(f => f.date));
+  if (distinctFoodDates.size >= 7 && !list.includes('calorie_commander')) {
+    list.push('calorie_commander');
+  }
+
+  // Water achievements
+  const totalsByDate: Record<string, number> = {};
+  (waterLogs || []).forEach((log) => {
+    totalsByDate[log.date] = (totalsByDate[log.date] || 0) + log.amount;
+  });
+  const totalCompletedDays = Object.keys(totalsByDate).filter(d => totalsByDate[d] >= waterGoal).length;
+
+  let waterStreak = 0;
+  if (waterLogs && waterLogs.length > 0) {
+    const todayStr = getLocalDateString();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = getLocalDateString(yesterday);
+    const completedDates = new Set(
+      Object.keys(totalsByDate).filter((date) => totalsByDate[date] >= waterGoal)
+    );
+
+    if (completedDates.has(todayStr) || completedDates.has(yesterdayStr)) {
+      const checkDate = new Date();
+      if (!completedDates.has(todayStr)) {
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+      while (true) {
+        const checkStr = getLocalDateString(checkDate);
+        if (completedDates.has(checkStr)) {
+          waterStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  if ((totalCompletedDays >= 7 || waterStreak >= 7) && !list.includes('hydration_starter')) {
+    list.push('hydration_starter');
+  }
+  if ((totalCompletedDays >= 30 || waterStreak >= 30) && !list.includes('hydration_master')) {
+    list.push('hydration_master');
+  }
+  if (totalCompletedDays >= 14 && !list.includes('water_enthusiast')) {
+    list.push('water_enthusiast');
+  }
+
+  // Level achievements
+  if (level >= 5 && !list.includes('level_five')) {
+    list.push('level_five');
+  }
+  if (level >= 10 && !list.includes('level_ten')) {
+    list.push('level_ten');
   }
 
   return list;
@@ -274,12 +319,6 @@ const initialFitnessState: FitnessState = {
   workouts: [],
   foodEntries: [],
   progressLogs: [],
-  reminders: [
-    { id: '1', title: 'Morning Workout', time: '07:00', type: 'workout', enabled: false, daysOfWeek: [1, 2, 3, 4, 5] },
-    { id: '2', title: 'Lunch Meal Tracker', time: '13:00', type: 'meal', enabled: false, daysOfWeek: [0, 1, 2, 3, 4, 5, 6] },
-    { id: '3', title: 'Drink Water Reminder', time: '10:00', type: 'water', enabled: false, daysOfWeek: [0, 1, 2, 3, 4, 5, 6] },
-    { id: '4', title: 'Drink Water Reminder', time: '15:00', type: 'water', enabled: false, daysOfWeek: [0, 1, 2, 3, 4, 5, 6] },
-  ],
   customExercises: [],
   foodPresets: FOOD_PRESETS,
   hasCompletedSetup: false,
@@ -305,7 +344,6 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       return {
         ...loaded,
         foodPresets: loaded.foodPresets || FOOD_PRESETS,
-        reminders: loaded.reminders || initialFitnessState.reminders,
         deletedExerciseIds: loaded.deletedExerciseIds || [],
         xp: loaded.xp !== undefined ? loaded.xp : 0,
         level: loaded.level !== undefined ? loaded.level : 1,
@@ -398,7 +436,11 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         state.waterLogs || [],
         state.waterGoal || 2000,
         state.sleepLogs || [],
-        state.sleepGoal || 480
+        state.sleepGoal || 480,
+        state.progressLogs || [],
+        state.foodEntries || [],
+        newLevel,
+        currentStreak
       );
       
       const targetProtein = state.profile?.targetProtein || 150;
@@ -457,7 +499,27 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       const { xp: newXp, level: newLevel } = awardXP(xpEarned, currentXp, currentLevel);
       
       const newFoodEntries = [foodEntry, ...state.foodEntries];
-      const newUnlocked = [...(state.unlockedAchievements || [])];
+      
+      const workoutDates = state.workouts.map((w) => w.date);
+      const foodDates = newFoodEntries.map((f) => f.date);
+      const currentStreak = calculateStreak(workoutDates, foodDates);
+      const newLongestStreak = Math.max(state.longestStreak || 0, currentStreak);
+      const prCount = Object.keys(state.personalRecords || {}).length;
+
+      let newUnlocked = checkAchievements(
+        state.workouts.length,
+        prCount,
+        state.unlockedAchievements || [],
+        state.waterLogs || [],
+        state.waterGoal || 2000,
+        state.sleepLogs || [],
+        state.sleepGoal || 480,
+        state.progressLogs || [],
+        newFoodEntries,
+        newLevel,
+        currentStreak
+      );
+
       if (checkProteinMaster(newFoodEntries, targetProtein) && !newUnlocked.includes('protein_master')) {
         newUnlocked.push('protein_master');
       }
@@ -469,6 +531,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         level: newLevel,
         lastNutritionXpDate: newLastNutritionXpDate,
         unlockedAchievements: newUnlocked,
+        longestStreak: newLongestStreak,
       };
     }
 
@@ -479,13 +542,44 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       };
     }
 
-    case 'ADD_PROGRESS_LOG':
+    case 'ADD_PROGRESS_LOG': {
+      const newLogs = [action.payload, ...state.progressLogs].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      const prCount = Object.keys(state.personalRecords || {}).length;
+      
+      const currentLevel = state.level || 1;
+      const currentXp = state.xp || 0;
+      const { xp: newXp, level: newLevel } = awardXP(20, currentXp, currentLevel);
+
+      const workoutDates = state.workouts.map((w) => w.date);
+      const foodDates = state.foodEntries.map((f) => f.date);
+      const currentStreak = calculateStreak(workoutDates, foodDates);
+      const newLongestStreak = Math.max(state.longestStreak || 0, currentStreak);
+
+      const newUnlocked = checkAchievements(
+        state.workouts.length,
+        prCount,
+        state.unlockedAchievements || [],
+        state.waterLogs || [],
+        state.waterGoal || 2000,
+        state.sleepLogs || [],
+        state.sleepGoal || 480,
+        newLogs,
+        state.foodEntries,
+        newLevel,
+        currentStreak
+      );
+
       return {
         ...state,
-        progressLogs: [action.payload, ...state.progressLogs].sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        ),
+        progressLogs: newLogs,
+        xp: newXp,
+        level: newLevel,
+        longestStreak: newLongestStreak,
+        unlockedAchievements: newUnlocked,
       };
+    }
 
     case 'DELETE_PROGRESS_LOG':
       return {
@@ -499,23 +593,6 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         customExercises: [...state.customExercises, action.payload],
       };
 
-    case 'UPDATE_REMINDER':
-      return {
-        ...state,
-        reminders: state.reminders.map((r) => (r.id === action.payload.id ? action.payload : r)),
-      };
-
-    case 'ADD_REMINDER':
-      return {
-        ...state,
-        reminders: [...state.reminders, action.payload],
-      };
-
-    case 'DELETE_REMINDER':
-      return {
-        ...state,
-        reminders: state.reminders.filter((r) => r.id !== action.payload),
-      };
 
     case 'ADD_FOOD_PRESET':
       return {
@@ -625,6 +702,10 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       const currentXp = state.xp || 0;
       const { xp: newXp, level: newLevel } = awardXP(xpEarned, currentXp, currentLevel);
       
+      const workoutDates = state.workouts.map((w) => w.date);
+      const foodDates = state.foodEntries.map((f) => f.date);
+      const currentStreak = calculateStreak(workoutDates, foodDates);
+
       const prCount = Object.keys(state.personalRecords || {}).length;
       const newUnlocked = checkAchievements(
         state.workouts.length,
@@ -633,7 +714,11 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         newWaterLogs,
         waterGoal,
         state.sleepLogs || [],
-        state.sleepGoal || 480
+        state.sleepGoal || 480,
+        state.progressLogs || [],
+        state.foodEntries || [],
+        newLevel,
+        currentStreak
       );
       
       return {
@@ -648,6 +733,11 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
     case 'SET_WATER_GOAL': {
       const newGoal = action.payload;
       const prCount = Object.keys(state.personalRecords || {}).length;
+
+      const workoutDates = state.workouts.map((w) => w.date);
+      const foodDates = state.foodEntries.map((f) => f.date);
+      const currentStreak = calculateStreak(workoutDates, foodDates);
+
       const newUnlocked = checkAchievements(
         state.workouts.length,
         prCount,
@@ -655,7 +745,11 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         state.waterLogs || [],
         newGoal,
         state.sleepLogs || [],
-        state.sleepGoal || 480
+        state.sleepGoal || 480,
+        state.progressLogs || [],
+        state.foodEntries || [],
+        state.level || 1,
+        currentStreak
       );
       return {
         ...state,
@@ -693,6 +787,10 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       const currentXp = state.xp || 0;
       const { xp: newXp, level: newLevel } = awardXP(xpEarned, currentXp, currentLevel);
       
+      const workoutDates = state.workouts.map((w) => w.date);
+      const foodDates = state.foodEntries.map((f) => f.date);
+      const currentStreakVal = calculateStreak(workoutDates, foodDates);
+
       const prCount = Object.keys(state.personalRecords || {}).length;
       const newUnlocked = checkAchievements(
         state.workouts.length,
@@ -701,7 +799,11 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         state.waterLogs || [],
         state.waterGoal || 2000,
         newSleepLogs,
-        sleepGoal
+        sleepGoal,
+        state.progressLogs || [],
+        state.foodEntries || [],
+        newLevel,
+        currentStreakVal
       );
 
       return {
@@ -745,6 +847,11 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
     case 'SET_SLEEP_GOAL': {
       const newGoal = action.payload;
       const prCount = Object.keys(state.personalRecords || {}).length;
+
+      const workoutDates = state.workouts.map((w) => w.date);
+      const foodDates = state.foodEntries.map((f) => f.date);
+      const currentStreakVal = calculateStreak(workoutDates, foodDates);
+
       const newUnlocked = checkAchievements(
         state.workouts.length,
         prCount,
@@ -752,7 +859,11 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         state.waterLogs || [],
         state.waterGoal || 2000,
         state.sleepLogs || [],
-        newGoal
+        newGoal,
+        state.progressLogs || [],
+        state.foodEntries || [],
+        state.level || 1,
+        currentStreakVal
       );
 
       return {
@@ -782,9 +893,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
   deleteProgressLog: (id: string) => void;
   addCustomExercise: (exercise: LibraryExercise) => void;
   deleteExercise: (id: string) => void;
-  updateReminder: (reminder: ReminderSetting) => void;
-  addReminder: (reminder: ReminderSetting) => void;
-  deleteReminder: (id: string) => void;
+
   addFoodPreset: (preset: FoodPreset) => void;
   updateFoodPreset: (preset: FoodPreset) => void;
   deleteFoodPreset: (id: string) => void;
@@ -872,17 +981,6 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'DELETE_EXERCISE', payload: id });
   };
 
-  const updateReminder = (reminder: ReminderSetting) => {
-    dispatch({ type: 'UPDATE_REMINDER', payload: reminder });
-  };
-
-  const addReminder = (reminder: ReminderSetting) => {
-    dispatch({ type: 'ADD_REMINDER', payload: reminder });
-  };
-
-  const deleteReminder = (id: string) => {
-    dispatch({ type: 'DELETE_REMINDER', payload: id });
-  };
 
   const addFoodPreset = (preset: FoodPreset) => {
     dispatch({ type: 'ADD_FOOD_PRESET', payload: preset });
@@ -995,9 +1093,7 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
         deleteProgressLog,
         addCustomExercise,
         deleteExercise,
-        updateReminder,
-        addReminder,
-        deleteReminder,
+
         addFoodPreset,
         updateFoodPreset,
         deleteFoodPreset,

@@ -22,7 +22,6 @@ import AddFoodItemScreen from '../screens/AddFoodItemScreen';
 import AddProgressLogScreen from '../screens/AddProgressLogScreen';
 import ThemeSettingsScreen from '../screens/ThemeSettingsScreen';
 import BackupRestoreScreen from '../screens/BackupRestoreScreen';
-import ManageRemindersScreen from '../screens/ManageRemindersScreen';
 import ManagePresetsScreen from '../screens/ManagePresetsScreen';
 import TargetSettingsScreen from '../screens/TargetSettingsScreen';
 import BodyStatsScreen from '../screens/BodyStatsScreen';
@@ -32,6 +31,7 @@ import ManageTemplateScreen from '../screens/ManageTemplateScreen';
 import VolumeAnalyticsScreen from '../screens/VolumeAnalyticsScreen';
 import WaterTrackerScreen from '../screens/WaterTrackerScreen';
 import SleepTrackerScreen from '../screens/SleepTrackerScreen';
+import UserProfileScreen from '../screens/UserProfileScreen';
 
 // Placeholders for secondary stacks (we will create actual screens for these soon)
 import { Text } from 'react-native';
@@ -180,11 +180,7 @@ export const AppNavigator = () => {
               component={BackupRestoreScreen}
               options={{ title: 'Backup & Restore' }}
             />
-            <Stack.Screen
-              name="ManageReminders"
-              component={ManageRemindersScreen}
-              options={{ title: 'Configure Reminders' }}
-            />
+
             <Stack.Screen
               name="ManagePresets"
               component={ManagePresetsScreen}
@@ -229,6 +225,11 @@ export const AppNavigator = () => {
               name="SleepTracker"
               component={SleepTrackerScreen}
               options={{ title: 'Sleep & Recovery' }}
+            />
+            <Stack.Screen
+              name="UserProfile"
+              component={UserProfileScreen}
+              options={{ title: 'User Profile' }}
             />
           </>
         )}

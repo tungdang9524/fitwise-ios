@@ -118,6 +118,7 @@ export const WaterTrackerScreen: React.FC = () => {
   // Achievements list
   const waterAchievements = [
     { id: 'hydration_starter', name: 'Hydration Starter', desc: 'Successfully hit your daily water goal for 7 days.', icon: 'water', color: '#00e5ff' },
+    { id: 'water_enthusiast', name: 'Water Enthusiast', desc: 'Successfully hit your daily water goal for 14 days.', icon: 'water', color: '#00b0ff' },
     { id: 'hydration_master', name: 'Hydration Master', desc: 'Successfully hit your daily water goal for 30 days.', icon: 'trophy', color: '#ffd700' },
   ];
 

@@ -578,6 +578,29 @@ export const SleepTrackerScreen: React.FC = () => {
               <Ionicons name="checkmark-circle" size={20} color={theme.success} />
             )}
           </View>
+
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
+          {/* Badge 3 */}
+          <View style={styles.badgeItem}>
+            <View style={[styles.badgeIconWrap, { 
+              backgroundColor: (state.unlockedAchievements || []).includes('sleep_champion') ? 'rgba(156, 39, 176, 0.12)' : 'rgba(255,255,255,0.03)',
+              borderColor: (state.unlockedAchievements || []).includes('sleep_champion') ? '#9C27B0' : theme.border
+            }]}>
+              <Ionicons name="moon" size={24} color={(state.unlockedAchievements || []).includes('sleep_champion') ? '#9C27B0' : theme.textMuted} />
+            </View>
+            <View style={styles.flex}>
+              <AppText variant="bodyBold" color={(state.unlockedAchievements || []).includes('sleep_champion') ? 'text' : 'textMuted'}>
+                Sleep Champion
+              </AppText>
+              <AppText variant="caption" color="textMuted">
+                Log at least 7 total days of sleep.
+              </AppText>
+            </View>
+            {(state.unlockedAchievements || []).includes('sleep_champion') && (
+              <Ionicons name="checkmark-circle" size={20} color={theme.success} />
+            )}
+          </View>
         </Card>
       </View>
 

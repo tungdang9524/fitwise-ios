@@ -239,6 +239,18 @@ export const BodyStatsScreen: React.FC = () => {
     { id: 'hydration_master', name: 'Hydration Master', desc: 'Successfully hit your daily water goal for 30 days.', icon: 'trophy-outline', color: '#00E5FF' },
     { id: 'early_sleeper', name: 'Early Sleeper', desc: 'Sleep before 11 PM for 7 days.', icon: 'moon-outline', color: '#8F00FF' },
     { id: 'recovery_master', name: 'Recovery Master', desc: 'Reach 8+ hours of sleep for 30 days.', icon: 'battery-charging-outline', color: '#00FF66' },
+
+    // New Achievements
+    { id: 'workout_warrior', name: 'Workout Warrior', desc: 'Log at least 10 workouts to establish your training routine.', icon: 'barbell-outline', color: '#FF9800' },
+    { id: 'workout_legend', name: 'Workout Legend', desc: 'Log at least 50 workouts and reach absolute legendary status.', icon: 'trophy-outline', color: '#F44336' },
+    { id: 'streak_starter', name: 'Streak Starter', desc: 'Reach an active logging streak of 3 days.', icon: 'flame-outline', color: '#FFEB3B' },
+    { id: 'streak_master', name: 'Streak Master', desc: 'Reach an active logging streak of 7 days.', icon: 'flame-outline', color: '#FF5722' },
+    { id: 'weight_tracker', name: 'Weight Tracker', desc: 'Log your weight and body progress 5 times.', icon: 'scale-outline', color: '#4CAF50' },
+    { id: 'sleep_champion', name: 'Sleep Champion', desc: 'Log at least 7 days of sleep.', icon: 'moon-outline', color: '#9C27B0' },
+    { id: 'calorie_commander', name: 'Calorie Commander', desc: 'Log meals on 7 distinct dates.', icon: 'restaurant-outline', color: '#FF5722' },
+    { id: 'water_enthusiast', name: 'Water Enthusiast', desc: 'Hit your daily water goal on 14 days.', icon: 'water-outline', color: '#00B0FF' },
+    { id: 'level_five', name: 'Level 5 Champion', desc: 'Reach level 5.', icon: 'shield-checkmark-outline', color: '#673AB7' },
+    { id: 'level_ten', name: 'Level 10 Master', desc: 'Reach level 10.', icon: 'shield-checkmark-outline', color: '#FFD700' },
   ];
 
   const unlockedSet = new Set(state.unlockedAchievements || []);

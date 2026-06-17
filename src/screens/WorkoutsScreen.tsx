@@ -17,11 +17,11 @@ import ExerciseLibraryScreen from './ExerciseLibraryScreen';
 type WorkoutsScreenNavProp = NativeStackNavigationProp<RootStackParamList>;
 
 export const WorkoutsScreen: React.FC = () => {
-  const { state, deleteWorkout } = useFitness();
+  const { state, deleteWorkout, deleteTemplate, duplicateTemplate } = useFitness();
   const { theme } = useTheme();
   const navigation = useNavigation<WorkoutsScreenNavProp>();
 
-  const [activeTab, setActiveTab] = useState<'history' | 'library'>('history');
+  const [activeTab, setActiveTab] = useState<'history' | 'templates' | 'library'>('history');
   const [historyFilter, setHistoryFilter] = useState<'day' | 'week' | 'month' | 'all'>('all');
   const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(null);
 
@@ -59,6 +59,95 @@ export const WorkoutsScreen: React.FC = () => {
     return true;
   });
 
+  const handleDeleteTemplate = (id: string, name: string) => {
+    Alert.alert(
+      'Delete Template',
+      `Are you sure you want to delete the template "${name}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => deleteTemplate(id) },
+      ]
+    );
+  };
+
+  const renderTemplatesTab = () => {
+    const templates = state.templates || [];
+    return (
+      <ScrollView contentContainerStyle={styles.historyScroll}>
+        <View style={styles.actionRow}>
+          <PrimaryButton
+            title="+ Create Template"
+            style={styles.actionBtn}
+            onPress={() => navigation.navigate('ManageTemplate')}
+          />
+        </View>
+
+        {templates.length === 0 ? (
+          <Card variant="glass" style={styles.emptyCard}>
+            <Ionicons name="copy-outline" size={48} color={theme.textMuted} />
+            <AppText variant="body" color="textSecondary" style={styles.emptyText}>
+              No workout templates created yet. Templates allow you to start workouts with one tap.
+            </AppText>
+          </Card>
+        ) : (
+          templates.map((tpl) => (
+            <Card key={tpl.id} variant="glass" style={styles.tplCard}>
+              <View style={styles.tplHeader}>
+                <View style={styles.flex}>
+                  <AppText variant="h3">{tpl.name}</AppText>
+                  <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>
+                    {tpl.muscleGroups.join(', ')} • {tpl.exercises.length} Exercises
+                  </AppText>
+                </View>
+                <View style={styles.tplActions}>
+                  <TouchableOpacity onPress={() => duplicateTemplate(tpl.id)} style={styles.actionIconBtn}>
+                    <Ionicons name="copy-outline" size={16} color={theme.textSecondary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => navigation.navigate('ManageTemplate', { templateId: tpl.id })} style={styles.actionIconBtn}>
+                    <Ionicons name="create-outline" size={16} color={theme.textSecondary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDeleteTemplate(tpl.id, tpl.name)} style={styles.actionIconBtn}>
+                    <Ionicons name="trash-outline" size={16} color={theme.error} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {tpl.notes ? (
+                <AppText variant="caption" color="textMuted" numberOfLines={2} style={styles.tplNotes}>
+                  {tpl.notes}
+                </AppText>
+              ) : null}
+
+              <View style={[styles.exPreviewList, { backgroundColor: theme.background }]}>
+                {tpl.exercises.slice(0, 3).map((ex) => (
+                  <View key={ex.id} style={styles.exPreviewRow}>
+                    <AppText variant="caption" color="textSecondary" style={styles.flex}>
+                      • {ex.name}
+                    </AppText>
+                    <AppText variant="caption" color="textMuted">
+                      {ex.sets.length} sets
+                    </AppText>
+                  </View>
+                ))}
+                {tpl.exercises.length > 3 && (
+                  <AppText variant="caption" color="textMuted" style={{ marginTop: 2 }}>
+                    + {tpl.exercises.length - 3} more exercises
+                  </AppText>
+                )}
+              </View>
+
+              <PrimaryButton
+                title="Start Workout"
+                onPress={() => navigation.navigate('AddWorkoutSession', { templateId: tpl.id })}
+                style={styles.startBtn}
+              />
+            </Card>
+          ))
+        )}
+      </ScrollView>
+    );
+  };
+
   return (
     <Screen style={{ paddingHorizontal: 0 }}>
       {/* Upper Segmented Control Tab */}
@@ -68,7 +157,15 @@ export const WorkoutsScreen: React.FC = () => {
           onPress={() => setActiveTab('history')}
         >
           <AppText variant="bodyBold" color={activeTab === 'history' ? 'primary' : 'textSecondary'}>
-            History Logs
+            History
+          </AppText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'templates' && { borderBottomColor: theme.primary }]}
+          onPress={() => setActiveTab('templates')}
+        >
+          <AppText variant="bodyBold" color={activeTab === 'templates' ? 'primary' : 'textSecondary'}>
+            Templates
           </AppText>
         </TouchableOpacity>
         <TouchableOpacity
@@ -76,13 +173,15 @@ export const WorkoutsScreen: React.FC = () => {
           onPress={() => setActiveTab('library')}
         >
           <AppText variant="bodyBold" color={activeTab === 'library' ? 'primary' : 'textSecondary'}>
-            Exercise Library
+            Library
           </AppText>
         </TouchableOpacity>
       </View>
 
       {activeTab === 'library' ? (
         <ExerciseLibraryScreen />
+      ) : activeTab === 'templates' ? (
+        renderTemplatesTab()
       ) : (
         <ScrollView contentContainerStyle={styles.historyScroll}>
           {/* Main Action buttons */}
@@ -329,6 +428,43 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
+  },
+  tplCard: {
+    marginVertical: 8,
+    padding: 16,
+  },
+  tplHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  tplActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionIconBtn: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  tplNotes: {
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
+  exPreviewList: {
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 8,
+    gap: 4,
+  },
+  exPreviewRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  startBtn: {
+    marginTop: 16,
   },
 });
 export default WorkoutsScreen;

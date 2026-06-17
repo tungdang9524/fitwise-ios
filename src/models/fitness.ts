@@ -78,15 +78,6 @@ export interface ProgressLog {
   photoUri?: string;
 }
 
-export interface ReminderSetting {
-  id: string;
-  title: string;
-  time: string; // HH:MM
-  type: 'workout' | 'meal' | 'water';
-  enabled: boolean;
-  daysOfWeek: number[]; // 0 = Sunday, 1 = Monday, etc.
-}
-
 export interface FoodPreset {
   id: string;
   name: string;
@@ -111,7 +102,6 @@ export interface FitnessState {
   workouts: WorkoutSession[];
   foodEntries: FoodEntry[];
   progressLogs: ProgressLog[];
-  reminders: ReminderSetting[];
   customExercises: LibraryExercise[];
   foodPresets: FoodPreset[];
   hasCompletedSetup: boolean;
