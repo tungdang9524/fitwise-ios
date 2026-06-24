@@ -197,6 +197,12 @@ export const WorkoutsScreen: React.FC = () => {
             >
               <Ionicons name="calendar" size={22} color={theme.primary} />
             </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.calendarBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+              onPress={() => navigation.navigate('ProgressiveOverload')}
+            >
+              <Ionicons name="trending-up" size={22} color={theme.primary} />
+            </TouchableOpacity>
           </View>
 
           {/* Filters Segment */}

@@ -19,6 +19,7 @@ export type RootStackParamList = {
   WaterTracker: undefined;
   SleepTracker: undefined;
   UserProfile: undefined;
+  ProgressiveOverload: { initialExerciseId?: string } | undefined;
 };
 
 export type MainTabParamList = {

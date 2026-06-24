@@ -32,6 +32,7 @@ import VolumeAnalyticsScreen from '../screens/VolumeAnalyticsScreen';
 import WaterTrackerScreen from '../screens/WaterTrackerScreen';
 import SleepTrackerScreen from '../screens/SleepTrackerScreen';
 import UserProfileScreen from '../screens/UserProfileScreen';
+import ProgressiveOverloadScreen from '../screens/ProgressiveOverloadScreen';
 
 // Placeholders for secondary stacks (we will create actual screens for these soon)
 const TempScreen = ({ title }: { title: string }) => (
@@ -283,6 +284,11 @@ export const AppNavigator = () => {
               name="UserProfile"
               component={UserProfileScreen}
               options={{ title: 'User Profile' }}
+            />
+            <Stack.Screen
+              name="ProgressiveOverload"
+              component={ProgressiveOverloadScreen}
+              options={{ title: 'Progressive Overload' }}
             />
           </>
         )}
