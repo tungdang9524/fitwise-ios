@@ -60,6 +60,8 @@ export const ProgressiveOverloadScreen: React.FC = () => {
     return exercisesInHistory[0]?.id || '';
   });
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const selectedExercise = useMemo(() => {
     return exercisesInHistory.find((ex) => ex.id === selectedExerciseId);
   }, [exercisesInHistory, selectedExerciseId]);
@@ -203,37 +205,75 @@ export const ProgressiveOverloadScreen: React.FC = () => {
         </Card>
       ) : (
         <View style={styles.container}>
-          {/* Exercise Selector */}
+          {/* Custom Dropdown Trigger */}
           <AppText variant="label" color="textSecondary" style={styles.sectionLabel}>SELECT EXERCISE</AppText>
-          <View style={styles.selectorWrapper}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-              {exercisesInHistory.map((ex) => {
-                const isSelected = ex.id === selectedExerciseId;
-                return (
-                  <TouchableOpacity
-                    key={ex.id}
-                    style={[
-                      styles.selectorTab,
-                      {
-                        backgroundColor: isSelected ? theme.primary : theme.surfaceElevated,
-                        borderColor: isSelected ? theme.primary : theme.border,
-                      },
-                    ]}
-                    onPress={() => setSelectedExerciseId(ex.id)}
-                  >
-                    <AppText
-                      variant="caption"
-                      style={{
-                        fontWeight: 'bold',
-                        color: isSelected ? '#0c0f12' : theme.text,
-                      }}
-                    >
-                      {ex.name}
+          <View style={styles.dropdownContainer}>
+            <TouchableOpacity 
+              style={[styles.dropdownTrigger, { backgroundColor: theme.surface, borderColor: theme.border }]}
+              onPress={() => setIsDropdownOpen(!isDropdownOpen)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.dropdownLeft}>
+                <Ionicons name="barbell-outline" size={20} color={theme.primary} />
+                <AppText variant="bodyBold" style={{ marginLeft: 8, flexShrink: 1 }} numberOfLines={1}>
+                  {selectedExercise ? selectedExercise.name : 'Choose an exercise'}
+                </AppText>
+                {selectedExercise && (
+                  <View style={[styles.muscleTag, { backgroundColor: `${theme.primary}15` }]}>
+                    <AppText variant="caption" style={{ color: theme.primary, fontSize: 10, fontWeight: 'bold' }}>
+                      {selectedExercise.muscleGroup}
                     </AppText>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+                  </View>
+                )}
+              </View>
+              <Ionicons 
+                name={isDropdownOpen ? 'chevron-up' : 'chevron-down'} 
+                size={20} 
+                color={theme.textMuted} 
+              />
+            </TouchableOpacity>
+
+            {isDropdownOpen && (
+              <Card variant="glass" style={[styles.dropdownListContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled={true} keyboardShouldPersistTaps="handled">
+                  {exercisesInHistory.map((ex) => {
+                    const isSelected = ex.id === selectedExerciseId;
+                    return (
+                      <TouchableOpacity
+                        key={ex.id}
+                        style={[
+                          styles.dropdownItem,
+                          { 
+                            borderBottomColor: theme.border,
+                            backgroundColor: isSelected ? `${theme.primary}12` : 'transparent'
+                          }
+                        ]}
+                        onPress={() => {
+                          setSelectedExerciseId(ex.id);
+                          setIsDropdownOpen(false);
+                        }}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+                          <AppText 
+                            variant={isSelected ? 'bodyBold' : 'body'} 
+                            style={{ color: isSelected ? theme.primary : theme.text, flex: 1, marginRight: 8 }}
+                            numberOfLines={1}
+                          >
+                            {ex.name}
+                          </AppText>
+                          <AppText variant="caption" color="textMuted">
+                            {ex.muscleGroup}
+                          </AppText>
+                        </View>
+                        {isSelected && (
+                          <Ionicons name="checkmark" size={18} color={theme.primary} style={{ marginLeft: 8 }} />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </Card>
+            )}
           </View>
 
           {exerciseHistory.length === 0 ? (
@@ -457,18 +497,54 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
   },
-  selectorWrapper: {
+  dropdownContainer: {
+    position: 'relative',
+    zIndex: 1000,
     marginBottom: 16,
   },
-  horizontalScroll: {
-    gap: 8,
-    paddingBottom: 4,
-  },
-  selectorTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+  dropdownTrigger: {
+    height: 52,
     borderWidth: 1,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+  },
+  dropdownLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  muscleTag: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  dropdownListContainer: {
+    position: 'absolute',
+    top: 58,
+    left: 0,
+    right: 0,
+    maxHeight: 220,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 4,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    zIndex: 1001,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   statsRow: {
     flexDirection: 'row',
