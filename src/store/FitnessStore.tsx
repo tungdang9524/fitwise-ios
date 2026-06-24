@@ -34,6 +34,7 @@ type FitnessAction =
   | { type: 'ADD_WATER'; payload: { amount: number; date: string } }
   | { type: 'SET_WATER_GOAL'; payload: number }
   | { type: 'DELETE_WATER_LOG'; payload: string }
+  | { type: 'SET_QUICK_WATER_AMOUNT'; payload: number }
   | { type: 'ADD_SLEEP'; payload: SleepLog }
   | { type: 'UPDATE_SLEEP'; payload: SleepLog }
   | { type: 'DELETE_SLEEP'; payload: string }
@@ -337,6 +338,7 @@ const initialFitnessState: FitnessState = {
   waterLogs: [],
   waterGoal: 2000,
   longestStreak: 0,
+  quickWaterAmount: 250,
   sleepLogs: [],
   sleepGoal: 480,
   longestSleepStreak: 0,
@@ -360,6 +362,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         waterLogs: loaded.waterLogs || [],
         waterGoal: loaded.waterGoal || 2000,
         longestStreak: loaded.longestStreak || 0,
+        quickWaterAmount: loaded.quickWaterAmount !== undefined ? loaded.quickWaterAmount : 250,
         sleepLogs: loaded.sleepLogs || [],
         sleepGoal: loaded.sleepGoal || 480,
         longestSleepStreak: loaded.longestSleepStreak || 0,
@@ -909,6 +912,12 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         activeWorkout: null,
       };
 
+    case 'SET_QUICK_WATER_AMOUNT':
+      return {
+        ...state,
+        quickWaterAmount: action.payload,
+      };
+
     case 'RESET_STATE':
       return initialFitnessState;
 
@@ -942,6 +951,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
   addWater: (amount: number, date: string) => void;
   setWaterGoal: (goal: number) => void;
   deleteWaterLog: (id: string) => void;
+  setQuickWaterAmount: (amount: number) => void;
   addSleepLog: (sleep: Omit<SleepLog, 'id' | 'sleepScore' | 'durationScore' | 'consistencyScore' | 'qualityScore'>) => void;
   updateSleepLog: (sleep: SleepLog) => void;
   deleteSleepLog: (id: string) => void;
@@ -1070,6 +1080,10 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'DELETE_WATER_LOG', payload: id });
   };
 
+  const setQuickWaterAmount = (amount: number) => {
+    dispatch({ type: 'SET_QUICK_WATER_AMOUNT', payload: amount });
+  };
+
   const addSleepLog = (sleep: Omit<SleepLog, 'id' | 'sleepScore' | 'durationScore' | 'consistencyScore' | 'qualityScore'>) => {
     const sleepGoal = state.sleepGoal || 480;
     const scores = calculateSleepScores(
@@ -1162,6 +1176,7 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addWater,
         setWaterGoal,
         deleteWaterLog,
+        setQuickWaterAmount,
         addSleepLog,
         updateSleepLog,
         deleteSleepLog,

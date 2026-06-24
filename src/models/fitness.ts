@@ -119,6 +119,7 @@ export interface FitnessState {
   waterLogs?: WaterLog[];
   waterGoal?: number;
   longestStreak?: number;
+  quickWaterAmount?: number;
 
   // Sleep Tracker fields
   sleepLogs?: SleepLog[];

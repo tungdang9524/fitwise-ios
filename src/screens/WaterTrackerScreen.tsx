@@ -13,7 +13,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { getLocalDateString, formatDisplayDate } from '../utils/dates';
 
 export const WaterTrackerScreen: React.FC = () => {
-  const { state, addWater, deleteWaterLog, setWaterGoal } = useFitness();
+  const { state, addWater, deleteWaterLog, setWaterGoal, setQuickWaterAmount } = useFitness();
   const { theme } = useTheme();
   const navigation = useNavigation();
 
@@ -24,8 +24,23 @@ export const WaterTrackerScreen: React.FC = () => {
   const [goalInput, setGoalInput] = useState(String(waterGoal));
   const [isEditingGoal, setIsEditingGoal] = useState(false);
 
+  // Homepage quick logger amount setting state
+  const homepageQuickAmount = state.quickWaterAmount || 250;
+  const [quickAmountInput, setQuickAmountInput] = useState(String(homepageQuickAmount));
+  const [isEditingQuickAmount, setIsEditingQuickAmount] = useState(false);
+
   // Custom log amount state
   const [customAmount, setCustomAmount] = useState('');
+
+  const handleSaveQuickAmount = () => {
+    const amount = parseInt(quickAmountInput);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('Invalid Amount', 'Quick add volume must be a positive number.');
+      return;
+    }
+    setQuickWaterAmount(amount);
+    setIsEditingQuickAmount(false);
+  };
 
   // 1. Calculations
   const todayLogs = useMemo(() => {
@@ -206,6 +221,32 @@ export const WaterTrackerScreen: React.FC = () => {
             ) : (
               <TouchableOpacity onPress={() => setIsEditingGoal(true)} style={styles.goalDisplayRow}>
                 <AppText variant="caption" color="textSecondary">Goal: {waterGoal} ml</AppText>
+                <Ionicons name="create-outline" size={14} color={theme.textMuted} style={{ marginLeft: 4 }} />
+              </TouchableOpacity>
+            )}
+
+            {/* Quick Add homepage logger modifier */}
+            {isEditingQuickAmount ? (
+              <View style={[styles.goalEditRow, { marginTop: 6 }]}>
+                <TextInput
+                  style={[styles.goalInput, { borderColor: theme.border, color: theme.text, backgroundColor: theme.background }]}
+                  keyboardType="numeric"
+                  value={quickAmountInput}
+                  onChangeText={setQuickAmountInput}
+                />
+                <TouchableOpacity onPress={handleSaveQuickAmount} style={[styles.goalBtn, { backgroundColor: theme.primary }]}>
+                  <Ionicons name="checkmark" size={16} color="#0c0f12" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setIsEditingQuickAmount(false)} style={[styles.goalBtn, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+                  <Ionicons name="close" size={16} color={theme.text} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity onPress={() => {
+                setQuickAmountInput(String(homepageQuickAmount));
+                setIsEditingQuickAmount(true);
+              }} style={[styles.goalDisplayRow, { marginTop: 6 }]}>
+                <AppText variant="caption" color="textSecondary">Home Quick Log: {homepageQuickAmount} ml</AppText>
                 <Ionicons name="create-outline" size={14} color={theme.textMuted} style={{ marginLeft: 4 }} />
               </TouchableOpacity>
             )}

@@ -316,8 +316,9 @@ export const DashboardScreen: React.FC = () => {
     return Array.from(muscles).join(' • ');
   }, [todayWorkouts, state.customExercises]);
 
+  const quickWaterAmount = state.quickWaterAmount || 250;
   const handleQuickAddWater = () => {
-    addWater(250, todayStr);
+    addWater(quickWaterAmount, todayStr);
   };
 
   const getGreeting = () => {
@@ -520,35 +521,9 @@ export const DashboardScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Body Overview Card */}
-      <View style={styles.bodyOverviewSection}>
-        <AppText variant="h3" style={styles.sectionHeader}>Body Status</AppText>
-        <Card variant="glass" style={styles.bodyCard} onPress={() => navigation.navigate('BodyStats')}>
-          <View style={styles.bodyCardHeader}>
-            <AppText variant="bodyBold">Muscle Balance</AppText>
-            <View style={[styles.bodyScoreBadge, { backgroundColor: 'rgba(174, 255, 0, 0.08)', borderColor: theme.primary }]}>
-              <AppText variant="caption" color="primary" style={{ fontWeight: 'bold' }}>
-                Overall: {bodySummary.overallScore}
-              </AppText>
-            </View>
-          </View>
-          <View style={styles.musclesOverviewGrid}>
-            {bodySummary.stats.map((m) => (
-              <View key={m.name} style={styles.muscleRow}>
-                <View style={styles.muscleRowHeader}>
-                  <AppText variant="caption" style={{ fontWeight: 'bold' }}>{m.name}</AppText>
-                  <AppText variant="caption" color="textSecondary">{m.score}/100</AppText>
-                </View>
-                <ProgressBar progress={m.score / 100} color={theme.primary} style={styles.muscleProgress} />
-              </View>
-            ))}
-          </View>
-        </Card>
-      </View>
-
       {/* Water Tracker Widget */}
       <View style={styles.waterSection}>
-        <Card variant="normal" style={styles.waterWidgetCard}>
+        <Card variant="normal" style={styles.waterWidgetCard} onPress={() => navigation.navigate('WaterTracker')}>
           <View style={styles.rowCentered}>
             <View style={[styles.waterIconWrap, { backgroundColor: 'rgba(0, 229, 255, 0.08)' }]}>
               <Ionicons name="water" size={20} color={theme.accent} />
@@ -563,7 +538,7 @@ export const DashboardScreen: React.FC = () => {
               onPress={handleQuickAddWater} 
               style={[styles.quickAddWaterBtn, { backgroundColor: `${theme.accent}10`, borderColor: theme.accent }]}
             >
-              <AppText variant="caption" color="accent" style={{ fontWeight: 'bold' }}>+250ml</AppText>
+              <AppText variant="caption" color="accent" style={{ fontWeight: 'bold' }}>+{quickWaterAmount}ml</AppText>
             </TouchableOpacity>
           </View>
         </Card>
@@ -608,6 +583,32 @@ export const DashboardScreen: React.FC = () => {
                 </View>
               )}
             </View>
+          </View>
+        </Card>
+      </View>
+
+      {/* Body Overview Card */}
+      <View style={styles.bodyOverviewSection}>
+        <AppText variant="h3" style={styles.sectionHeader}>Body Status</AppText>
+        <Card variant="glass" style={styles.bodyCard} onPress={() => navigation.navigate('BodyStats')}>
+          <View style={styles.bodyCardHeader}>
+            <AppText variant="bodyBold">Muscle Balance</AppText>
+            <View style={[styles.bodyScoreBadge, { backgroundColor: 'rgba(174, 255, 0, 0.08)', borderColor: theme.primary }]}>
+              <AppText variant="caption" color="primary" style={{ fontWeight: 'bold' }}>
+                Overall: {bodySummary.overallScore}
+              </AppText>
+            </View>
+          </View>
+          <View style={styles.musclesOverviewGrid}>
+            {bodySummary.stats.map((m) => (
+              <View key={m.name} style={styles.muscleRow}>
+                <View style={styles.muscleRowHeader}>
+                  <AppText variant="caption" style={{ fontWeight: 'bold' }}>{m.name}</AppText>
+                  <AppText variant="caption" color="textSecondary">{m.score}/100</AppText>
+                </View>
+                <ProgressBar progress={m.score / 100} color={theme.primary} style={styles.muscleProgress} />
+              </View>
+            ))}
           </View>
         </Card>
       </View>
