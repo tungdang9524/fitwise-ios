@@ -93,6 +93,9 @@ export const AddFoodItemScreen: React.FC = () => {
       }
       cleanText = cleanText.trim();
 
+      // Normalize smart/curly quotes to standard straight quotes
+      cleanText = cleanText.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+
       const parsed = JSON.parse(cleanText);
       if (!parsed.name || parsed.calories === undefined) {
         throw new Error('Missing name or calories property.');

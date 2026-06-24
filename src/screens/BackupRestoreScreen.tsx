@@ -39,7 +39,11 @@ export const BackupRestoreScreen: React.FC = () => {
     }
 
     try {
-      const parsed = JSON.parse(importText.trim());
+      let cleanText = importText.trim();
+      // Normalize smart/curly quotes to standard straight quotes
+      cleanText = cleanText.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+
+      const parsed = JSON.parse(cleanText);
       if (parsed && typeof parsed === 'object' && 'hasCompletedSetup' in parsed) {
         dispatch({
           type: 'INITIALIZE_STATE',
