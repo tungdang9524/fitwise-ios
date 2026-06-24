@@ -38,6 +38,7 @@ export const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({
   const [customMuscle, setCustomMuscle] = useState('');
   const [customInstructions, setCustomInstructions] = useState('');
   const [customNotes, setCustomNotes] = useState('');
+  const [customNoWeight, setCustomNoWeight] = useState(false);
 
   // Merge static and custom exercises, filtering out deleted ones
   const allExercises = [...STATIC_EXERCISE_LIBRARY, ...state.customExercises].filter(
@@ -67,6 +68,7 @@ export const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({
       instructions: customInstructions.split('\n').filter((i) => i.trim() !== ''),
       techniqueNotes: customNotes.trim(),
       isCustom: true,
+      noWeight: customNoWeight,
     };
 
     addCustomExercise(newExercise);
@@ -74,6 +76,7 @@ export const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({
     setCustomMuscle('');
     setCustomInstructions('');
     setCustomNotes('');
+    setCustomNoWeight(false);
     setModalVisible(false);
 
     if (onSelectExercise) {
@@ -282,6 +285,22 @@ export const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({
                   onChangeText={setCustomNotes}
                 />
 
+                <View style={styles.checkboxRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.checkbox,
+                      {
+                        backgroundColor: customNoWeight ? theme.primary : 'transparent',
+                        borderColor: customNoWeight ? theme.primary : theme.border,
+                      },
+                    ]}
+                    onPress={() => setCustomNoWeight(!customNoWeight)}
+                  >
+                    {customNoWeight && <Ionicons name="checkmark" size={14} color="#0c0f12" />}
+                  </TouchableOpacity>
+                  <AppText variant="body" style={{ marginLeft: 8 }}>Bodyweight / No-Weight Exercise</AppText>
+                </View>
+
                 <PrimaryButton
                   title="Create Exercise"
                   onPress={handleCreateCustom}
@@ -401,12 +420,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   multilineInput: {
-    height: 80,
-    paddingTop: 10,
+    height: 60,
     textAlignVertical: 'top',
+    paddingTop: 8,
   },
   modalSubmitBtn: {
-    marginTop: 20,
+    marginTop: 10,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 12,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 export default ExerciseLibraryScreen;

@@ -61,6 +61,7 @@ export interface LibraryExercise {
   instructions: string[];
   techniqueNotes: string;
   isCustom?: boolean;
+  noWeight?: boolean;
 }
 
 export interface ProgressLog {

@@ -14,6 +14,7 @@ import { WorkoutSession, ExerciseLog, LibraryExercise, SetLog } from '../models/
 import { RootStackParamList } from '../navigation/types';
 import { useTheme } from '../theme/ThemeProvider';
 import ExerciseLibraryScreen from './ExerciseLibraryScreen';
+import { isNoWeightExercise } from '../utils/exercises';
 
 type AddWorkoutNavProp = NativeStackNavigationProp<RootStackParamList, 'AddWorkoutSession'>;
 type AddWorkoutRouteProp = RouteProp<RootStackParamList, 'AddWorkoutSession'>;
@@ -472,87 +473,121 @@ export const AddWorkoutSessionScreen: React.FC = () => {
           </AppText>
         </Card>
       ) : (
-        exercises.map((exLog, exIdx) => (
-          <Card key={exLog.id} variant="normal" style={styles.exerciseCard}>
-            <View style={styles.exCardHeader}>
-              <View style={styles.flex}>
-                <AppText variant="bodyBold">{exIdx + 1}. {exLog.name}</AppText>
-                <AppText variant="caption" color="textMuted">{exLog.muscleGroup}</AppText>
-              </View>
-              <TouchableOpacity onPress={() => handleRemoveExercise(exLog.id)}>
-                <Ionicons name="trash-outline" size={20} color={theme.error} />
-              </TouchableOpacity>
-            </View>
+        exercises.map((exLog, exIdx) => {
+          const isWarmupOrStretch = exLog.muscleGroup === 'Warm-up' || exLog.muscleGroup === 'Stretching';
+          const isNoWeight = isNoWeightExercise({ name: exLog.name, muscleGroup: exLog.muscleGroup });
 
-            {/* Set Headers */}
-            <View style={styles.setHeaders}>
-              <AppText variant="caption" color="textMuted" style={styles.setColNumber}>SET</AppText>
-              <AppText variant="caption" color="textMuted" style={styles.setColInput}>WEIGHT (kg)</AppText>
-              <AppText variant="caption" color="textMuted" style={styles.setColInput}>REPS</AppText>
-              <AppText variant="caption" color="textMuted" style={styles.setColCheck}>DONE</AppText>
-            </View>
-
-            {/* Sets list */}
-            {exLog.sets.map((set, setIdx) => (
-              <View key={set.id} style={styles.setRow}>
-                <TouchableOpacity 
-                  onPress={() => handleRemoveSet(exLog.id, set.id)}
-                  style={styles.setColNumber}
-                >
-                  <AppText variant="body" color="textSecondary">
-                    {setIdx + 1}
-                  </AppText>
-                </TouchableOpacity>
-                
-                <TextInput
-                  style={[styles.setInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                  keyboardType="numeric"
-                  value={String(set.weight)}
-                  onChangeText={(val) => handleUpdateSet(exLog.id, set.id, 'weight', val)}
-                />
-                
-                <TextInput
-                  style={[styles.setInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                  keyboardType="number-pad"
-                  value={String(set.reps)}
-                  onChangeText={(val) => handleUpdateSet(exLog.id, set.id, 'reps', val)}
-                />
-
-                <TouchableOpacity 
-                  style={[
-                    styles.setColCheck, 
-                    styles.checkbox, 
-                    { 
-                      backgroundColor: set.completed ? theme.success : 'transparent',
-                      borderColor: set.completed ? theme.success : theme.border
-                    }
-                  ]}
-                  onPress={() => handleUpdateSet(exLog.id, set.id, 'completed', !set.completed)}
-                >
-                  {set.completed && <Ionicons name="checkmark" size={14} color="#ffffff" />}
+          return (
+            <Card key={exLog.id} variant="normal" style={styles.exerciseCard}>
+              <View style={styles.exCardHeader}>
+                <View style={styles.flex}>
+                  <AppText variant="bodyBold">{exIdx + 1}. {exLog.name}</AppText>
+                  <AppText variant="caption" color="textMuted">{exLog.muscleGroup}</AppText>
+                </View>
+                <TouchableOpacity onPress={() => handleRemoveExercise(exLog.id)}>
+                  <Ionicons name="trash-outline" size={20} color={theme.error} />
                 </TouchableOpacity>
               </View>
-            ))}
 
-            {/* Exercise Notes & Add Set Row */}
-            <View style={styles.exerciseCardFooter}>
-              <TextInput
-                style={[styles.exNotesInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                placeholder="Exercise notes (e.g. drop sets, RPE 9...)"
-                placeholderTextColor={theme.textMuted}
-                value={exLog.notes}
-                onChangeText={(val) => handleUpdateExerciseNotes(exLog.id, val)}
-              />
-              <TouchableOpacity 
-                style={[styles.addSetRowBtn, { backgroundColor: theme.surfaceElevated }]}
-                onPress={() => handleAddSet(exLog.id)}
-              >
-                <Ionicons name="add" size={16} color={theme.text} />
-                <AppText variant="caption">Add Set</AppText>
-              </TouchableOpacity>
-            </View>
-          </Card>
-        ))
+              {isWarmupOrStretch ? (
+                <View style={styles.warmupRow}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.setColCheck, 
+                      styles.checkbox, 
+                      { 
+                        backgroundColor: exLog.sets[0]?.completed ? theme.success : 'transparent',
+                        borderColor: exLog.sets[0]?.completed ? theme.success : theme.border,
+                        width: 24,
+                        height: 24,
+                      }
+                    ]}
+                    onPress={() => handleUpdateSet(exLog.id, exLog.sets[0]?.id, 'completed', !exLog.sets[0]?.completed)}
+                  >
+                    {exLog.sets[0]?.completed && <Ionicons name="checkmark" size={16} color="#ffffff" />}
+                  </TouchableOpacity>
+                  <AppText variant="body" style={{ marginLeft: 12 }}>Mark Warm-up / Stretch Completed</AppText>
+                </View>
+              ) : (
+                <>
+                  {/* Set Headers */}
+                  <View style={styles.setHeaders}>
+                    <AppText variant="caption" color="textMuted" style={styles.setColNumber}>SET</AppText>
+                    {!isNoWeight && (
+                      <AppText variant="caption" color="textMuted" style={styles.setColInput}>WEIGHT (kg)</AppText>
+                    )}
+                    <AppText variant="caption" color="textMuted" style={styles.setColInput}>REPS</AppText>
+                    <AppText variant="caption" color="textMuted" style={styles.setColCheck}>DONE</AppText>
+                  </View>
+
+                  {/* Sets list */}
+                  {exLog.sets.map((set, setIdx) => (
+                    <View key={set.id} style={styles.setRow}>
+                      <TouchableOpacity 
+                        onPress={() => handleRemoveSet(exLog.id, set.id)}
+                        style={styles.setColNumber}
+                      >
+                        <AppText variant="body" color="textSecondary">
+                          {setIdx + 1}
+                        </AppText>
+                      </TouchableOpacity>
+                      
+                      {!isNoWeight && (
+                        <TextInput
+                          style={[styles.setInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                          keyboardType="numeric"
+                          value={String(set.weight)}
+                          onChangeText={(val) => handleUpdateSet(exLog.id, set.id, 'weight', val)}
+                        />
+                      )}
+                      
+                      <TextInput
+                        style={[styles.setInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                        keyboardType="number-pad"
+                        value={String(set.reps)}
+                        onChangeText={(val) => handleUpdateSet(exLog.id, set.id, 'reps', val)}
+                      />
+
+                      <TouchableOpacity 
+                        style={[
+                          styles.setColCheck, 
+                          styles.checkbox, 
+                          { 
+                            backgroundColor: set.completed ? theme.success : 'transparent',
+                            borderColor: set.completed ? theme.success : theme.border
+                          }
+                        ]}
+                        onPress={() => handleUpdateSet(exLog.id, set.id, 'completed', !set.completed)}
+                      >
+                        {set.completed && <Ionicons name="checkmark" size={14} color="#ffffff" />}
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </>
+              )}
+
+              {/* Exercise Notes & Add Set Row */}
+              <View style={styles.exerciseCardFooter}>
+                <TextInput
+                  style={[styles.exNotesInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                  placeholder="Exercise notes (e.g. drop sets, RPE 9...)"
+                  placeholderTextColor={theme.textMuted}
+                  value={exLog.notes}
+                  onChangeText={(val) => handleUpdateExerciseNotes(exLog.id, val)}
+                />
+                {!isWarmupOrStretch && (
+                  <TouchableOpacity 
+                    style={[styles.addSetRowBtn, { backgroundColor: theme.surfaceElevated }]}
+                    onPress={() => handleAddSet(exLog.id)}
+                  >
+                    <Ionicons name="add" size={16} color={theme.text} />
+                    <AppText variant="caption">Add Set</AppText>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </Card>
+          );
+        })
       )}
 
       {/* Save Button */}
@@ -761,6 +796,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  warmupRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
   editDetailsBtn: {
     flexDirection: 'row',
