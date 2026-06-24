@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Modal } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -457,96 +457,111 @@ export const AddFoodItemScreen: React.FC = () => {
           </View>
 
           {/* Quantity Inspector Drawer (shows when preset selected) */}
-          {selectedPreset && presetPreview && (
-            <Card variant="elevated" style={[styles.inspectorCard, { borderColor: theme.primary }]}>
-              <View style={styles.inspectorTitleRow}>
-                <AppText variant="h2" style={{ marginRight: 8 }}>{selectedPreset.icon}</AppText>
-                <View style={styles.flex}>
-                  <AppText variant="bodyBold" style={{ fontSize: 16 }}>{selectedPreset.name}</AppText>
-                  <AppText variant="caption" color="textSecondary">Base: {selectedPreset.servingSize}</AppText>
-                </View>
-                <TouchableOpacity onPress={() => setSelectedPreset(null)}>
-                  <Ionicons name="close-circle-outline" size={24} color={theme.textMuted} />
-                </TouchableOpacity>
-              </View>
+          <Modal
+            visible={!!selectedPreset}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={() => setSelectedPreset(null)}
+          >
+            <TouchableOpacity 
+              style={styles.modalBackdrop} 
+              activeOpacity={1} 
+              onPress={() => setSelectedPreset(null)}
+            />
+            <View style={styles.bottomSheetContainer}>
+              {selectedPreset && presetPreview && (
+                <Card variant="elevated" style={[styles.inspectorCard, { borderColor: theme.primary, backgroundColor: theme.surface }]}>
+                  <View style={[styles.sheetHandle, { backgroundColor: theme.border }]} />
+                  <View style={styles.inspectorTitleRow}>
+                    <AppText variant="h2" style={{ marginRight: 8 }}>{selectedPreset.icon}</AppText>
+                    <View style={styles.flex}>
+                      <AppText variant="bodyBold" style={{ fontSize: 16 }}>{selectedPreset.name}</AppText>
+                      <AppText variant="caption" color="textSecondary">Base: {selectedPreset.servingSize}</AppText>
+                    </View>
+                    <TouchableOpacity onPress={() => setSelectedPreset(null)}>
+                      <Ionicons name="close-circle-outline" size={24} color={theme.textMuted} />
+                    </TouchableOpacity>
+                  </View>
 
-              {/* Adjuster */}
-              <View style={styles.adjusterRow}>
-                <AppText variant="body">Portions / Quantity:</AppText>
-                <View style={styles.adjusterControls}>
-                  <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(-1)}>
-                    <AppText variant="bodyBold">-1</AppText>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(-0.5)}>
-                    <AppText variant="bodyBold">-0.5</AppText>
-                  </TouchableOpacity>
-                  
-                  <TextInput
-                    style={[styles.quantityInput, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
-                    keyboardType="decimal-pad"
-                    value={quantity}
-                    onChangeText={setQuantity}
-                    selectTextOnFocus
+                  {/* Adjuster */}
+                  <View style={styles.adjusterRow}>
+                    <AppText variant="body">Portions / Quantity:</AppText>
+                    <View style={styles.adjusterControls}>
+                      <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(-1)}>
+                        <AppText variant="bodyBold">-1</AppText>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(-0.5)}>
+                        <AppText variant="bodyBold">-0.5</AppText>
+                      </TouchableOpacity>
+                      
+                      <TextInput
+                        style={[styles.quantityInput, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
+                        keyboardType="decimal-pad"
+                        value={quantity}
+                        onChangeText={setQuantity}
+                        selectTextOnFocus
+                      />
+
+                      <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(0.5)}>
+                        <AppText variant="bodyBold">+0.5</AppText>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(1)}>
+                        <AppText variant="bodyBold">+1</AppText>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* Quick Preset multipliers */}
+                  <View style={styles.quickMultRow}>
+                    {['0.5', '1.0', '1.5', '2.0', '3.0'].map((val) => (
+                      <TouchableOpacity
+                        key={val}
+                        style={[
+                          styles.quickMultBtn,
+                          { 
+                            backgroundColor: quantity === val ? theme.primary : theme.surfaceElevated,
+                          }
+                        ]}
+                        onPress={() => setQuantity(val)}
+                      >
+                        <AppText variant="caption" style={{ fontWeight: 'bold', color: quantity === val ? '#0c0f12' : theme.text }}>
+                          {val}x
+                        </AppText>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  {/* Dynamic Preview */}
+                  <View style={[styles.previewCabinet, { backgroundColor: theme.background }]}>
+                    <View style={styles.previewValRow}>
+                      <View style={styles.previewCol}>
+                        <AppText variant="h3" color="primary">{presetPreview.calories}</AppText>
+                        <AppText variant="caption" color="textMuted">KCAL</AppText>
+                      </View>
+                      <View style={styles.previewCol}>
+                        <AppText variant="bodyBold">{presetPreview.protein}g</AppText>
+                        <AppText variant="caption" color="textSecondary">PROTEIN</AppText>
+                      </View>
+                      <View style={styles.previewCol}>
+                        <AppText variant="bodyBold">{presetPreview.carbs}g</AppText>
+                        <AppText variant="caption" color="textSecondary">CARBS</AppText>
+                      </View>
+                      <View style={styles.previewCol}>
+                        <AppText variant="bodyBold">{presetPreview.fats}g</AppText>
+                        <AppText variant="caption" color="textSecondary">FATS</AppText>
+                      </View>
+                    </View>
+                  </View>
+
+                  <PrimaryButton
+                    title={`Log ${quantity} portion(s) • ${presetPreview.calories} kcal`}
+                    onPress={handleSavePresetFood}
+                    style={styles.saveBtn}
                   />
-
-                  <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(0.5)}>
-                    <AppText variant="bodyBold">+0.5</AppText>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.adjustBtn, { backgroundColor: theme.surfaceElevated }]} onPress={() => handleAdjustQuantity(1)}>
-                    <AppText variant="bodyBold">+1</AppText>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Quick Preset multipliers */}
-              <View style={styles.quickMultRow}>
-                {['0.5', '1.0', '1.5', '2.0', '3.0'].map((val) => (
-                  <TouchableOpacity
-                    key={val}
-                    style={[
-                      styles.quickMultBtn,
-                      { 
-                        backgroundColor: quantity === val ? theme.primary : theme.surfaceElevated,
-                      }
-                    ]}
-                    onPress={() => setQuantity(val)}
-                  >
-                    <AppText variant="caption" style={{ fontWeight: 'bold', color: quantity === val ? '#0c0f12' : theme.text }}>
-                      {val}x
-                    </AppText>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Dynamic Preview */}
-              <View style={[styles.previewCabinet, { backgroundColor: theme.background }]}>
-                <View style={styles.previewValRow}>
-                  <View style={styles.previewCol}>
-                    <AppText variant="h3" color="primary">{presetPreview.calories}</AppText>
-                    <AppText variant="caption" color="textMuted">KCAL</AppText>
-                  </View>
-                  <View style={styles.previewCol}>
-                    <AppText variant="bodyBold">{presetPreview.protein}g</AppText>
-                    <AppText variant="caption" color="textSecondary">PROTEIN</AppText>
-                  </View>
-                  <View style={styles.previewCol}>
-                    <AppText variant="bodyBold">{presetPreview.carbs}g</AppText>
-                    <AppText variant="caption" color="textSecondary">CARBS</AppText>
-                  </View>
-                  <View style={styles.previewCol}>
-                    <AppText variant="bodyBold">{presetPreview.fats}g</AppText>
-                    <AppText variant="caption" color="textSecondary">FATS</AppText>
-                  </View>
-                </View>
-              </View>
-
-              <PrimaryButton
-                title={`Log ${quantity} portion(s) • ${presetPreview.calories} kcal`}
-                onPress={handleSavePresetFood}
-                style={styles.saveBtn}
-              />
-            </Card>
-          )}
+                </Card>
+              )}
+            </View>
+          </Modal>
         </View>
       )}
 
@@ -761,9 +776,31 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   inspectorCard: {
-    padding: 14,
+    padding: 20,
     borderWidth: 1.5,
-    gap: 10,
+    borderBottomWidth: 0,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    gap: 12,
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  bottomSheetContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 5,
+    borderRadius: 2.5,
+    alignSelf: 'center',
+    marginBottom: 8,
   },
   inspectorTitleRow: {
     flexDirection: 'row',
