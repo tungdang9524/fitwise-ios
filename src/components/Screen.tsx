@@ -19,33 +19,37 @@ export const Screen: React.FC<ScreenProps> = ({ children, scrollable = false, st
     headerHeight = 0;
   }
 
-  const content = scrollable ? (
-    <ScrollView 
-      contentContainerStyle={[styles.scrollContent, style]}
-      keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="on-drag"
-      showsVerticalScrollIndicator={false}
-    >
-      {children}
-    </ScrollView>
-  ) : (
-    <View style={[styles.content, style]}>
-      {children}
-    </View>
-  );
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      {scrollable ? (
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
           style={styles.keyboardAvoid}
           keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight + 20 : 0}
         >
-          {content}
+          <ScrollView 
+            contentContainerStyle={[styles.scrollContent, style]}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </ScrollView>
         </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
+      ) : (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+            style={styles.keyboardAvoid}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight + 20 : 0}
+          >
+            <View style={[styles.content, style]}>
+              {children}
+            </View>
+          </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
+      )}
     </SafeAreaView>
   );
 };
