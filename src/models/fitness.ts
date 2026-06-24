@@ -120,7 +120,6 @@ export interface FitnessState {
   waterGoal?: number;
   longestStreak?: number;
   quickWaterAmount?: number;
-  geminiApiKey?: string;
 
   // Sleep Tracker fields
   sleepLogs?: SleepLog[];

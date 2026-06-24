@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback, Modal, Platform } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as Clipboard from 'expo-clipboard';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,16 @@ import { useTheme } from '../theme/ThemeProvider';
 type AddFoodNavProp = NativeStackNavigationProp<RootStackParamList, 'AddFoodItem'>;
 type AddFoodRouteProp = RouteProp<RootStackParamList, 'AddFoodItem'>;
 
+const AI_FOOD_PROMPT = `Analyze the food/meal in this photo. Estimate its portion size/weight, calories (kcal), and macros (Protein, Carbs, Fats in grams). Respond ONLY with a single JSON object in this exact format, with no markdown backticks, explanations, or extra text:
+{
+  "name": "Food Name",
+  "servingSize": "e.g. 1 plate, 300g",
+  "calories": 450,
+  "protein": 25,
+  "carbohydrates": 50,
+  "fats": 12
+}`;
+
 export const AddFoodItemScreen: React.FC = () => {
   const { state, addFoodEntry, updateFoodEntry } = useFitness();
   const { theme } = useTheme();
@@ -26,14 +37,13 @@ export const AddFoodItemScreen: React.FC = () => {
   const foodEntryId = route.params?.foodEntryId;
   const isEditMode = !!foodEntryId;
 
-  // Camera, Barcode & AI states
+  // Camera, Barcode & AI Assistant states
   const [isScanning, setIsScanning] = useState(false);
   const [isFetchingBarcode, setIsFetchingBarcode] = useState(false);
-  const [isAiCamera, setIsAiCamera] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAiAssistantVisible, setIsAiAssistantVisible] = useState(false);
+  const [pastedJson, setPastedJson] = useState('');
   const [permission, requestPermission] = useCameraPermissions();
   const hasScannedRef = useRef(false);
-  const cameraRef = useRef<any>(null);
 
   const handleStartScan = async () => {
     if (!permission) {
@@ -53,107 +63,42 @@ export const AddFoodItemScreen: React.FC = () => {
     setIsScanning(true);
   };
 
-  const handleStartAiCamera = async () => {
-    if (!state.geminiApiKey || !state.geminiApiKey.trim()) {
+  const handleCopyPrompt = async () => {
+    try {
+      await Clipboard.setStringAsync(AI_FOOD_PROMPT);
       Alert.alert(
-        'Gemini Key Required',
-        'Please configure your Gemini API Key in Settings first to use the AI Food Scanner.'
+        'Prompt Copied',
+        'The AI Food Scan prompt has been copied to your clipboard. Upload your food photo to your favorite AI chatbot (ChatGPT, Claude, Gemini Web), paste the prompt, and copy the resulting JSON back here!'
       );
-      return;
-    }
-    if (!permission) {
-      const status = await requestPermission();
-      if (!status.granted) {
-        Alert.alert('Permission Denied', 'Camera permission is required to scan food.');
-        return;
-      }
-    } else if (!permission.granted) {
-      const status = await requestPermission();
-      if (!status.granted) {
-        Alert.alert('Permission Denied', 'Camera permission is required to scan food.');
-        return;
-      }
-    }
-    setIsAiCamera(true);
-  };
-
-  const handleCaptureAiPhoto = async () => {
-    if (!cameraRef.current) return;
-    try {
-      setIsAiCamera(false);
-      setIsAnalyzing(true);
-      
-      const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.5,
-        base64: true,
-      });
-
-      if (!photo || !photo.base64) {
-        throw new Error('Failed to capture photo base64.');
-      }
-
-      await analyzeFoodPhoto(photo.base64);
     } catch (e) {
-      Alert.alert('Error', 'Failed to capture food photo. Please try again.');
-      setIsAnalyzing(false);
+      Alert.alert('Error', 'Failed to copy prompt.');
     }
   };
 
-  const analyzeFoodPhoto = async (base64Image: string) => {
-    const apiKey = state.geminiApiKey;
-    if (!apiKey) {
-      Alert.alert('Error', 'Gemini API Key is not set.');
-      setIsAnalyzing(false);
+  const handleImportJson = () => {
+    if (!pastedJson.trim()) {
+      Alert.alert('Empty Input', 'Please paste the JSON string returned by the AI.');
       return;
     }
-
     try {
-      const prompt = `Analyze this photo of a meal. Identify the food name, portion/serving size description, and estimate calories (kcal), protein (g), carbs (g), and fats (g). Respond ONLY in this exact JSON schema: { "name": "string", "servingSize": "string", "calories": number, "protein": number, "carbohydrates": number, "fats": number }`;
+      let cleanText = pastedJson.trim();
+      if (cleanText.startsWith('```json')) {
+        cleanText = cleanText.substring(7);
+      }
+      if (cleanText.startsWith('```')) {
+        cleanText = cleanText.substring(3);
+      }
+      if (cleanText.endsWith('```')) {
+        cleanText = cleanText.substring(0, cleanText.length - 3);
+      }
+      cleanText = cleanText.trim();
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  { text: prompt },
-                  {
-                    inlineData: {
-                      mimeType: 'image/jpeg',
-                      data: base64Image,
-                    },
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              responseMimeType: 'application/json',
-            },
-          }),
-        }
-      );
-
-      const data = await response.json();
-      
-      if (!response.ok || data.error) {
-        const errorMsg = data.error?.message || 'Failed to analyze food.';
-        throw new Error(errorMsg);
+      const parsed = JSON.parse(cleanText);
+      if (!parsed.name || parsed.calories === undefined) {
+        throw new Error('Missing name or calories property.');
       }
 
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) {
-        throw new Error('No analysis text returned from Gemini.');
-      }
-
-      // Parse JSON from text
-      const parsed = JSON.parse(text.trim());
-      
-      setCustomName(parsed.name || 'AI Food Log');
+      setCustomName(parsed.name);
       setCustomCalories(String(parsed.calories || 0));
       setCustomServingSize(parsed.servingSize || '1 portion');
       setCustomProtein(String(parsed.protein || 0));
@@ -161,15 +106,14 @@ export const AddFoodItemScreen: React.FC = () => {
       setCustomFats(String(parsed.fats || 0));
       setCustomQuantity('1.0');
 
-      Alert.alert(
-        'AI Food Scan Success',
-        `Identified: "${parsed.name}"\nEstimated Calories: ${parsed.calories} kcal\n\nForm fields pre-filled successfully!`
-      );
+      setIsAiAssistantVisible(false);
+      setPastedJson('');
+      Alert.alert('Success', `Imported details for "${parsed.name}" successfully!`);
     } catch (e: any) {
-      console.error(e);
-      Alert.alert('Analysis Failed', e.message || 'Failed to analyze the photo. Please check your API key and connection.');
-    } finally {
-      setIsAnalyzing(false);
+      Alert.alert(
+        'Invalid JSON',
+        'Failed to parse the text. Make sure you copy the entire JSON object from the AI chatbot and paste it here.'
+      );
     }
   };
 
@@ -438,42 +382,7 @@ export const AddFoodItemScreen: React.FC = () => {
     };
   }, [customQuantity, customCalories, customProtein, customCarbs, customFats]);
 
-  if (isAiCamera) {
-    return (
-      <View style={styles.scannerWrapper}>
-        <CameraView
-          ref={cameraRef}
-          style={StyleSheet.absoluteFillObject}
-        >
-          {/* Overlay UI */}
-          <View style={styles.scannerOverlay}>
-            <View style={styles.scannerHeader}>
-              <TouchableOpacity style={styles.closeScanBtn} onPress={() => setIsAiCamera(false)}>
-                <Ionicons name="close" size={28} color="#fff" />
-              </TouchableOpacity>
-              <AppText variant="h3" style={{ color: '#fff' }}>AI Food Scanner</AppText>
-              <View style={{ width: 28 }} />
-            </View>
 
-            {/* Scanning area outline */}
-            <View style={styles.scannerFocusContainer}>
-              <View style={[styles.scannerFocusFrame, { borderColor: theme.primary, borderStyle: 'dashed' }]} />
-              <AppText variant="caption" style={styles.scannerHint}>
-                Place food inside the frame and take a photo
-              </AppText>
-            </View>
-
-            {/* Capture shutter button */}
-            <View style={styles.shutterContainer}>
-              <TouchableOpacity style={[styles.shutterBtn, { backgroundColor: theme.primary }]} onPress={handleCaptureAiPhoto}>
-                <Ionicons name="camera" size={32} color="#0c0f12" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </CameraView>
-      </View>
-    );
-  }
 
   if (isScanning) {
     return (
@@ -512,12 +421,10 @@ export const AddFoodItemScreen: React.FC = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.flex}>
         <Screen scrollable={activeTab !== 'presets'}>
-      {(isFetchingBarcode || isAnalyzing) && (
+      {isFetchingBarcode && (
         <View style={styles.fetchingOverlay}>
           <ActivityIndicator size="large" color={theme.primary} />
-          <AppText style={styles.fetchingText}>
-            {isFetchingBarcode ? 'Fetching product data...' : 'AI is analyzing your meal...'}
-          </AppText>
+          <AppText style={styles.fetchingText}>Fetching product data...</AppText>
         </View>
       )}
       {/* Header */}
@@ -729,7 +636,7 @@ export const AddFoodItemScreen: React.FC = () => {
             {/* AI scanner */}
             <TouchableOpacity 
               style={[styles.scanOptionItem, { backgroundColor: theme.surfaceElevated, borderColor: theme.border }]}
-              onPress={handleStartAiCamera}
+              onPress={() => setIsAiAssistantVisible(true)}
             >
               <Ionicons name="sparkles-outline" size={22} color={theme.primary} />
               <AppText variant="caption" style={{ fontWeight: 'bold', marginTop: 4 }}>AI Food Scan</AppText>
@@ -864,6 +771,103 @@ export const AddFoodItemScreen: React.FC = () => {
           />
         </Card>
       )}
+
+      {/* AI Assistant Modal */}
+      <Modal
+        visible={isAiAssistantVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsAiAssistantVisible(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalBackdrop} 
+          activeOpacity={1} 
+          onPress={() => setIsAiAssistantVisible(false)}
+        />
+        <View style={styles.assistantModalContainer}>
+          <Card variant="elevated" style={[styles.assistantCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={styles.assistantHeader}>
+              <Ionicons name="sparkles" size={20} color={theme.primary} />
+              <AppText variant="h2" style={{ marginLeft: 8, flex: 1 }}>AI Food Scan Assistant</AppText>
+              <TouchableOpacity onPress={() => setIsAiAssistantVisible(false)}>
+                <Ionicons name="close" size={24} color={theme.textMuted} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ maxHeight: 250 }} showsVerticalScrollIndicator={true} keyboardShouldPersistTaps="handled">
+              <AppText variant="bodyBold" style={{ marginTop: 4 }}>How it works:</AppText>
+              <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>
+                1. Tap **Copy Prompt** below.
+              </AppText>
+              <AppText variant="caption" color="textSecondary">
+                2. Open any AI Chatbot (ChatGPT, Claude, Gemini Web).
+              </AppText>
+              <AppText variant="caption" color="textSecondary">
+                3. Upload a photo of your food, paste the prompt, and send it.
+              </AppText>
+              <AppText variant="caption" color="textSecondary">
+                4. Copy the JSON response from the chatbot.
+              </AppText>
+              <AppText variant="caption" color="textSecondary">
+                5. Paste it in the input area below and click **Import & Auto-fill**.
+              </AppText>
+
+              <View style={[styles.promptPreviewContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                <AppText variant="caption" style={{ fontWeight: 'bold' }}>Prompt to Copy:</AppText>
+                <AppText variant="caption" color="textMuted" numberOfLines={4} style={{ marginTop: 4 }}>
+                  {AI_FOOD_PROMPT}
+                </AppText>
+              </View>
+            </ScrollView>
+
+            <TouchableOpacity 
+              style={[styles.copyPromptBtn, { backgroundColor: `${theme.primary}12`, borderColor: theme.primary }]}
+              onPress={handleCopyPrompt}
+            >
+              <Ionicons name="copy-outline" size={16} color={theme.primary} />
+              <AppText variant="bodyBold" color="primary" style={{ marginLeft: 6 }}>Copy Prompt</AppText>
+            </TouchableOpacity>
+
+            <AppText variant="label" color="textSecondary" style={{ marginTop: 8 }}>Paste JSON Response Here:</AppText>
+            <TextInput
+              style={[
+                styles.jsonTextArea, 
+                { 
+                  color: theme.text, 
+                  backgroundColor: theme.background, 
+                  borderColor: theme.border 
+                }
+              ]}
+              multiline
+              numberOfLines={4}
+              placeholder='e.g. {"name": "Apple", "calories": 52, ...}'
+              placeholderTextColor={theme.textMuted}
+              value={pastedJson}
+              onChangeText={setPastedJson}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            <View style={styles.assistantActionsRow}>
+              <TouchableOpacity 
+                style={[styles.assistantBtnOutline, { borderColor: theme.border }]} 
+                onPress={() => {
+                  setIsAiAssistantVisible(false);
+                  setPastedJson('');
+                }}
+              >
+                <AppText variant="bodyBold">Cancel</AppText>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.assistantBtnPrimary, { backgroundColor: theme.primary }]} 
+                onPress={handleImportJson}
+              >
+                <AppText variant="bodyBold" style={{ color: '#0c0f12' }}>Import & Auto-fill</AppText>
+              </TouchableOpacity>
+            </View>
+          </Card>
+        </View>
+      </Modal>
         </Screen>
       </View>
     </TouchableWithoutFeedback>
@@ -1155,21 +1159,75 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
   },
-  shutterContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  shutterBtn: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+  assistantModalContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+    zIndex: 1000,
+  },
+  assistantCard: {
+    width: '100%',
+    maxWidth: 380,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 12,
+    elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 6,
+    shadowRadius: 6,
+  },
+  assistantHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: 8,
+  },
+  promptPreviewContainer: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 8,
+  },
+  copyPromptBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 4,
+  },
+  jsonTextArea: {
+    height: 100,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 13,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    textAlignVertical: 'top',
+  },
+  assistantActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    marginTop: 8,
+  },
+  assistantBtnOutline: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  assistantBtnPrimary: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
 });
 
