@@ -4,7 +4,7 @@ export type RootStackParamList = {
   EditProfile: undefined;
   AddWorkoutSession: { workoutId?: string; templateId?: string } | undefined;
   ActiveWorkout: { sessionName: string; muscleGroups: string[] };
-  AddFoodItem: undefined;
+  AddFoodItem: { foodEntryId?: string } | undefined;
   ExerciseDetails: { exerciseId: string };
   AddProgressLog: undefined;
   ManagePresets: undefined;

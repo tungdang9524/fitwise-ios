@@ -209,12 +209,20 @@ export const NutritionScreen: React.FC = () => {
                 
                 <View style={styles.rightCol}>
                   <AppText variant="bodyBold">{food.calories} kcal</AppText>
-                  <TouchableOpacity 
-                    style={styles.deleteBtn} 
-                    onPress={() => handleDeleteFood(food.id, food.name)}
-                  >
-                    <Ionicons name="trash-outline" size={18} color={theme.error} />
-                  </TouchableOpacity>
+                  <View style={styles.actionButtonsRow}>
+                    <TouchableOpacity 
+                      style={styles.editBtn} 
+                      onPress={() => navigation.navigate('AddFoodItem', { foodEntryId: food.id })}
+                    >
+                      <Ionicons name="pencil-outline" size={18} color={theme.primary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.deleteBtn} 
+                      onPress={() => handleDeleteFood(food.id, food.name)}
+                    >
+                      <Ionicons name="trash-outline" size={18} color={theme.error} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </Card>
@@ -330,6 +338,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   deleteBtn: {
+    padding: 4,
+  },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  editBtn: {
     padding: 4,
   },
 });

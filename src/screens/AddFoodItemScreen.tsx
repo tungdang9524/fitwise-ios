@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -16,11 +16,15 @@ import { RootStackParamList } from '../navigation/types';
 import { useTheme } from '../theme/ThemeProvider';
 
 type AddFoodNavProp = NativeStackNavigationProp<RootStackParamList, 'AddFoodItem'>;
+type AddFoodRouteProp = RouteProp<RootStackParamList, 'AddFoodItem'>;
 
 export const AddFoodItemScreen: React.FC = () => {
-  const { state, addFoodEntry } = useFitness();
+  const { state, addFoodEntry, updateFoodEntry } = useFitness();
   const { theme } = useTheme();
   const navigation = useNavigation<AddFoodNavProp>();
+  const route = useRoute<AddFoodRouteProp>();
+  const foodEntryId = route.params?.foodEntryId;
+  const isEditMode = !!foodEntryId;
 
   // Camera & Barcode states
   const [isScanning, setIsScanning] = useState(false);
@@ -135,6 +139,23 @@ export const AddFoodItemScreen: React.FC = () => {
   const [customFats, setCustomFats] = useState('');
   const [customQuantity, setCustomQuantity] = useState('1.0');
 
+  useEffect(() => {
+    if (isEditMode && foodEntryId) {
+      const existingEntry = state.foodEntries.find((f) => f.id === foodEntryId);
+      if (existingEntry) {
+        const qty = existingEntry.quantity || 1.0;
+        setCustomName(existingEntry.name);
+        setCustomCalories(String(Math.round(existingEntry.calories / qty)));
+        setCustomServingSize(existingEntry.servingSize || '1 portion');
+        setCustomProtein(String(Math.round((existingEntry.protein / qty) * 10) / 10));
+        setCustomCarbs(String(Math.round((existingEntry.carbohydrates / qty) * 10) / 10));
+        setCustomFats(String(Math.round((existingEntry.fats / qty) * 10) / 10));
+        setCustomQuantity(String(qty));
+        setActiveTab('custom');
+      }
+    }
+  }, [isEditMode, foodEntryId, state.foodEntries]);
+
   // Filter food presets based on search query
   const filteredPresets = useMemo(() => {
     if (!searchQuery.trim()) return state.foodPresets;
@@ -219,31 +240,51 @@ export const AddFoodItemScreen: React.FC = () => {
     const carbsVal = parseFloat(customCarbs) || 0;
     const fatsVal = parseFloat(customFats) || 0;
 
-    const timeStr = new Date().toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-
     const scaledCalories = Math.round(baseCalVal * qMult);
     const scaledProtein = Math.round(proteinVal * qMult * 10) / 10;
     const scaledCarbs = Math.round(carbsVal * qMult * 10) / 10;
     const scaledFats = Math.round(fatsVal * qMult * 10) / 10;
 
-    const newFoodEntry: FoodEntry = {
-      id: `food_${Date.now()}`,
-      date: getLocalDateString(),
-      time: timeStr,
-      name: customName.trim(),
-      calories: scaledCalories,
-      protein: scaledProtein,
-      carbohydrates: scaledCarbs,
-      fats: scaledFats,
-      servingSize: customServingSize.trim(),
-      quantity: qMult,
-    };
+    if (isEditMode && foodEntryId) {
+      const originalEntry = state.foodEntries.find((f) => f.id === foodEntryId);
+      const updatedFoodEntry: FoodEntry = {
+        id: foodEntryId,
+        date: originalEntry ? originalEntry.date : getLocalDateString(),
+        time: originalEntry ? originalEntry.time : new Date().toLocaleTimeString(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        }),
+        name: customName.trim(),
+        calories: scaledCalories,
+        protein: scaledProtein,
+        carbohydrates: scaledCarbs,
+        fats: scaledFats,
+        servingSize: customServingSize.trim(),
+        quantity: qMult,
+      };
+      updateFoodEntry(updatedFoodEntry);
+    } else {
+      const timeStr = new Date().toLocaleTimeString(undefined, {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      const newFoodEntry: FoodEntry = {
+        id: `food_${Date.now()}`,
+        date: getLocalDateString(),
+        time: timeStr,
+        name: customName.trim(),
+        calories: scaledCalories,
+        protein: scaledProtein,
+        carbohydrates: scaledCarbs,
+        fats: scaledFats,
+        servingSize: customServingSize.trim(),
+        quantity: qMult,
+      };
+      addFoodEntry(newFoodEntry);
+    }
 
-    addFoodEntry(newFoodEntry);
     navigation.goBack();
   };
 
@@ -320,31 +361,33 @@ export const AddFoodItemScreen: React.FC = () => {
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="close" size={24} color={theme.text} />
         </TouchableOpacity>
-        <AppText variant="h2" style={styles.headerTitle}>Log Food Item</AppText>
+        <AppText variant="h2" style={styles.headerTitle}>{isEditMode ? 'Edit Food Log' : 'Log Food Item'}</AppText>
       </View>
 
       {/* Custom Tab Switcher */}
-      <View style={[styles.tabContainer, { backgroundColor: theme.surface }]}>
-        <TouchableOpacity
-          onPress={() => {
-            setActiveTab('presets');
-            setSelectedPreset(null);
-          }}
-          style={[styles.tabBtn, activeTab === 'presets' && { backgroundColor: theme.surfaceElevated }]}
-        >
-          <AppText variant="bodyBold" color={activeTab === 'presets' ? 'primary' : 'textMuted'}>
-            Quick Presets
-          </AppText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setActiveTab('custom')}
-          style={[styles.tabBtn, activeTab === 'custom' && { backgroundColor: theme.surfaceElevated }]}
-        >
-          <AppText variant="bodyBold" color={activeTab === 'custom' ? 'primary' : 'textMuted'}>
-            Custom Entry
-          </AppText>
-        </TouchableOpacity>
-      </View>
+      {!isEditMode && (
+        <View style={[styles.tabContainer, { backgroundColor: theme.surface }]}>
+          <TouchableOpacity
+            onPress={() => {
+              setActiveTab('presets');
+              setSelectedPreset(null);
+            }}
+            style={[styles.tabBtn, activeTab === 'presets' && { backgroundColor: theme.surfaceElevated }]}
+          >
+            <AppText variant="bodyBold" color={activeTab === 'presets' ? 'primary' : 'textMuted'}>
+              Quick Presets
+            </AppText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setActiveTab('custom')}
+            style={[styles.tabBtn, activeTab === 'custom' && { backgroundColor: theme.surfaceElevated }]}
+          >
+            <AppText variant="bodyBold" color={activeTab === 'custom' ? 'primary' : 'textMuted'}>
+              Custom Entry
+            </AppText>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* QUICK PRESETS TAB CONTENT */}
       {activeTab === 'presets' && (
@@ -632,7 +675,7 @@ export const AddFoodItemScreen: React.FC = () => {
           </View>
 
           <PrimaryButton
-            title={`Save Custom Log • ${customPreview.calories} kcal`}
+            title={isEditMode ? `Update Log • ${customPreview.calories} kcal` : `Save Custom Log • ${customPreview.calories} kcal`}
             onPress={handleSaveCustomFood}
             style={styles.submitBtn}
           />

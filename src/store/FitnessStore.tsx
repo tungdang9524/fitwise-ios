@@ -15,6 +15,7 @@ type FitnessAction =
   | { type: 'UPDATE_WORKOUT'; payload: WorkoutSession }
   | { type: 'DELETE_WORKOUT'; payload: string }
   | { type: 'ADD_FOOD_ENTRY'; payload: FoodEntry }
+  | { type: 'UPDATE_FOOD_ENTRY'; payload: FoodEntry }
   | { type: 'DELETE_FOOD_ENTRY'; payload: string }
   | { type: 'ADD_PROGRESS_LOG'; payload: ProgressLog }
   | { type: 'DELETE_PROGRESS_LOG'; payload: string }
@@ -542,6 +543,13 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       };
     }
 
+    case 'UPDATE_FOOD_ENTRY': {
+      return {
+        ...state,
+        foodEntries: state.foodEntries.map((f) => (f.id === action.payload.id ? action.payload : f)),
+      };
+    }
+
     case 'ADD_PROGRESS_LOG': {
       const newLogs = [action.payload, ...state.progressLogs].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -888,6 +896,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
   updateWorkout: (workout: WorkoutSession) => void;
   deleteWorkout: (id: string) => void;
   addFoodEntry: (food: FoodEntry) => void;
+  updateFoodEntry: (food: FoodEntry) => void;
   deleteFoodEntry: (id: string) => void;
   addProgressLog: (log: ProgressLog) => void;
   deleteProgressLog: (id: string) => void;
@@ -959,6 +968,10 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addFoodEntry = (food: FoodEntry) => {
     dispatch({ type: 'ADD_FOOD_ENTRY', payload: food });
+  };
+
+  const updateFoodEntry = (food: FoodEntry) => {
+    dispatch({ type: 'UPDATE_FOOD_ENTRY', payload: food });
   };
 
   const deleteFoodEntry = (id: string) => {
@@ -1088,6 +1101,7 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updateWorkout,
         deleteWorkout,
         addFoodEntry,
+        updateFoodEntry,
         deleteFoodEntry,
         addProgressLog,
         deleteProgressLog,
