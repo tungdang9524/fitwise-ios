@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useMemo, useRef } from 'react';
+import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,102 @@ export const AddFoodItemScreen: React.FC = () => {
   const { state, addFoodEntry } = useFitness();
   const { theme } = useTheme();
   const navigation = useNavigation<AddFoodNavProp>();
+
+  // Camera & Barcode states
+  const [isScanning, setIsScanning] = useState(false);
+  const [isFetchingBarcode, setIsFetchingBarcode] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
+  const hasScannedRef = useRef(false);
+
+  const handleStartScan = async () => {
+    if (!permission) {
+      const status = await requestPermission();
+      if (!status.granted) {
+        Alert.alert('Permission Denied', 'Camera permission is required to scan barcodes.');
+        return;
+      }
+    } else if (!permission.granted) {
+      const status = await requestPermission();
+      if (!status.granted) {
+        Alert.alert('Permission Denied', 'Camera permission is required to scan barcodes.');
+        return;
+      }
+    }
+    hasScannedRef.current = false;
+    setIsScanning(true);
+  };
+
+  const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
+    if (hasScannedRef.current) return;
+    hasScannedRef.current = true;
+    setIsScanning(false);
+    setIsFetchingBarcode(true);
+
+    try {
+      const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${data}.json`);
+      const result = await response.json();
+
+      if (result.status === 1 && result.product) {
+        const product = result.product;
+        const nutriments = product.nutriments || {};
+
+        const name = product.product_name || product.product_name_en || product.product_name_vi || `Barcode: ${data}`;
+        
+        let calories = 0;
+        if (nutriments['energy-kcal_serving'] !== undefined) {
+          calories = Math.round(Number(nutriments['energy-kcal_serving']));
+        } else if (nutriments['energy-kcal_100g'] !== undefined) {
+          calories = Math.round(Number(nutriments['energy-kcal_100g']));
+        } else if (nutriments['energy-kj_serving'] !== undefined) {
+          calories = Math.round(Number(nutriments['energy-kj_serving']) / 4.184);
+        } else if (nutriments['energy-kj_100g'] !== undefined) {
+          calories = Math.round(Number(nutriments['energy-kj_100g']) / 4.184);
+        }
+
+        const servingSize = product.serving_size || (nutriments['energy-kcal_serving'] !== undefined ? '1 serving' : '100g');
+
+        const protein = Number(nutriments.proteins_serving || nutriments.proteins_100g || 0);
+        const carbs = Number(nutriments.carbohydrates_serving || nutriments.carbohydrates_100g || 0);
+        const fats = Number(nutriments.fat_serving || nutriments.fat_100g || 0);
+
+        setCustomName(name);
+        setCustomCalories(String(calories));
+        setCustomServingSize(servingSize);
+        setCustomProtein(String(protein));
+        setCustomCarbs(String(carbs));
+        setCustomFats(String(fats));
+        setCustomQuantity('1.0');
+
+        setActiveTab('custom');
+        
+        Alert.alert(
+          'Barcode Scanned',
+          `Successfully loaded details for:\n"${name}"\n\nMacros pre-filled in Custom Entry.`
+        );
+      } else {
+        Alert.alert(
+          'Product Not Found',
+          `Could not find details for barcode: ${data}. You can still add it manually.`,
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setCustomName(`Barcode: ${data}`);
+                setActiveTab('custom');
+              }
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch food details. Please check your internet connection.');
+    } finally {
+      setIsFetchingBarcode(false);
+      setTimeout(() => {
+        hasScannedRef.current = false;
+      }, 1500);
+    }
+  };
 
   // Tabs: 'presets' | 'custom'
   const [activeTab, setActiveTab] = useState<'presets' | 'custom'>('presets');
@@ -177,8 +274,47 @@ export const AddFoodItemScreen: React.FC = () => {
     };
   }, [customQuantity, customCalories, customProtein, customCarbs, customFats]);
 
+  if (isScanning) {
+    return (
+      <View style={styles.scannerWrapper}>
+        <CameraView
+          style={StyleSheet.absoluteFillObject}
+          barcodeScannerSettings={{
+            barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e'],
+          }}
+          onBarcodeScanned={handleBarCodeScanned}
+        >
+          {/* Overlay UI */}
+          <View style={styles.scannerOverlay}>
+            <View style={styles.scannerHeader}>
+              <TouchableOpacity style={styles.closeScanBtn} onPress={() => setIsScanning(false)}>
+                <Ionicons name="close" size={28} color="#fff" />
+              </TouchableOpacity>
+              <AppText variant="h3" style={{ color: '#fff' }}>Scan Food Barcode</AppText>
+              <View style={{ width: 28 }} />
+            </View>
+
+            {/* Scanning area outline */}
+            <View style={styles.scannerFocusContainer}>
+              <View style={styles.scannerFocusFrame} />
+              <AppText variant="caption" style={styles.scannerHint}>
+                Align barcode inside the frame
+              </AppText>
+            </View>
+          </View>
+        </CameraView>
+      </View>
+    );
+  }
+
   return (
     <Screen scrollable={activeTab !== 'presets'}>
+      {isFetchingBarcode && (
+        <View style={styles.fetchingOverlay}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <AppText style={styles.fetchingText}>Fetching product data...</AppText>
+        </View>
+      )}
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
@@ -224,10 +360,13 @@ export const AddFoodItemScreen: React.FC = () => {
               onChangeText={setSearchQuery}
             />
             {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <TouchableOpacity onPress={() => setSearchQuery('')} style={{ marginRight: 8 }}>
                 <Ionicons name="close-circle" size={18} color={theme.textMuted} />
               </TouchableOpacity>
             )}
+            <TouchableOpacity onPress={handleStartScan} style={styles.scanBtn}>
+              <Ionicons name="barcode-outline" size={24} color={theme.primary} />
+            </TouchableOpacity>
           </View>
 
           {/* List of presets */}
@@ -691,6 +830,72 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
+  },
+  scannerWrapper: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  scannerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'space-between',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  scannerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  closeScanBtn: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  scannerFocusContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scannerFocusFrame: {
+    width: 280,
+    height: 180,
+    borderWidth: 2,
+    borderColor: '#00E5FF',
+    borderRadius: 12,
+    backgroundColor: 'transparent',
+    marginBottom: 20,
+    shadowColor: '#00E5FF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+  },
+  scannerHint: {
+    color: '#fff',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    overflow: 'hidden',
+    textAlign: 'center',
+  },
+  scanBtn: {
+    paddingLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fetchingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  fetchingText: {
+    marginTop: 12,
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

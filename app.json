@@ -20,6 +20,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow FitWise to access the camera to scan food barcodes.",
+          "barcodeScannerEnabled": true
+        }
+      ]
+    ]
   }
 }
