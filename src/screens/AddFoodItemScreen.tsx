@@ -409,9 +409,6 @@ export const AddFoodItemScreen: React.FC = () => {
                 <Ionicons name="close-circle" size={18} color={theme.textMuted} />
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={handleStartScan} style={styles.scanBtn}>
-              <Ionicons name="barcode-outline" size={24} color={theme.primary} />
-            </TouchableOpacity>
           </View>
 
           {/* List of presets */}
@@ -556,6 +553,21 @@ export const AddFoodItemScreen: React.FC = () => {
       {/* CUSTOM FOOD ENTRY TAB CONTENT */}
       {activeTab === 'custom' && (
         <Card variant="glass" style={styles.formCard}>
+          {/* Scan Barcode button/card to auto fill */}
+          <TouchableOpacity 
+            style={[styles.scanBarcodeCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.border }]}
+            onPress={handleStartScan}
+          >
+            <View style={[styles.scanIconWrap, { backgroundColor: `${theme.primary}12` }]}>
+              <Ionicons name="barcode-outline" size={20} color={theme.primary} />
+            </View>
+            <View style={styles.flex}>
+              <AppText variant="bodyBold">Scan Barcode to Auto-fill</AppText>
+              <AppText variant="caption" color="textSecondary">Auto-fill name & nutrients using camera</AppText>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+          </TouchableOpacity>
+
           <AppText variant="label" color="textSecondary" style={styles.label}>Food Name</AppText>
           <TextInput
             style={[styles.input, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
@@ -944,6 +956,22 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: '#fff',
     fontWeight: 'bold',
+  },
+  scanBarcodeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 8,
+    gap: 12,
+  },
+  scanIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
