@@ -123,6 +123,9 @@ export interface FitnessState {
   sleepLogs?: SleepLog[];
   sleepGoal?: number; // target in minutes
   longestSleepStreak?: number;
+  
+  // Active Workout persistence
+  activeWorkout?: ActiveWorkoutState | null;
 }
 
 export interface TemplateSet {
@@ -165,5 +168,15 @@ export interface SleepLog {
   durationScore: number; // 0-100 sub-score
   consistencyScore: number; // 0-100 sub-score
   qualityScore: number; // 0-100 sub-score
+}
+
+export interface ActiveWorkoutState {
+  name: string;
+  exercises: ExerciseLog[];
+  notes: string;
+  muscleGroups: string[];
+  startTime: string;
+  templateId?: string;
+  editingWorkoutId?: string;
 }
 

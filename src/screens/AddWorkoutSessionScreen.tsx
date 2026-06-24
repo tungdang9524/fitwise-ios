@@ -19,7 +19,7 @@ type AddWorkoutNavProp = NativeStackNavigationProp<RootStackParamList, 'AddWorko
 type AddWorkoutRouteProp = RouteProp<RootStackParamList, 'AddWorkoutSession'>;
 
 export const AddWorkoutSessionScreen: React.FC = () => {
-  const { state, addWorkout, updateWorkout } = useFitness();
+  const { state, addWorkout, updateWorkout, startActiveWorkout, updateActiveWorkout, clearActiveWorkout } = useFitness();
   const { theme } = useTheme();
   const navigation = useNavigation<AddWorkoutNavProp>();
   const route = useRoute<AddWorkoutRouteProp>();
@@ -28,10 +28,11 @@ export const AddWorkoutSessionScreen: React.FC = () => {
   const editingWorkoutId = route.params?.workoutId;
   const existingWorkout = editingWorkoutId ? state.workouts.find((w) => w.id === editingWorkoutId) : null;
 
-  const [sessionName, setSessionName] = useState(existingWorkout?.name || 'Workout Session');
-  const [exercises, setExercises] = useState<ExerciseLog[]>(existingWorkout?.exercises || []);
-  const [notes, setNotes] = useState(existingWorkout?.notes || '');
-  const [muscleGroups, setMuscleGroups] = useState<string[]>(existingWorkout?.muscleGroups || []);
+  const [sessionName, setSessionName] = useState('Workout Session');
+  const [exercises, setExercises] = useState<ExerciseLog[]>([]);
+  const [notes, setNotes] = useState('');
+  const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Exercise Selection Modal state
   const [libraryModalVisible, setLibraryModalVisible] = useState(false);
@@ -40,14 +41,163 @@ export const AddWorkoutSessionScreen: React.FC = () => {
   const [secondsElapsed, setSecondsElapsed] = useState(0);
 
   useEffect(() => {
-    // Only run timer if we are tracking a new workout session (not editing a past one)
+    if (isInitialized) return;
+
+    if (state.activeWorkout && !existingWorkout) {
+      const templateId = route.params?.templateId;
+      const isDifferent = 
+        (templateId && templateId !== state.activeWorkout.templateId) ||
+        (editingWorkoutId && editingWorkoutId !== state.activeWorkout.editingWorkoutId) ||
+        (!templateId && !editingWorkoutId && state.activeWorkout.templateId);
+        
+      if (isDifferent) {
+        Alert.alert(
+          'Workout in Progress',
+          'You already have an active workout session. Would you like to resume it or start a new session instead?',
+          [
+            {
+              text: 'Resume Active',
+              onPress: () => {
+                const act = state.activeWorkout!;
+                setSessionName(act.name);
+                setExercises(act.exercises);
+                setNotes(act.notes);
+                setMuscleGroups(act.muscleGroups);
+                const start = new Date(act.startTime).getTime();
+                setSecondsElapsed(Math.max(0, Math.floor((Date.now() - start) / 1000)));
+                setIsInitialized(true);
+              }
+            },
+            {
+              text: 'Start New (Discard Active)',
+              style: 'destructive',
+              onPress: () => {
+                clearActiveWorkout();
+                setupFreshWorkout();
+              }
+            }
+          ]
+        );
+      } else {
+        const act = state.activeWorkout;
+        setSessionName(act.name);
+        setExercises(act.exercises);
+        setNotes(act.notes);
+        setMuscleGroups(act.muscleGroups);
+        const start = new Date(act.startTime).getTime();
+        setSecondsElapsed(Math.max(0, Math.floor((Date.now() - start) / 1000)));
+        setIsInitialized(true);
+      }
+    } else {
+      setupFreshWorkout();
+    }
+
+    function setupFreshWorkout() {
+      const templateId = route.params?.templateId;
+      if (existingWorkout) {
+        setSessionName(existingWorkout.name);
+        setExercises(existingWorkout.exercises);
+        setNotes(existingWorkout.notes || '');
+        setMuscleGroups(existingWorkout.muscleGroups);
+        setIsInitialized(true);
+      } else if (templateId) {
+        const template = (state.templates || []).find((t) => t.id === templateId);
+        if (template) {
+          setSessionName(template.name);
+          setNotes(template.notes || '');
+          setMuscleGroups(template.muscleGroups);
+
+          const loadedExercises: ExerciseLog[] = template.exercises.map((tplEx) => {
+            let previousSets: SetLog[] = [];
+            for (const workout of state.workouts) {
+              const historyEx = workout.exercises.find((e) => e.exerciseId === tplEx.exerciseId);
+              if (historyEx) {
+                const completedHistorySets = historyEx.sets.filter((s) => s.completed);
+                if (completedHistorySets.length > 0) {
+                  previousSets = completedHistorySets.map((s, idx) => ({
+                    id: `set_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 4)}`,
+                    weight: s.weight,
+                    reps: s.reps,
+                    completed: false,
+                  }));
+                  break;
+                }
+              }
+            }
+
+            if (previousSets.length === 0) {
+              previousSets = tplEx.sets.map((s, idx) => ({
+                id: `set_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 4)}`,
+                weight: s.weight,
+                reps: s.reps,
+                completed: false,
+              }));
+            }
+
+            return {
+              id: `ex_log_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+              exerciseId: tplEx.exerciseId,
+              name: tplEx.name,
+              muscleGroup: tplEx.muscleGroup,
+              sets: previousSets,
+              notes: '',
+            };
+          });
+
+          setExercises(loadedExercises);
+          startActiveWorkout({
+            name: template.name,
+            exercises: loadedExercises,
+            notes: template.notes || '',
+            muscleGroups: template.muscleGroups,
+            startTime: new Date().toISOString(),
+            templateId,
+          });
+        }
+        setIsInitialized(true);
+      } else {
+        setSessionName('Workout Session');
+        setExercises([]);
+        setNotes('');
+        setMuscleGroups([]);
+        startActiveWorkout({
+          name: 'Workout Session',
+          exercises: [],
+          notes: '',
+          muscleGroups: [],
+          startTime: new Date().toISOString(),
+        });
+        setIsInitialized(true);
+      }
+    }
+  }, [route.params?.templateId, route.params?.workoutId, state.activeWorkout, state.templates, state.workouts, existingWorkout, isInitialized]);
+
+  useEffect(() => {
+    if (isInitialized && !existingWorkout && state.activeWorkout) {
+      updateActiveWorkout({
+        name: sessionName,
+        exercises,
+        notes,
+        muscleGroups,
+      });
+    }
+  }, [isInitialized, existingWorkout, sessionName, exercises, notes, muscleGroups]);
+
+  useEffect(() => {
     if (!existingWorkout) {
-      const interval = setInterval(() => {
-        setSecondsElapsed((prev) => prev + 1);
-      }, 1000);
+      const update = () => {
+        if (state.activeWorkout) {
+          const start = new Date(state.activeWorkout.startTime).getTime();
+          setSecondsElapsed(Math.max(0, Math.floor((Date.now() - start) / 1000)));
+        } else {
+          setSecondsElapsed((prev) => prev + 1);
+        }
+      };
+      update();
+      const interval = setInterval(update, 1000);
       return () => clearInterval(interval);
     }
-  }, [existingWorkout]);
+  }, [existingWorkout, state.activeWorkout?.startTime]);
 
   const formatTimer = (sec: number) => {
     const hrs = Math.floor(sec / 3600);
@@ -55,61 +205,6 @@ export const AddWorkoutSessionScreen: React.FC = () => {
     const secs = sec % 60;
     return `${hrs > 0 ? `${hrs}:` : ''}${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
-
-  useEffect(() => {
-    const templateId = route.params?.templateId;
-    if (templateId && !existingWorkout) {
-      const template = (state.templates || []).find((t) => t.id === templateId);
-      if (template) {
-        setSessionName(template.name);
-        setNotes(template.notes || '');
-        setMuscleGroups(template.muscleGroups);
-
-        // Convert template exercises and pull historical data
-        const loadedExercises: ExerciseLog[] = template.exercises.map((tplEx) => {
-          let previousSets: SetLog[] = [];
-
-          // Walk back through workouts to find the most recent completed sets for this exerciseId
-          for (const workout of state.workouts) {
-            const historyEx = workout.exercises.find((e) => e.exerciseId === tplEx.exerciseId);
-            if (historyEx) {
-              const completedHistorySets = historyEx.sets.filter((s) => s.completed);
-              if (completedHistorySets.length > 0) {
-                previousSets = completedHistorySets.map((s, idx) => ({
-                  id: `set_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 4)}`,
-                  weight: s.weight,
-                  reps: s.reps,
-                  completed: false,
-                }));
-                break;
-              }
-            }
-          }
-
-          // Fallback to template defaults if no history is found
-          if (previousSets.length === 0) {
-            previousSets = tplEx.sets.map((s, idx) => ({
-              id: `set_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 4)}`,
-              weight: s.weight,
-              reps: s.reps,
-              completed: false,
-            }));
-          }
-
-          return {
-            id: `ex_log_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
-            exerciseId: tplEx.exerciseId,
-            name: tplEx.name,
-            muscleGroup: tplEx.muscleGroup,
-            sets: previousSets,
-            notes: '',
-          };
-        });
-
-        setExercises(loadedExercises);
-      }
-    }
-  }, [route.params?.templateId, state.templates, state.workouts, existingWorkout]);
 
   const availableMuscleGroups = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio', 'Warm-up', 'Stretching'];
 
@@ -231,7 +326,7 @@ export const AddWorkoutSessionScreen: React.FC = () => {
     const sessionData: WorkoutSession = {
       id: existingWorkout?.id || `workout_${Date.now()}`,
       date: existingWorkout?.date || getLocalDateString(),
-      startTime: existingWorkout?.startTime || new Date().toISOString(),
+      startTime: (existingWorkout || !state.activeWorkout) ? (existingWorkout?.startTime || new Date().toISOString()) : state.activeWorkout.startTime,
       endTime: new Date().toISOString(),
       name: sessionName.trim(),
       muscleGroups: muscleGroups.length > 0 ? muscleGroups : ['Full Body'],
@@ -243,9 +338,28 @@ export const AddWorkoutSessionScreen: React.FC = () => {
       updateWorkout(sessionData);
     } else {
       addWorkout(sessionData);
+      clearActiveWorkout();
     }
 
     navigation.goBack();
+  };
+
+  const handleDiscardWorkout = () => {
+    Alert.alert(
+      'Discard Workout',
+      'Are you sure you want to discard this workout session? Your current progress will be lost.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Discard',
+          style: 'destructive',
+          onPress: () => {
+            clearActiveWorkout();
+            navigation.goBack();
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -448,6 +562,15 @@ export const AddWorkoutSessionScreen: React.FC = () => {
         style={styles.saveBtn}
       />
 
+      {!existingWorkout && (
+        <TouchableOpacity 
+          onPress={handleDiscardWorkout}
+          style={styles.discardBtn}
+        >
+          <AppText variant="bodyBold" color="error">Discard Workout Session</AppText>
+        </TouchableOpacity>
+      )}
+
       {/* Exercise Selection Overlay Modal */}
       <Modal visible={libraryModalVisible} animationType="slide">
         <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.background }]}>
@@ -646,6 +769,11 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
+  },
+  discardBtn: {
+    marginVertical: 12,
+    alignItems: 'center',
+    paddingVertical: 12,
   },
 });
 export default AddWorkoutSessionScreen;

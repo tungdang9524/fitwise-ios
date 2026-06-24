@@ -1,9 +1,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { useFitness } from '../store/FitnessStore';
 import { useTheme } from '../theme/ThemeProvider';
@@ -34,7 +34,6 @@ import SleepTrackerScreen from '../screens/SleepTrackerScreen';
 import UserProfileScreen from '../screens/UserProfileScreen';
 
 // Placeholders for secondary stacks (we will create actual screens for these soon)
-import { Text } from 'react-native';
 const TempScreen = ({ title }: { title: string }) => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0c0f12' }}>
     <Text style={{ color: '#fff' }}>{title} Placeholder</Text>
@@ -44,58 +43,112 @@ const TempScreen = ({ title }: { title: string }) => (
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const TabNavigator = () => {
-  const { theme, isDark } = useTheme();
+const ActiveWorkoutTimer = ({ startTime, theme }: { startTime: string; theme: any }) => {
+  const [elapsed, setElapsed] = React.useState(0);
+
+  React.useEffect(() => {
+    const update = () => {
+      const start = new Date(startTime).getTime();
+      setElapsed(Math.max(0, Math.floor((Date.now() - start) / 1000)));
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [startTime]);
+
+  const formatTimer = (sec: number) => {
+    const hrs = Math.floor(sec / 3600);
+    const mins = Math.floor((sec % 3600) / 60);
+    const secs = sec % 60;
+    return `${hrs > 0 ? `${hrs}:` : ''}${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
 
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap = 'cube';
+    <Text style={{ color: theme.primary, fontWeight: 'bold' }}>
+      {formatTimer(elapsed)}
+    </Text>
+  );
+};
 
-          if (route.name === 'Dashboard') {
-            iconName = focused ? 'grid' : 'grid-outline';
-          } else if (route.name === 'Workouts') {
-            iconName = focused ? 'barbell' : 'barbell-outline';
-          } else if (route.name === 'Nutrition') {
-            iconName = focused ? 'nutrition' : 'nutrition-outline';
-          } else if (route.name === 'Progress') {
-            iconName = focused ? 'trending-up' : 'trending-up-outline';
-          } else if (route.name === 'Settings') {
-            iconName = focused ? 'settings' : 'settings-outline';
-          }
+const TabNavigator = () => {
+  const { theme } = useTheme();
+  const { state } = useFitness();
+  const navigation = useNavigation<any>();
 
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: theme.textMuted,
-        tabBarStyle: {
-          backgroundColor: theme.surface,
-          borderTopColor: theme.border,
-          height: 80,
-          paddingBottom: 20,
-          paddingTop: 10,
-        },
-        headerStyle: {
-          backgroundColor: theme.background,
-          borderBottomWidth: 1,
-          borderBottomColor: theme.border,
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        headerTitleStyle: {
-          fontWeight: 'bold',
-          color: theme.text,
-        },
-        headerTintColor: theme.text,
-      })}
-    >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Summary' }} />
-      <Tab.Screen name="Workouts" component={WorkoutsScreen} options={{ title: 'Workouts' }} />
-      <Tab.Screen name="Nutrition" component={NutritionScreen} options={{ title: 'Nutrition' }} />
-      <Tab.Screen name="Progress" component={ProgressScreen} options={{ title: 'Progress' }} />
-      <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
-    </Tab.Navigator>
+  return (
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName: keyof typeof Ionicons.glyphMap = 'cube';
+
+            if (route.name === 'Dashboard') {
+              iconName = focused ? 'grid' : 'grid-outline';
+            } else if (route.name === 'Workouts') {
+              iconName = focused ? 'barbell' : 'barbell-outline';
+            } else if (route.name === 'Nutrition') {
+              iconName = focused ? 'nutrition' : 'nutrition-outline';
+            } else if (route.name === 'Progress') {
+              iconName = focused ? 'trending-up' : 'trending-up-outline';
+            } else if (route.name === 'Settings') {
+              iconName = focused ? 'settings' : 'settings-outline';
+            }
+
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: theme.primary,
+          tabBarInactiveTintColor: theme.textMuted,
+          tabBarStyle: {
+            backgroundColor: theme.surface,
+            borderTopColor: theme.border,
+            height: 80,
+            paddingBottom: 20,
+            paddingTop: 10,
+          },
+          headerStyle: {
+            backgroundColor: theme.background,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.border,
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            color: theme.text,
+          },
+          headerTintColor: theme.text,
+        })}
+      >
+        <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Summary' }} />
+        <Tab.Screen name="Workouts" component={WorkoutsScreen} options={{ title: 'Workouts' }} />
+        <Tab.Screen name="Nutrition" component={NutritionScreen} options={{ title: 'Nutrition' }} />
+        <Tab.Screen name="Progress" component={ProgressScreen} options={{ title: 'Progress' }} />
+        <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
+      </Tab.Navigator>
+
+      {state.activeWorkout && (
+        <TouchableOpacity
+          style={[styles.activeWorkoutBar, { backgroundColor: theme.surfaceElevated, borderTopColor: theme.border }]}
+          onPress={() => {
+            navigation.navigate('AddWorkoutSession', {
+              workoutId: state.activeWorkout?.editingWorkoutId,
+              templateId: state.activeWorkout?.templateId,
+            });
+          }}
+        >
+          <Ionicons name="barbell" size={24} color={theme.primary} />
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 14 }}>
+              Active: {state.activeWorkout.name}
+            </Text>
+            <Text style={{ color: theme.textMuted, fontSize: 12 }}>
+              Tap to resume workout
+            </Text>
+          </View>
+          <ActiveWorkoutTimer startTime={state.activeWorkout.startTime} theme={theme} />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
@@ -243,5 +296,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  activeWorkoutBar: {
+    position: 'absolute',
+    bottom: 80,
+    left: 0,
+    right: 0,
+    height: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
 });

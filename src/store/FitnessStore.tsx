@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { 
   FitnessState, UserProfile, WorkoutSession, FoodEntry, ProgressLog, 
-  LibraryExercise, FoodPreset, PersonalRecord, WorkoutTemplate, WaterLog, SleepLog 
+  LibraryExercise, FoodPreset, PersonalRecord, WorkoutTemplate, WaterLog, SleepLog,
+  ActiveWorkoutState
 } from '../models/fitness';
 import { saveFitnessState, loadFitnessState, clearFitnessState } from './storage';
 import { calculateCaloricTargets } from '../utils/formulas';
@@ -37,6 +38,9 @@ type FitnessAction =
   | { type: 'UPDATE_SLEEP'; payload: SleepLog }
   | { type: 'DELETE_SLEEP'; payload: string }
   | { type: 'SET_SLEEP_GOAL'; payload: number }
+  | { type: 'START_ACTIVE_WORKOUT'; payload: ActiveWorkoutState }
+  | { type: 'UPDATE_ACTIVE_WORKOUT'; payload: Partial<ActiveWorkoutState> }
+  | { type: 'CLEAR_ACTIVE_WORKOUT' }
   | { type: 'RESET_STATE' };
 
 // Gamification Helpers
@@ -336,6 +340,7 @@ const initialFitnessState: FitnessState = {
   sleepLogs: [],
   sleepGoal: 480,
   longestSleepStreak: 0,
+  activeWorkout: null,
 };
 
 const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessState => {
@@ -358,6 +363,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         sleepLogs: loaded.sleepLogs || [],
         sleepGoal: loaded.sleepGoal || 480,
         longestSleepStreak: loaded.longestSleepStreak || 0,
+        activeWorkout: loaded.activeWorkout !== undefined ? loaded.activeWorkout : null,
       };
     }
 
@@ -881,6 +887,28 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
       };
     }
 
+    case 'START_ACTIVE_WORKOUT':
+      return {
+        ...state,
+        activeWorkout: action.payload,
+      };
+
+    case 'UPDATE_ACTIVE_WORKOUT':
+      if (!state.activeWorkout) return state;
+      return {
+        ...state,
+        activeWorkout: {
+          ...state.activeWorkout,
+          ...action.payload,
+        },
+      };
+
+    case 'CLEAR_ACTIVE_WORKOUT':
+      return {
+        ...state,
+        activeWorkout: null,
+      };
+
     case 'RESET_STATE':
       return initialFitnessState;
 
@@ -918,6 +946,9 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
   updateSleepLog: (sleep: SleepLog) => void;
   deleteSleepLog: (id: string) => void;
   setSleepGoal: (goal: number) => void;
+  startActiveWorkout: (workout: ActiveWorkoutState) => void;
+  updateActiveWorkout: (workout: Partial<ActiveWorkoutState>) => void;
+  clearActiveWorkout: () => void;
   resetState: () => void;
 }
 const FitnessContext = createContext<FitnessContextType | undefined>(undefined);
@@ -1085,6 +1116,18 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'SET_SLEEP_GOAL', payload: goal });
   };
 
+  const startActiveWorkout = (workout: ActiveWorkoutState) => {
+    dispatch({ type: 'START_ACTIVE_WORKOUT', payload: workout });
+  };
+
+  const updateActiveWorkout = (workout: Partial<ActiveWorkoutState>) => {
+    dispatch({ type: 'UPDATE_ACTIVE_WORKOUT', payload: workout });
+  };
+
+  const clearActiveWorkout = () => {
+    dispatch({ type: 'CLEAR_ACTIVE_WORKOUT' });
+  };
+
   const resetState = async () => {
     await clearFitnessState();
     dispatch({ type: 'RESET_STATE' });
@@ -1123,6 +1166,9 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updateSleepLog,
         deleteSleepLog,
         setSleepGoal,
+        startActiveWorkout,
+        updateActiveWorkout,
+        clearActiveWorkout,
         resetState,
       }}
     >
