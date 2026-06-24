@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback, Modal, Platform } from 'react-native';
+import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Keyboard, TouchableWithoutFeedback, Modal, Platform, KeyboardAvoidingView } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Clipboard from 'expo-clipboard';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -418,9 +418,8 @@ export const AddFoodItemScreen: React.FC = () => {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.flex}>
-        <Screen scrollable={activeTab !== 'presets'}>
+    <View style={styles.flex}>
+      <Screen scrollable={activeTab !== 'presets'}>
       {isFetchingBarcode && (
         <View style={styles.fetchingOverlay}>
           <ActivityIndicator size="large" color={theme.primary} />
@@ -784,93 +783,99 @@ export const AddFoodItemScreen: React.FC = () => {
           activeOpacity={1} 
           onPress={() => setIsAiAssistantVisible(false)}
         />
-        <View style={styles.assistantModalContainer}>
-          <Card variant="elevated" style={[styles.assistantCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <View style={styles.assistantHeader}>
-              <Ionicons name="sparkles" size={20} color={theme.primary} />
-              <AppText variant="h2" style={{ marginLeft: 8, flex: 1 }}>AI Food Scan Assistant</AppText>
-              <TouchableOpacity onPress={() => setIsAiAssistantVisible(false)}>
-                <Ionicons name="close" size={24} color={theme.textMuted} />
-              </TouchableOpacity>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={styles.assistantModalContainer}>
+              <Card variant="elevated" style={[styles.assistantCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <View style={styles.assistantHeader}>
+                  <Ionicons name="sparkles" size={20} color={theme.primary} />
+                  <AppText variant="h2" style={{ marginLeft: 8, flex: 1 }}>AI Food Scan Assistant</AppText>
+                  <TouchableOpacity onPress={() => setIsAiAssistantVisible(false)}>
+                    <Ionicons name="close" size={24} color={theme.textMuted} />
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView style={{ maxHeight: 250 }} showsVerticalScrollIndicator={true} keyboardShouldPersistTaps="handled">
+                  <AppText variant="bodyBold" style={{ marginTop: 4 }}>How it works:</AppText>
+                  <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>
+                    1. Tap **Copy Prompt** below.
+                  </AppText>
+                  <AppText variant="caption" color="textSecondary">
+                    2. Open any AI Chatbot (ChatGPT, Claude, Gemini Web).
+                  </AppText>
+                  <AppText variant="caption" color="textSecondary">
+                    3. Upload a photo of your food, paste the prompt, and send it.
+                  </AppText>
+                  <AppText variant="caption" color="textSecondary">
+                    4. Copy the JSON response from the chatbot.
+                  </AppText>
+                  <AppText variant="caption" color="textSecondary">
+                    5. Paste it in the input area below and click **Import & Auto-fill**.
+                  </AppText>
+
+                  <View style={[styles.promptPreviewContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                    <AppText variant="caption" style={{ fontWeight: 'bold' }}>Prompt to Copy:</AppText>
+                    <AppText variant="caption" color="textMuted" numberOfLines={4} style={{ marginTop: 4 }}>
+                      {AI_FOOD_PROMPT}
+                    </AppText>
+                  </View>
+                </ScrollView>
+
+                <TouchableOpacity 
+                  style={[styles.copyPromptBtn, { backgroundColor: `${theme.primary}12`, borderColor: theme.primary }]}
+                  onPress={handleCopyPrompt}
+                >
+                  <Ionicons name="copy-outline" size={16} color={theme.primary} />
+                  <AppText variant="bodyBold" color="primary" style={{ marginLeft: 6 }}>Copy Prompt</AppText>
+                </TouchableOpacity>
+
+                <AppText variant="label" color="textSecondary" style={{ marginTop: 8 }}>Paste JSON Response Here:</AppText>
+                <TextInput
+                  style={[
+                    styles.jsonTextArea, 
+                    { 
+                      color: theme.text, 
+                      backgroundColor: theme.background, 
+                      borderColor: theme.border 
+                    }
+                  ]}
+                  multiline
+                  numberOfLines={4}
+                  placeholder='e.g. {"name": "Apple", "calories": 52, ...}'
+                  placeholderTextColor={theme.textMuted}
+                  value={pastedJson}
+                  onChangeText={setPastedJson}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+
+                <View style={styles.assistantActionsRow}>
+                  <TouchableOpacity 
+                    style={[styles.assistantBtnOutline, { borderColor: theme.border }]} 
+                    onPress={() => {
+                      setIsAiAssistantVisible(false);
+                      setPastedJson('');
+                    }}
+                  >
+                    <AppText variant="bodyBold">Cancel</AppText>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.assistantBtnPrimary, { backgroundColor: theme.primary }]} 
+                    onPress={handleImportJson}
+                  >
+                    <AppText variant="bodyBold" style={{ color: '#0c0f12' }}>Import & Auto-fill</AppText>
+                  </TouchableOpacity>
+                </View>
+              </Card>
             </View>
-
-            <ScrollView style={{ maxHeight: 250 }} showsVerticalScrollIndicator={true} keyboardShouldPersistTaps="handled">
-              <AppText variant="bodyBold" style={{ marginTop: 4 }}>How it works:</AppText>
-              <AppText variant="caption" color="textSecondary" style={{ marginTop: 2 }}>
-                1. Tap **Copy Prompt** below.
-              </AppText>
-              <AppText variant="caption" color="textSecondary">
-                2. Open any AI Chatbot (ChatGPT, Claude, Gemini Web).
-              </AppText>
-              <AppText variant="caption" color="textSecondary">
-                3. Upload a photo of your food, paste the prompt, and send it.
-              </AppText>
-              <AppText variant="caption" color="textSecondary">
-                4. Copy the JSON response from the chatbot.
-              </AppText>
-              <AppText variant="caption" color="textSecondary">
-                5. Paste it in the input area below and click **Import & Auto-fill**.
-              </AppText>
-
-              <View style={[styles.promptPreviewContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
-                <AppText variant="caption" style={{ fontWeight: 'bold' }}>Prompt to Copy:</AppText>
-                <AppText variant="caption" color="textMuted" numberOfLines={4} style={{ marginTop: 4 }}>
-                  {AI_FOOD_PROMPT}
-                </AppText>
-              </View>
-            </ScrollView>
-
-            <TouchableOpacity 
-              style={[styles.copyPromptBtn, { backgroundColor: `${theme.primary}12`, borderColor: theme.primary }]}
-              onPress={handleCopyPrompt}
-            >
-              <Ionicons name="copy-outline" size={16} color={theme.primary} />
-              <AppText variant="bodyBold" color="primary" style={{ marginLeft: 6 }}>Copy Prompt</AppText>
-            </TouchableOpacity>
-
-            <AppText variant="label" color="textSecondary" style={{ marginTop: 8 }}>Paste JSON Response Here:</AppText>
-            <TextInput
-              style={[
-                styles.jsonTextArea, 
-                { 
-                  color: theme.text, 
-                  backgroundColor: theme.background, 
-                  borderColor: theme.border 
-                }
-              ]}
-              multiline
-              numberOfLines={4}
-              placeholder='e.g. {"name": "Apple", "calories": 52, ...}'
-              placeholderTextColor={theme.textMuted}
-              value={pastedJson}
-              onChangeText={setPastedJson}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-            <View style={styles.assistantActionsRow}>
-              <TouchableOpacity 
-                style={[styles.assistantBtnOutline, { borderColor: theme.border }]} 
-                onPress={() => {
-                  setIsAiAssistantVisible(false);
-                  setPastedJson('');
-                }}
-              >
-                <AppText variant="bodyBold">Cancel</AppText>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.assistantBtnPrimary, { backgroundColor: theme.primary }]} 
-                onPress={handleImportJson}
-              >
-                <AppText variant="bodyBold" style={{ color: '#0c0f12' }}>Import & Auto-fill</AppText>
-              </TouchableOpacity>
-            </View>
-          </Card>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
         </Screen>
       </View>
-    </TouchableWithoutFeedback>
   );
 };
 

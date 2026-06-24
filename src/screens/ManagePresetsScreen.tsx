@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '../components/Screen';
@@ -168,108 +168,114 @@ export const ManagePresetsScreen: React.FC = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
         >
-          <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
-            <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <View style={styles.modalHeader}>
-                <AppText variant="h3">{editingPreset ? 'Edit Food Preset' : 'New Food Preset'}</AppText>
-                <TouchableOpacity onPress={handleCloseModal}>
-                  <Ionicons name="close" size={24} color={theme.text} />
-                </TouchableOpacity>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+              <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <View style={styles.modalHeader}>
+                  <AppText variant="h3">{editingPreset ? 'Edit Food Preset' : 'New Food Preset'}</AppText>
+                  <TouchableOpacity onPress={handleCloseModal}>
+                    <Ionicons name="close" size={24} color={theme.text} />
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView 
+                  contentContainerStyle={styles.modalForm}
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode="on-drag"
+                >
+                  <View style={styles.row}>
+                    <View style={[styles.col, { flex: 1.5 }]}>
+                      <AppText variant="label" color="textSecondary" style={styles.formLabel}>Food Name</AppText>
+                      <TextInput
+                        style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                        placeholder="e.g. Greek Yogurt"
+                        placeholderTextColor={theme.textMuted}
+                        value={preName}
+                        onChangeText={setPreName}
+                      />
+                    </View>
+                    <View style={[styles.col, { flex: 0.5 }]}>
+                      <AppText variant="label" color="textSecondary" style={styles.formLabel}>Emoji Icon</AppText>
+                      <TextInput
+                        style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border, textAlign: 'center' }]}
+                        placeholder="🍯"
+                        placeholderTextColor={theme.textMuted}
+                        value={preIcon}
+                        onChangeText={setPreIcon}
+                      />
+                    </View>
+                  </View>
+
+                  <View style={styles.row}>
+                    <View style={styles.col}>
+                      <AppText variant="label" color="textSecondary" style={styles.formLabel}>Calories (kcal)</AppText>
+                      <TextInput
+                        style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                        placeholder="e.g. 120"
+                        placeholderTextColor={theme.textMuted}
+                        keyboardType="number-pad"
+                        value={preCalories}
+                        onChangeText={setPreCalories}
+                      />
+                    </View>
+                    <View style={styles.col}>
+                      <AppText variant="label" color="textSecondary" style={styles.formLabel}>Serving Size</AppText>
+                      <TextInput
+                        style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                        placeholder="e.g. 100g, 1 cup"
+                        placeholderTextColor={theme.textMuted}
+                        value={preServing}
+                        onChangeText={setPreServing}
+                      />
+                    </View>
+                  </View>
+
+                  <AppText variant="label" color="textSecondary" style={styles.formLabel}>Macros (Grams)</AppText>
+                  <View style={styles.row}>
+                    <View style={styles.col}>
+                      <AppText variant="caption" color="textMuted">Protein</AppText>
+                      <TextInput
+                        style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                        placeholder="0"
+                        placeholderTextColor={theme.textMuted}
+                        keyboardType="decimal-pad"
+                        value={preProtein}
+                        onChangeText={setPreProtein}
+                      />
+                    </View>
+                    <View style={styles.col}>
+                      <AppText variant="caption" color="textMuted">Carbs</AppText>
+                      <TextInput
+                        style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                        placeholder="0"
+                        placeholderTextColor={theme.textMuted}
+                        keyboardType="decimal-pad"
+                        value={preCarbs}
+                        onChangeText={setPreCarbs}
+                      />
+                    </View>
+                    <View style={styles.col}>
+                      <AppText variant="caption" color="textMuted">Fats</AppText>
+                      <TextInput
+                        style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                        placeholder="0"
+                        placeholderTextColor={theme.textMuted}
+                        keyboardType="decimal-pad"
+                        value={preFats}
+                        onChangeText={setPreFats}
+                      />
+                    </View>
+                  </View>
+
+                  <PrimaryButton
+                    title={editingPreset ? 'Save Changes' : 'Create Food Preset'}
+                    onPress={handleCreatePreset}
+                    style={styles.modalSubmitBtn}
+                  />
+                </ScrollView>
               </View>
-
-              <ScrollView contentContainerStyle={styles.modalForm}>
-                <View style={styles.row}>
-                  <View style={[styles.col, { flex: 1.5 }]}>
-                    <AppText variant="label" color="textSecondary" style={styles.formLabel}>Food Name</AppText>
-                    <TextInput
-                      style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                      placeholder="e.g. Greek Yogurt"
-                      placeholderTextColor={theme.textMuted}
-                      value={preName}
-                      onChangeText={setPreName}
-                    />
-                  </View>
-                  <View style={[styles.col, { flex: 0.5 }]}>
-                    <AppText variant="label" color="textSecondary" style={styles.formLabel}>Emoji Icon</AppText>
-                    <TextInput
-                      style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border, textAlign: 'center' }]}
-                      placeholder="🍯"
-                      placeholderTextColor={theme.textMuted}
-                      value={preIcon}
-                      onChangeText={setPreIcon}
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.row}>
-                  <View style={styles.col}>
-                    <AppText variant="label" color="textSecondary" style={styles.formLabel}>Calories (kcal)</AppText>
-                    <TextInput
-                      style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                      placeholder="e.g. 120"
-                      placeholderTextColor={theme.textMuted}
-                      keyboardType="number-pad"
-                      value={preCalories}
-                      onChangeText={setPreCalories}
-                    />
-                  </View>
-                  <View style={styles.col}>
-                    <AppText variant="label" color="textSecondary" style={styles.formLabel}>Serving Size</AppText>
-                    <TextInput
-                      style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                      placeholder="e.g. 100g, 1 cup"
-                      placeholderTextColor={theme.textMuted}
-                      value={preServing}
-                      onChangeText={setPreServing}
-                    />
-                  </View>
-                </View>
-
-                <AppText variant="label" color="textSecondary" style={styles.formLabel}>Macros (Grams)</AppText>
-                <View style={styles.row}>
-                  <View style={styles.col}>
-                    <AppText variant="caption" color="textMuted">Protein</AppText>
-                    <TextInput
-                      style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                      placeholder="0"
-                      placeholderTextColor={theme.textMuted}
-                      keyboardType="decimal-pad"
-                      value={preProtein}
-                      onChangeText={setPreProtein}
-                    />
-                  </View>
-                  <View style={styles.col}>
-                    <AppText variant="caption" color="textMuted">Carbs</AppText>
-                    <TextInput
-                      style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                      placeholder="0"
-                      placeholderTextColor={theme.textMuted}
-                      keyboardType="decimal-pad"
-                      value={preCarbs}
-                      onChangeText={setPreCarbs}
-                    />
-                  </View>
-                  <View style={styles.col}>
-                    <AppText variant="caption" color="textMuted">Fats</AppText>
-                    <TextInput
-                      style={[styles.modalInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                      placeholder="0"
-                      placeholderTextColor={theme.textMuted}
-                      keyboardType="decimal-pad"
-                      value={preFats}
-                      onChangeText={setPreFats}
-                    />
-                  </View>
-                </View>
-
-                <PrimaryButton
-                  title={editingPreset ? 'Save Changes' : 'Create Food Preset'}
-                  onPress={handleCreatePreset}
-                  style={styles.modalSubmitBtn}
-                />
-              </ScrollView>
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </Modal>
     </Screen>

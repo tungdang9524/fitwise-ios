@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView, StatusBar, ViewStyle, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, ScrollView, StatusBar, ViewStyle, SafeAreaView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
+import { useHeaderHeight } from '@react-navigation/elements';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -10,28 +11,41 @@ interface ScreenProps {
 
 export const Screen: React.FC<ScreenProps> = ({ children, scrollable = false, style }) => {
   const { theme, isDark } = useTheme();
+  let headerHeight = 0;
+  try {
+    headerHeight = useHeaderHeight();
+  } catch (e) {
+    // In case hook is used outside of navigation context
+    headerHeight = 0;
+  }
+
+  const content = scrollable ? (
+    <ScrollView 
+      contentContainerStyle={[styles.scrollContent, style]}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      showsVerticalScrollIndicator={false}
+    >
+      {children}
+    </ScrollView>
+  ) : (
+    <View style={[styles.content, style]}>
+      {children}
+    </View>
+  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.background} />
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
-        style={styles.keyboardAvoid}
-      >
-        {scrollable ? (
-          <ScrollView 
-            contentContainerStyle={[styles.scrollContent, style]}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {children}
-          </ScrollView>
-        ) : (
-          <View style={[styles.content, style]}>
-            {children}
-          </View>
-        )}
-      </KeyboardAvoidingView>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+          style={styles.keyboardAvoid}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight + 20 : 0}
+        >
+          {content}
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
@@ -129,43 +129,49 @@ export const BackupRestoreScreen: React.FC = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
         >
-          <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
-            <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <View style={styles.modalHeader}>
-                <AppText variant="h3">Export Fitwise Data</AppText>
-                <TouchableOpacity onPress={() => setBackupModalVisible(false)}>
-                  <Ionicons name="close" size={24} color={theme.text} />
-                </TouchableOpacity>
-              </View>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+              <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <View style={styles.modalHeader}>
+                  <AppText variant="h3">Export Fitwise Data</AppText>
+                  <TouchableOpacity onPress={() => setBackupModalVisible(false)}>
+                    <Ionicons name="close" size={24} color={theme.text} />
+                  </TouchableOpacity>
+                </View>
 
-              <ScrollView contentContainerStyle={styles.modalForm}>
-                <AppText variant="body" color="textSecondary" style={styles.introText}>
-                  Copy the text below and save it somewhere safe. You can paste this text back in the "Import" tab to restore your settings, workouts, and progress.
-                </AppText>
-                
-                <TextInput
-                  style={[styles.textarea, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                  value={JSON.stringify(state)}
-                  editable={false}
-                  selectTextOnFocus
-                  multiline
-                />
-                
-                <PrimaryButton
-                  title="Copy to Clipboard"
-                  onPress={handleCopyBackup}
-                  style={styles.copyBtn}
-                />
-                
-                <PrimaryButton
-                  title="Done"
-                  variant="outline"
-                  onPress={() => setBackupModalVisible(false)}
-                  style={styles.modalSubmitBtn}
-                />
-              </ScrollView>
+                <ScrollView 
+                  contentContainerStyle={styles.modalForm}
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode="on-drag"
+                >
+                  <AppText variant="body" color="textSecondary" style={styles.introText}>
+                    Copy the text below and save it somewhere safe. You can paste this text back in the "Import" tab to restore your settings, workouts, and progress.
+                  </AppText>
+                  
+                  <TextInput
+                    style={[styles.textarea, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                    value={JSON.stringify(state)}
+                    editable={false}
+                    selectTextOnFocus
+                    multiline
+                  />
+                  
+                  <PrimaryButton
+                    title="Copy to Clipboard"
+                    onPress={handleCopyBackup}
+                    style={styles.copyBtn}
+                  />
+                  
+                  <PrimaryButton
+                    title="Done"
+                    variant="outline"
+                    onPress={() => setBackupModalVisible(false)}
+                    style={styles.modalSubmitBtn}
+                  />
+                </ScrollView>
+              </View>
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -175,37 +181,43 @@ export const BackupRestoreScreen: React.FC = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
         >
-          <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
-            <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <View style={styles.modalHeader}>
-                <AppText variant="h3">Import Fitwise Data</AppText>
-                <TouchableOpacity onPress={() => setImportModalVisible(false)}>
-                  <Ionicons name="close" size={24} color={theme.text} />
-                </TouchableOpacity>
-              </View>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+              <View style={[styles.modalContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <View style={styles.modalHeader}>
+                  <AppText variant="h3">Import Fitwise Data</AppText>
+                  <TouchableOpacity onPress={() => setImportModalVisible(false)}>
+                    <Ionicons name="close" size={24} color={theme.text} />
+                  </TouchableOpacity>
+                </View>
 
-              <ScrollView contentContainerStyle={styles.modalForm}>
-                <AppText variant="body" color="textSecondary" style={styles.introText}>
-                  Paste your backup JSON string below. This will overwrite all current data in the application.
-                </AppText>
-                
-                <TextInput
-                  style={[styles.textarea, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                  placeholder="Paste backup JSON string here..."
-                  placeholderTextColor={theme.textMuted}
-                  value={importText}
-                  onChangeText={setImportText}
-                  multiline
-                />
-                
-                <PrimaryButton
-                  title="Verify & Restore Data"
-                  onPress={handleImportBackup}
-                  style={styles.modalSubmitBtn}
-                />
-              </ScrollView>
+                <ScrollView 
+                  contentContainerStyle={styles.modalForm}
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode="on-drag"
+                >
+                  <AppText variant="body" color="textSecondary" style={styles.introText}>
+                    Paste your backup JSON string below. This will overwrite all current data in the application.
+                  </AppText>
+                  
+                  <TextInput
+                    style={[styles.textarea, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                    placeholder="Paste backup JSON string here..."
+                    placeholderTextColor={theme.textMuted}
+                    value={importText}
+                    onChangeText={setImportText}
+                    multiline
+                  />
+                  
+                  <PrimaryButton
+                    title="Verify & Restore Data"
+                    onPress={handleImportBackup}
+                    style={styles.modalSubmitBtn}
+                  />
+                </ScrollView>
+              </View>
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </Modal>
     </Screen>
