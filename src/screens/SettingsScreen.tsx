@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,7 +22,7 @@ interface SettingsMenuItemProps {
 }
 
 export const SettingsScreen: React.FC = () => {
-  const { state } = useFitness();
+  const { state, setGeminiApiKey } = useFitness();
   const { theme } = useTheme();
   const navigation = useNavigation<SettingsScreenNavigationProp>();
   const profile = state.profile;
@@ -109,6 +109,26 @@ export const SettingsScreen: React.FC = () => {
             </Card>
           ))}
         </View>
+        {/* Gemini AI Settings */}
+        <Card variant="glass" style={styles.geminiCard}>
+          <View style={styles.geminiHeader}>
+            <Ionicons name="sparkles" size={18} color={theme.primary} />
+            <AppText variant="bodyBold" style={{ marginLeft: 6 }}>Gemini AI Settings</AppText>
+          </View>
+          <AppText variant="caption" color="textSecondary" style={{ marginVertical: 4 }}>
+            Enter your Google Gemini API Key to enable the AI Food Scanner feature.
+          </AppText>
+          <TextInput
+            style={[styles.apiKeyInput, { borderColor: theme.border, color: theme.text, backgroundColor: theme.background }]}
+            placeholder="Enter Gemini API Key (AIzaSy...)"
+            placeholderTextColor={theme.textMuted}
+            secureTextEntry
+            value={state.geminiApiKey || ''}
+            onChangeText={setGeminiApiKey}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </Card>
       </View>
     </Screen>
   );
@@ -164,6 +184,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  geminiCard: {
+    marginTop: 16,
+    padding: 16,
+  },
+  geminiHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  apiKeyInput: {
+    height: 40,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    marginTop: 8,
   },
 });
 export default SettingsScreen;

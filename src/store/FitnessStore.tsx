@@ -35,6 +35,7 @@ type FitnessAction =
   | { type: 'SET_WATER_GOAL'; payload: number }
   | { type: 'DELETE_WATER_LOG'; payload: string }
   | { type: 'SET_QUICK_WATER_AMOUNT'; payload: number }
+  | { type: 'SET_GEMINI_API_KEY'; payload: string }
   | { type: 'ADD_SLEEP'; payload: SleepLog }
   | { type: 'UPDATE_SLEEP'; payload: SleepLog }
   | { type: 'DELETE_SLEEP'; payload: string }
@@ -339,6 +340,7 @@ const initialFitnessState: FitnessState = {
   waterGoal: 2000,
   longestStreak: 0,
   quickWaterAmount: 250,
+  geminiApiKey: '',
   sleepLogs: [],
   sleepGoal: 480,
   longestSleepStreak: 0,
@@ -363,6 +365,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         waterGoal: loaded.waterGoal || 2000,
         longestStreak: loaded.longestStreak || 0,
         quickWaterAmount: loaded.quickWaterAmount !== undefined ? loaded.quickWaterAmount : 250,
+        geminiApiKey: loaded.geminiApiKey || '',
         sleepLogs: loaded.sleepLogs || [],
         sleepGoal: loaded.sleepGoal || 480,
         longestSleepStreak: loaded.longestSleepStreak || 0,
@@ -918,6 +921,12 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
         quickWaterAmount: action.payload,
       };
 
+    case 'SET_GEMINI_API_KEY':
+      return {
+        ...state,
+        geminiApiKey: action.payload,
+      };
+
     case 'RESET_STATE':
       return initialFitnessState;
 
@@ -952,6 +961,7 @@ const fitnessReducer = (state: FitnessState, action: FitnessAction): FitnessStat
   setWaterGoal: (goal: number) => void;
   deleteWaterLog: (id: string) => void;
   setQuickWaterAmount: (amount: number) => void;
+  setGeminiApiKey: (key: string) => void;
   addSleepLog: (sleep: Omit<SleepLog, 'id' | 'sleepScore' | 'durationScore' | 'consistencyScore' | 'qualityScore'>) => void;
   updateSleepLog: (sleep: SleepLog) => void;
   deleteSleepLog: (id: string) => void;
@@ -1084,6 +1094,10 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'SET_QUICK_WATER_AMOUNT', payload: amount });
   };
 
+  const setGeminiApiKey = (key: string) => {
+    dispatch({ type: 'SET_GEMINI_API_KEY', payload: key });
+  };
+
   const addSleepLog = (sleep: Omit<SleepLog, 'id' | 'sleepScore' | 'durationScore' | 'consistencyScore' | 'qualityScore'>) => {
     const sleepGoal = state.sleepGoal || 480;
     const scores = calculateSleepScores(
@@ -1177,6 +1191,7 @@ export const FitnessProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setWaterGoal,
         deleteWaterLog,
         setQuickWaterAmount,
+        setGeminiApiKey,
         addSleepLog,
         updateSleepLog,
         deleteSleepLog,

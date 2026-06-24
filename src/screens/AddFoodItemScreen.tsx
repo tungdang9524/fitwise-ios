@@ -26,11 +26,14 @@ export const AddFoodItemScreen: React.FC = () => {
   const foodEntryId = route.params?.foodEntryId;
   const isEditMode = !!foodEntryId;
 
-  // Camera & Barcode states
+  // Camera, Barcode & AI states
   const [isScanning, setIsScanning] = useState(false);
   const [isFetchingBarcode, setIsFetchingBarcode] = useState(false);
+  const [isAiCamera, setIsAiCamera] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const hasScannedRef = useRef(false);
+  const cameraRef = useRef<any>(null);
 
   const handleStartScan = async () => {
     if (!permission) {
@@ -48,6 +51,126 @@ export const AddFoodItemScreen: React.FC = () => {
     }
     hasScannedRef.current = false;
     setIsScanning(true);
+  };
+
+  const handleStartAiCamera = async () => {
+    if (!state.geminiApiKey || !state.geminiApiKey.trim()) {
+      Alert.alert(
+        'Gemini Key Required',
+        'Please configure your Gemini API Key in Settings first to use the AI Food Scanner.'
+      );
+      return;
+    }
+    if (!permission) {
+      const status = await requestPermission();
+      if (!status.granted) {
+        Alert.alert('Permission Denied', 'Camera permission is required to scan food.');
+        return;
+      }
+    } else if (!permission.granted) {
+      const status = await requestPermission();
+      if (!status.granted) {
+        Alert.alert('Permission Denied', 'Camera permission is required to scan food.');
+        return;
+      }
+    }
+    setIsAiCamera(true);
+  };
+
+  const handleCaptureAiPhoto = async () => {
+    if (!cameraRef.current) return;
+    try {
+      setIsAiCamera(false);
+      setIsAnalyzing(true);
+      
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.5,
+        base64: true,
+      });
+
+      if (!photo || !photo.base64) {
+        throw new Error('Failed to capture photo base64.');
+      }
+
+      await analyzeFoodPhoto(photo.base64);
+    } catch (e) {
+      Alert.alert('Error', 'Failed to capture food photo. Please try again.');
+      setIsAnalyzing(false);
+    }
+  };
+
+  const analyzeFoodPhoto = async (base64Image: string) => {
+    const apiKey = state.geminiApiKey;
+    if (!apiKey) {
+      Alert.alert('Error', 'Gemini API Key is not set.');
+      setIsAnalyzing(false);
+      return;
+    }
+
+    try {
+      const prompt = `Analyze this photo of a meal. Identify the food name, portion/serving size description, and estimate calories (kcal), protein (g), carbs (g), and fats (g). Respond ONLY in this exact JSON schema: { "name": "string", "servingSize": "string", "calories": number, "protein": number, "carbohydrates": number, "fats": number }`;
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: prompt },
+                  {
+                    inlineData: {
+                      mimeType: 'image/jpeg',
+                      data: base64Image,
+                    },
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              responseMimeType: 'application/json',
+            },
+          }),
+        }
+      );
+
+      const data = await response.json();
+      
+      if (!response.ok || data.error) {
+        const errorMsg = data.error?.message || 'Failed to analyze food.';
+        throw new Error(errorMsg);
+      }
+
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        throw new Error('No analysis text returned from Gemini.');
+      }
+
+      // Parse JSON from text
+      const parsed = JSON.parse(text.trim());
+      
+      setCustomName(parsed.name || 'AI Food Log');
+      setCustomCalories(String(parsed.calories || 0));
+      setCustomServingSize(parsed.servingSize || '1 portion');
+      setCustomProtein(String(parsed.protein || 0));
+      setCustomCarbs(String(parsed.carbohydrates || parsed.carbs || 0));
+      setCustomFats(String(parsed.fats || 0));
+      setCustomQuantity('1.0');
+
+      Alert.alert(
+        'AI Food Scan Success',
+        `Identified: "${parsed.name}"\nEstimated Calories: ${parsed.calories} kcal\n\nForm fields pre-filled successfully!`
+      );
+    } catch (e: any) {
+      console.error(e);
+      Alert.alert('Analysis Failed', e.message || 'Failed to analyze the photo. Please check your API key and connection.');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
@@ -315,6 +438,43 @@ export const AddFoodItemScreen: React.FC = () => {
     };
   }, [customQuantity, customCalories, customProtein, customCarbs, customFats]);
 
+  if (isAiCamera) {
+    return (
+      <View style={styles.scannerWrapper}>
+        <CameraView
+          ref={cameraRef}
+          style={StyleSheet.absoluteFillObject}
+        >
+          {/* Overlay UI */}
+          <View style={styles.scannerOverlay}>
+            <View style={styles.scannerHeader}>
+              <TouchableOpacity style={styles.closeScanBtn} onPress={() => setIsAiCamera(false)}>
+                <Ionicons name="close" size={28} color="#fff" />
+              </TouchableOpacity>
+              <AppText variant="h3" style={{ color: '#fff' }}>AI Food Scanner</AppText>
+              <View style={{ width: 28 }} />
+            </View>
+
+            {/* Scanning area outline */}
+            <View style={styles.scannerFocusContainer}>
+              <View style={[styles.scannerFocusFrame, { borderColor: theme.primary, borderStyle: 'dashed' }]} />
+              <AppText variant="caption" style={styles.scannerHint}>
+                Place food inside the frame and take a photo
+              </AppText>
+            </View>
+
+            {/* Capture shutter button */}
+            <View style={styles.shutterContainer}>
+              <TouchableOpacity style={[styles.shutterBtn, { backgroundColor: theme.primary }]} onPress={handleCaptureAiPhoto}>
+                <Ionicons name="camera" size={32} color="#0c0f12" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </CameraView>
+      </View>
+    );
+  }
+
   if (isScanning) {
     return (
       <View style={styles.scannerWrapper}>
@@ -352,10 +512,12 @@ export const AddFoodItemScreen: React.FC = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.flex}>
         <Screen scrollable={activeTab !== 'presets'}>
-      {isFetchingBarcode && (
+      {(isFetchingBarcode || isAnalyzing) && (
         <View style={styles.fetchingOverlay}>
           <ActivityIndicator size="large" color={theme.primary} />
-          <AppText style={styles.fetchingText}>Fetching product data...</AppText>
+          <AppText style={styles.fetchingText}>
+            {isFetchingBarcode ? 'Fetching product data...' : 'AI is analyzing your meal...'}
+          </AppText>
         </View>
       )}
       {/* Header */}
@@ -553,20 +715,26 @@ export const AddFoodItemScreen: React.FC = () => {
       {/* CUSTOM FOOD ENTRY TAB CONTENT */}
       {activeTab === 'custom' && (
         <Card variant="glass" style={styles.formCard}>
-          {/* Scan Barcode button/card to auto fill */}
-          <TouchableOpacity 
-            style={[styles.scanBarcodeCard, { backgroundColor: theme.surfaceElevated, borderColor: theme.border }]}
-            onPress={handleStartScan}
-          >
-            <View style={[styles.scanIconWrap, { backgroundColor: `${theme.primary}12` }]}>
-              <Ionicons name="barcode-outline" size={20} color={theme.primary} />
-            </View>
-            <View style={styles.flex}>
-              <AppText variant="bodyBold">Scan Barcode to Auto-fill</AppText>
-              <AppText variant="caption" color="textSecondary">Auto-fill name & nutrients using camera</AppText>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
-          </TouchableOpacity>
+          {/* Scan options row */}
+          <View style={styles.scanOptionsRow}>
+            {/* Barcode scanner */}
+            <TouchableOpacity 
+              style={[styles.scanOptionItem, { backgroundColor: theme.surfaceElevated, borderColor: theme.border }]}
+              onPress={handleStartScan}
+            >
+              <Ionicons name="barcode-outline" size={22} color={theme.primary} />
+              <AppText variant="caption" style={{ fontWeight: 'bold', marginTop: 4 }}>Barcode Scan</AppText>
+            </TouchableOpacity>
+
+            {/* AI scanner */}
+            <TouchableOpacity 
+              style={[styles.scanOptionItem, { backgroundColor: theme.surfaceElevated, borderColor: theme.border }]}
+              onPress={handleStartAiCamera}
+            >
+              <Ionicons name="sparkles-outline" size={22} color={theme.primary} />
+              <AppText variant="caption" style={{ fontWeight: 'bold', marginTop: 4 }}>AI Food Scan</AppText>
+            </TouchableOpacity>
+          </View>
 
           <AppText variant="label" color="textSecondary" style={styles.label}>Food Name</AppText>
           <TextInput
@@ -972,6 +1140,36 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  scanOptionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  scanOptionItem: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  shutterContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  shutterBtn: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
   },
 });
 
