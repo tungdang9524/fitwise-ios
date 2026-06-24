@@ -3,6 +3,9 @@ import { StyleSheet, View, TextInput, TouchableOpacity, Modal, ScrollView, Alert
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 
 import { Screen } from '../components/Screen';
 import { AppText } from '../components/AppText';
@@ -59,6 +62,67 @@ export const BackupRestoreScreen: React.FC = () => {
       }
     } catch (e) {
       Alert.alert('Parser Error', 'Invalid JSON string. Please ensure the string is complete.');
+    }
+  };
+
+  const handleExportToFile = async () => {
+    try {
+      const dataStr = JSON.stringify(state, null, 2);
+      const fileUri = FileSystem.cacheDirectory + 'fitwise_backup.json';
+      await FileSystem.writeAsStringAsync(fileUri, dataStr, { encoding: FileSystem.EncodingType.UTF8 });
+      
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: 'application/json',
+          dialogTitle: 'Export Fitwise Data',
+          UTI: 'public.json',
+        });
+      } else {
+        Alert.alert('Sharing Unavailable', 'Sharing is not supported on this platform.');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Failed to generate and share the backup file.');
+    }
+  };
+
+  const handleImportFromFile = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: 'application/json',
+        copyToCacheDirectory: true,
+      });
+
+      if (res.canceled || !res.assets || res.assets.length === 0) {
+        return;
+      }
+
+      const fileUri = res.assets[0].uri;
+      const fileContent = await FileSystem.readAsStringAsync(fileUri, { encoding: FileSystem.EncodingType.UTF8 });
+      
+      if (!fileContent.trim()) {
+        Alert.alert('Validation Error', 'The selected file is empty.');
+        return;
+      }
+
+      let cleanText = fileContent.trim();
+      // Normalize smart/curly quotes to standard straight quotes
+      cleanText = cleanText.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+
+      const parsed = JSON.parse(cleanText);
+      if (parsed && typeof parsed === 'object' && 'hasCompletedSetup' in parsed) {
+        dispatch({
+          type: 'INITIALIZE_STATE',
+          payload: parsed as FitnessState,
+        });
+        
+        Alert.alert('Success', 'Backup data successfully restored from file!');
+        setImportModalVisible(false);
+        navigation.goBack();
+      } else {
+        Alert.alert('Import Failed', 'Invalid format. The file JSON does not match a Fitwise backup schema.');
+      }
+    } catch (e) {
+      Alert.alert('Parser Error', 'Failed to read or parse the selected file. Please ensure it is a valid JSON file.');
     }
   };
 
@@ -161,6 +225,12 @@ export const BackupRestoreScreen: React.FC = () => {
                   />
                   
                   <PrimaryButton
+                    title="Share / Save as JSON File"
+                    onPress={handleExportToFile}
+                    style={{ marginBottom: 12 }}
+                  />
+
+                  <PrimaryButton
                     title="Copy to Clipboard"
                     onPress={handleCopyBackup}
                     style={styles.copyBtn}
@@ -213,6 +283,12 @@ export const BackupRestoreScreen: React.FC = () => {
                     multiline
                   />
                   
+                  <PrimaryButton
+                    title="Select Backup JSON File"
+                    onPress={handleImportFromFile}
+                    style={{ marginBottom: 12 }}
+                  />
+
                   <PrimaryButton
                     title="Verify & Restore Data"
                     onPress={handleImportBackup}
